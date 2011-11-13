@@ -1,0 +1,126 @@
+/* Common position styles */
+.helvetica 	{ font-family: Arial, Helvetica, sans-serif; }
+.top		{ vertical-align: top; }
+.middle		{ vertical-align: middle; }
+.border		{ border: 1px solid; }
+.no_border	{ border-style: none; }
+.center		{ text-align: center; }
+.left		{ text-align: left; }
+.right		{ text-align: right; }
+
+/* Common font styles */
+.font_normal		{ }
+.font_bold 			{ font-weight: bold; }
+.font_medium		{ font-size: 83%; }
+.font_medium_bold	{ font-size: 83%; font-weight: bold; }
+.font_small			{ font-size: 75%; }
+.font_small_bold	{ font-size: 75%; font-weight: bold; }
+
+.section_separator  {		/* used to give service name in the reports page or hostname */
+	text-align: left;
+	font-style:normal; font-weight: bold;
+	margin-bottom: 0px;
+	margin-top: 1em;
+	float: left;
+	width: 100%;
+}
+.centp {
+	width: 100%;
+	padding: 0px;
+	
+}
+
+.error  {
+	text-align: left;
+	font-style:normal; font-weight: bold;
+	margin-bottom: 1em;
+	margin-top: 1em;
+	width: 100%;
+	color: red; 
+}
+
+body {
+	text-align: center;
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	width: 99%;
+	margin-left: 5px; 
+	margin-right: 5px;
+}
+body#body_form {
+	text-align: center;
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	width: 700px;
+	margin-left: auto; 
+	margin-right: auto;
+}
+
+.paging {
+	text-align: right;
+	font-size: 75%;
+	font-style:normal;
+	font-weight: bold;
+	margin-right: 3em;
+}
+
+div.graphx1 {
+	float: left;
+	width: 98%;
+	margin: 5px;
+	border: 1px solid;
+}
+div.graphx2 {
+	float: left;
+	width: 48%;
+	margin: 5px;
+	border: 1px solid;
+}
+div.graphx3 {
+	float: left;
+	width: 32%;
+	margin: 5px;
+	border: 1px solid;
+}
+div.graphx2 img {
+	text-align: center;
+	width: 100%;
+	margin: auto;
+}
+div.graphx3 img {
+	text-align: center;
+	width: 100%;
+	margin: auto;
+}
+
+/*  Form for checking one single SE */
+#formCheckSE {
+	text-align: left;
+	font-size: 80%;
+}
+#formCheckSE table {
+	width: 100%;
+}
+#formCheckSE td {
+	padding-top: 5px;
+	padding-bottom: 3px;
+	width: 45%;
+}
+#formCheckSE input#idHostname {
+    font-family: Verdana, Arial, sans-serif;
+	width: 100%;
+ }
+#formCheckSE select {
+	width: 100%;
+ }
+.form_bloc {
+	background-color: #eeebe0;
+	border-width: 1px; border-color: #ccc9c0; border-style: solid;
+	padding-left: 10px; padding-right: 10px; padding-top: 5px; padding-bottom: 7px;
+	margin-top: 15px; margin-bottom: 15px;
+	width: 100%;
+}
+.form_bloc_title {
+	color: #666460;
+	margin-bottom: 5px;
+	padding-bottom: 3px;
+	border-bottom-width: 2px; border-bottom-color: #ccc9c0; border-bottom-style: solid;
+}

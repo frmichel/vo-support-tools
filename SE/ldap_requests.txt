@@ -1,0 +1,31 @@
+=============================== Usual LDAP requests ===================================
+
+# ldapsearch command options:
+# -s base|one|sub|children: Specify the scope of the search to be one of base, one, sub, or children to specify a base object, one-level, subtree, or children search. The default is sub. 
+# -L: Search results are displayed in LDAP Data Interchange Format detailed in ldif(5).  A single  -L  restricts  the  output  to LDIFv1.   A  second  -L  disables  comments.  A third -L disables printing of the LDIF version.  The default is to use an extended version of LDIF.
+# -H ldapuri: Specify URI(s) referring to the ldap server(s); only the protocol/host/port fields are allowed; a list of URI,  separated by whitespace or commas is expected.
+# -b searchbase: Use searchbase as the starting point for the search instead of the default.
+
+
+$ alias ldapsearch='ldapsearch -x -L -s sub -H ldap://cclcgtopbdii01.in2p3.fr:2170 -b mds-vo-name=local,o=grid'
+
+#--- Given a Site Name find the GlueSiteUniqueID:
+ldapsearch '(&(ObjectClass=GlueSite)(GlueSiteName=IN2P3-CC))' GlueSiteUniqueID
+	==> GlueSiteUniqueID: IN2P3-CC
+
+#--- Find all Storage Elements for this site and get the GlueSEUniqueID
+ldapsearch '(&(ObjectClass=GlueSE)(GlueForeignKey=GlueSiteUniqueID=IN2P3-CC))' GlueSEUniqueID
+	==> ccsrm.in2p3.fr, ccsrm02.in2p3.fr
+
+#--- Get details of one SE
+ldapsearch '(&(ObjectClass=GlueSE)(GlueSEUniqueID=ccsrm02.in2p3.fr))'
+
+#--- Find all Storage Areas (GlueSA) part of the SE that serve biomed VO and for those 
+# 	 find the GlueSACapability: Installed[Online|Nearline]Capacity
+ldapsearch '(&(ObjectClass=GlueSA)(GlueChunkKey=GlueSEUniqueID=ccsrm02.in2p3.fr)(|(GlueSAAccessControlBaseRule=VO:biomed*)(GlueSAAccessControlBaseRule=biomed*)))' GlueSACapability
+
+#--- Find all VOInfo elements for the biomed VO
+ldapsearch "(GlueVOInfoLocalID=biomed*)" GlueVOInfoPath GlueChunkKey GlueVOInfoAccessControlBaseRule
+
+#--- Find all VOInfo elements for the biomed VO for a SE
+ldapsearch  "(&(GlueVOInfoLocalID=biomed*)(GlueChunkKey=GlueSEUniqueID=ccsrm02.in2p3.fr))"

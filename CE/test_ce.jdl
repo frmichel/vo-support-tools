@@ -1,0 +1,9 @@
+[
+Executable    = "/bin/hostname";
+StdOutput     = "hello.out";
+StdError      = "hello.err";
+OutputSandbox = {"hello.out","hello.err"};
+Requirements = (RegExp("ce_name",other.GlueCEUniqueID));
+RetryCount  =  0;
+ShallowRetryCount  =  0;
+]
