@@ -1,0 +1,283 @@
+/O=GermanGrid/OU=Fraunhofer SCAI/CN=Astrid Maass, /C=DE/O=GermanGrid/CN=GridKa-CA - astrid.maass@scai.fraunhofer.de
+/C=IL/O=IUCC/OU=Technion/CN=Maxim Kovgan, /C=IL/O=IUCC/CN=IUCC/Email=ca@mail.iucc.ac.il - maxk@cs.technion.ac.il
+/c=tw/o=as/ou=phys/cn=hurng-chun lee (BIOMED)/Email=hclee@twgrid.org, /C=TW/O=AS/CN=Academia Sinica Grid Computing Certification Authority - Hurng-Chun.Lee@cern.ch
+/C=HU/O=NIIF CA/OU=GRID/OU=NIIF/CN=Gergely Sipos/Email=sipos@sztaki.hu, /C=HU/O=NIIF/OU=Certificate Authorities/CN=NIIF Root CA - sipos@sztaki.hu
+/O=GermanGrid/OU=Fraunhofer SCAI/CN=Jiri Kraus, /C=DE/O=GermanGrid/CN=GridKa-CA - jiri.kraus@scai.fraunhofer.de
+/DC=es/DC=irisgrid/O=upv/CN=gabri-aparicio, /DC=es/DC=irisgrid/CN=IRISGridCA - gaparicio@itaca.upv.es
+/DC=es/DC=irisgrid/O=upv/CN=damian-segrelles, /DC=es/DC=irisgrid/CN=IRISGridCA - dquilis@itaca.upv.es
+/DC=es/DC=irisgrid/O=upv/CN=miguel-caballer, /DC=es/DC=irisgrid/CN=IRISGridCA - micafer1@upv.es
+/DC=es/DC=irisgrid/O=upv/CN=ignacio-blanquer, /DC=es/DC=irisgrid/CN=IRISGridCA - iblanque@dsic.upv.es
+/C=DE/O=GermanGrid/OU=DKFZ/CN=Martin Senger, /C=DE/O=GermanGrid/CN=GridKa-CA - martin.senger@gmail.com
+/DC=es/DC=irisgrid/O=upv/CN=german-molto, /DC=es/DC=irisgrid/CN=IRISGridCA - gmolto@dsic.upv.es
+/DC=es/DC=irisgrid/O=ucm/CN=joseluis.vazquez, /DC=es/DC=irisgrid/CN=IRISGridCA - jlvazquez@fdi.ucm.es
+/C=PL/O=GRID/O=ICM/CN=Michal J. Gajda, /C=PL/O=GRID/CN=Polish Grid CA - mgajda@genesilico.pl
+/C=IT/O=INFN/OU=Personal Certificate/L=CNR-ITB/CN=Alessandro Orro, /C=IT/O=INFN/CN=INFN CA - alessandro.orro@itb.cnr.it
+/C=IL/O=IUCC/OU=Bar Ilan/CN=Alon Korngreen, /C=IL/O=IUCC/CN=IUCC/Email=ca@mail.iucc.ac.il - korngra@mail.biu.ac.il
+/C=IT/O=INFN/OU=Personal Certificate/L=CNR-ITB/CN=Gabriele Trombetti, /C=IT/O=INFN/CN=INFN CA - g.trombetti@logicschema.com
+/C=RU/O=RDIG/OU=users/OU=impb.ru/CN=Nadezhda Fialko, /C=RU/O=RDIG/CN=Russian Data-Intensive Grid CA - fialka@impb.psn.ru
+/C=IT/O=INFN/OU=Personal Certificate/L=LabCSAI/CN=Gianluca Degliesposti, /C=IT/O=INFN/CN=INFN CA - gianluca.degliesposti@unimo.it
+/DC=es/DC=irisgrid/O=ucm/CN=Javier-Fontan, /DC=es/DC=irisgrid/CN=IRISGridCA - jfontan@fdi.ucm.es
+/C=IT/O=INFN/OU=Personal Certificate/L=CILEA/CN=Marco Pirola, /C=IT/O=INFN/CN=INFN CA - pirola@cilea.it
+/DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=gdebrecz/CN=Gergely Debreczeni, /DC=ch/DC=cern/CN=CERN Trusted Certification Authority - Gergely.Debreczeni@cern.ch
+/C=RU/O=RDIG/OU=users/OU=impb.ru/CN=Gayane Tiulbasheva, /C=RU/O=RDIG/CN=Russian Data-Intensive Grid CA - gayat@itaec.ru
+/C=IT/O=INFN/OU=Personal Certificate/L=Torino/CN=Rosario Piro, /C=IT/O=INFN/CN=INFN CA - piro@to.infn.it
+/C=TW/O=AP/OU=GRID/CN=Sunil Ahn/Email=siahn@kisti.re.kr, /C=TW/O=AS/CN=Academia Sinica Grid Computing Certification Authority - siahn@kisti.re.kr
+/C=TW/O=AS/OU=CC/CN=Li-Yung Ho/Email=liyungho@gate.sinica.edu.tw, /C=TW/O=AS/CN=Academia Sinica Grid Computing Certification Authority - liyungho@gate.sinica.edu.tw
+/C=IT/O=INFN/OU=Personal Certificate/L=Catania/CN=Giuseppe La Rocca/Email=giuseppe.larocca@ct.infn.it, /C=IT/O=INFN/CN=INFN CA - giuseppe.larocca@ct.infn.it
+/O=dutchgrid/O=users/O=tudelft/CN=Herman van Dam, /C=NL/O=NIKHEF/CN=NIKHEF medium-security certification auth - h.t.vandam@tudelft.nl
+/C=CY/O=CyGrid/O=UCY/CN=Ioannis Kirmitzoglou, /C=CY/O=CyGrid/O=HPCL/CN=CyGridCA - bip6ki2@ucy.ac.cy
+/C=IT/O=INFN/OU=Personal Certificate/L=CNR-ITB/CN=Andrea Calabria, /C=IT/O=INFN/CN=INFN CA - andrea.cala@gmail.com
+/C=IT/O=INFN/OU=Personal Certificate/L=CNR-ITB/CN=Ivan Merelli, /C=IT/O=INFN/CN=INFN CA - ivan.merelli@itb.cnr.it
+/C=IT/O=INFN/OU=Personal Certificate/L=CILEA/CN=Claudio Arlandini, /C=IT/O=INFN/CN=INFN CA - arlandini@cilea.it
+/C=IT/O=INFN/OU=Personal Certificate/L=CILEA/CN=Paolo Ramieri, /C=IT/O=INFN/CN=INFN CA - ramieri@cilea.it
+/O=Grid/O=NorduGrid/OU=biotech.kth.se/CN=Jorge Andrade Ortiz, /O=Grid/O=NorduGrid/CN=NorduGrid Certification Authority - jorge@biotech.kth.se
+/C=IT/O=INFN/OU=Personal Certificate/L=CNR-ITB/CN=paolo cozzi, /C=IT/O=INFN/CN=INFN CA - bunop@libero.it
+/C=GR/O=HellasGrid/OU=ntua.gr/CN=Fotis Georgatos, /C=GR/O=HellasGrid/OU=Certification Authorities/CN=HellasGrid CA 2006 - fotis@mail.ntua.gr
+/C=IT/O=INFN/OU=Personal Certificate/L=DIST Genova/CN=Livia Torterolo, /C=IT/O=INFN/CN=INFN CA - livia.torterolo@unige.it
+/C=IT/O=INFN/OU=Personal Certificate/L=DIST Genova/CN=Luca Corradi, /C=IT/O=INFN/CN=INFN CA - luca.corradi@dist.unige.it
+/C=IT/O=INFN/OU=Personal Certificate/L=Lecce/CN=Silvio Maglio, /C=IT/O=INFN/CN=INFN CA - Silvio.Maglio@le.infn.it
+/C=IT/O=INFN/OU=Personal Certificate/L=Catania/CN=Lorenzo Neri, /C=IT/O=INFN/CN=INFN CA - lorenzo.neri@ct.infn.it
+/C=IT/O=INFN/OU=Personal Certificate/L=Lecce/CN=Antonella Agrusti, /C=IT/O=INFN/CN=INFN CA - antonella.agrusti@unile.it
+/C=HR/O=edu/OU=irb/CN=Fran Supek, /C=HR/O=edu/OU=srce/CN=SRCE CA - fran.supek@irb.hr
+/C=PL/O=GRID/O=Cyfronet/CN=Bartlomiej Dybiec, /C=PL/O=GRID/CN=Polish Grid CA - bartek@th.if.uj.edu.pl
+/C=PT/O=LIPCA/O=UP/OU=IBMC/CN=Nuno Alberto Paulino da Fonseca, /C=PT/O=LIPCA/CN=LIP Certification Authority - nuno.fonseca@gmail.com
+/C=IT/O=INFN/OU=Personal Certificate/L=Pisa/CN=Sascha Moehrs, /C=IT/O=INFN/CN=INFN CA - sascha.moehrs@pi.infn.it
+/C=GR/O=HellasGrid/OU=auth.gr/CN=Vegoudakis Konstantinos, /C=GR/O=HellasGrid/OU=Certification Authorities/CN=HellasGrid CA 2006 - kostasve@med.auth.gr
+/C=IT/O=INFN/OU=Personal Certificate/L=Lecce/CN=giorgio de nunzio, /C=IT/O=INFN/CN=INFN CA - giorgio.denunzio@unile.it
+/C=TW/O=AP/OU=GRID/CN=Son Do 127714, /C=TW/O=AS/CN=Academia Sinica Grid Computing Certification Authority - dhson@phys.hcmuns.edu.vn
+/C=IT/O=INFN/OU=Personal Certificate/L=CNR-ITB/CN=Davide Di Pasquale, /C=IT/O=INFN/CN=INFN CA - davide.dipasquale@gmail.com
+/C=IT/O=INFN/OU=Personal Certificate/L=Pisa/CN=Alessandra Retico, /C=IT/O=INFN/CN=INFN CA - alessandra.retico@pi.infn.it
+/C=TW/O=AP/OU=GRID/CN=Nhan Nguyen Dang 147301, /C=TW/O=AS/CN=Academia Sinica Grid Computing Certification Authority Mercury - ndnhan@kisti.re.kr
+/C=GR/O=HellasGrid/OU=ntua.gr/CN=Nikolaos Charitonides, /C=GR/O=HellasGrid/OU=Certification Authorities/CN=HellasGrid CA 2006 - charitonick@math.ntua.gr
+/C=HU/O=NIIF CA/OU=GRID/OU=ELTE IK/CN=Balasko Akos/Email=akos0215@freemail.hu, /C=HU/O=NIIF/OU=Certificate Authorities/CN=NIIF Root CA - akos0215@freemail.hu
+/C=IT/O=INFN/OU=Personal Certificate/L=NICE/CN=Alberto Falzone, /C=IT/O=INFN/CN=INFN CA - Alberto.Falzone@nice-italy.com
+/C=GR/O=HellasGrid/OU=grid.auth.gr/CN=Fotis E. Psomopoulos, /C=GR/O=HellasGrid/OU=Certification Authorities/CN=HellasGrid CA 2006 - fpsom@issel.ee.auth.gr
+/DC=org/DC=doegrids/OU=People/CN=Aonan Tang 893963 14786, /DC=org/DC=DOEGrids/OU=Certificate Authorities/CN=DOEGrids CA 1 - aotang@indiana.edu
+/C=IT/O=INFN/OU=Personal Certificate/L=Pisa/CN=Francesco Bagagli, /C=IT/O=INFN/CN=INFN CA - francesco.bagagli@pi.infn.it
+/C=TW/O=AP/OU=GRID/CN=Sehoon Lee 155840, /C=TW/O=AS/CN=Academia Sinica Grid Computing Certification Authority Mercury - sehooi@kisti.re.kr
+/C=IT/O=INFN/OU=Personal Certificate/L=FBK/CN=Silvano Paoli, /C=IT/O=INFN/CN=INFN CA - silpaoli@fbk.eu
+/C=IT/O=INFN/OU=Personal Certificate/L=Catania/CN=Giuseppe La Rocca, /C=IT/O=INFN/CN=INFN CA - giuseppe.larocca@ct.infn.it
+/C=TW/O=AS/OU=GRID/CN=Hurng-Chun Lee 101535, /C=TW/O=AS/CN=Academia Sinica Grid Computing Certification Authority Mercury - Hurng-Chun.Lee@cern.ch
+/C=IL/O=IUCC/OU=TAU/CN=Assaf Gottlieb, /C=IL/O=IUCC/CN=IUCC/Email=ca@mail.iucc.ac.il - assafgot@tau.ac.il
+/DC=ch/DC=switch/DC=slcs/O=Universite de Lausanne/CN=Jean-Pascal Laedermann 95B3EB6E, /C=CH/O=Switch - Teleinformatikdienste fuer Lehre und Forschung/CN=SWITCHslcs CA - Jean-Pascal.Laedermann@unil.ch
+/C=GR/O=HellasGrid/OU=bioacademy.gr/CN=Ioannis Michalopoulos, /C=GR/O=HellasGrid/OU=Certification Authorities/CN=HellasGrid CA 2006 - imichalop@bioacademy.gr
+/C=IT/O=INFN/OU=Personal Certificate/L=LabCSAI/CN=Miriam Sgobba, /C=IT/O=INFN/CN=INFN CA - miriam.sgobba@unimore.it
+/C=KR/O=KISTI/O=GRID/O=KISTI/CN=97968351 Sehoon Lee, /C=KR/O=KISTI/O=GRID/CN=KISTI Grid Certificate Authority - sehooi@kisti.re.kr
+/C=IT/O=INFN/OU=Personal Certificate/L=Catania/CN=Diego Scardaci, /C=IT/O=INFN/CN=INFN CA - diego.scardaci@ct.infn.it
+/C=KR/O=KISTI/O=GRID/O=KISTI/CN=66244821 Sunil Ahn, /C=KR/O=KISTI/O=GRID/CN=KISTI Grid Certificate Authority - siahn@kisti.re.kr
+/C=KR/O=KISTI/O=GRID/O=KISTI/CN=20651217 Soonwook Hwang, /C=KR/O=KISTI/O=GRID/CN=KISTI Grid Certificate Authority - hwang@kisti.re.kr
+/DC=es/DC=irisgrid/O=upv/CN=abel.carrion, /DC=es/DC=irisgrid/CN=IRISGridCA - abcarcol@fiv.upv.es
+/C=DE/O=GermanGrid/OU=DESY/CN=Judith Katzy, /C=DE/O=GermanGrid/CN=GridKa-CA - judith.katzy@desy.de
+/C=DE/O=GermanGrid/OU=DESY/CN=Frank Schluenzen, /C=DE/O=GermanGrid/CN=GridKa-CA - frank.schluenzen@desy.de
+/DC=es/DC=irisgrid/O=ifca/CN=Isabel-Campos-Plasencia, /DC=es/DC=irisgrid/CN=IRISGridCA - iscampos@ifca.unican.es
+/C=IT/O=INFN/OU=Personal Certificate/L=CNR-ITB Bari/CN=Andreas Gisel, /C=IT/O=INFN/CN=INFN CA - andreas.gisel@ba.itb.cnr.it
+/C=TR/O=TRGrid/OU=Ege/CN=Burhan Bakar, /C=TR/O=TRGrid/CN=TR-Grid CA - bbakar@gmail.com
+/C=TW/O=AS/OU=GRID/CN=Ying-Ta Wu 152633, /C=TW/O=AS/CN=Academia Sinica Grid Computing Certification Authority Mercury - ywu@gate.sinica.edu.tw
+/C=KR/O=KISTI/O=GRID/O=Seoul National University/CN=81004238 Yoonki Lee, /C=KR/O=KISTI/O=GRID/CN=KISTI Grid Certificate Authority - yklee@dcslab.snu.ac.kr
+/C=UK/O=eScience/OU=Manchester/L=MC/CN=fumie costen, /C=UK/O=eScienceCA/OU=Authority/CN=UK e-Science CA - f.costen@cs.man.ac.uk
+/C=HR/O=edu/OU=biolpmf/CN=Vedran Lucic, /C=HR/O=edu/OU=srce/CN=SRCE CA - vlucic@bioinfo.hr
+/C=IT/O=INFN/OU=Personal Certificate/L=Bari/CN=giacinto donvito, /C=IT/O=INFN/CN=INFN CA - giacinto.donvito@ba.infn.it
+/C=UK/O=eScience/OU=UCL/L=EISD/CN=stefan zasada, /C=UK/O=eScienceCA/OU=Authority/CN=UK e-Science CA - stefan.zasada@ucl.ac.uk
+/DC=es/DC=irisgrid/O=ifca/CN=alvaro-lopez, /DC=es/DC=irisgrid/CN=IRISGridCA - aloga@ifca.unican.es
+/C=IT/O=INFN/OU=Robot/L=Catania/CN=Robot: MrBayes - Giuseppe La Rocca, /C=IT/O=INFN/CN=INFN CA - giuseppe.larocca@ct.infn.it
+/C=IT/O=INFN/OU=Personal Certificate/L=CNR-ITB/CN=Matteo Gnocchi, /C=IT/O=INFN/CN=INFN CA - matteo.gnocchi@itb.cnr.it
+/C=UK/O=eScience/OU=Glasgow/L=Compserv/CN=george michalareas, /C=UK/O=eScienceCA/OU=Authority/CN=UK e-Science CA - georgem@psy.gla.ac.uk
+/C=TW/O=AS/OU=GRID/CN=WeiLong Ueng 194701, /C=TW/O=AS/CN=Academia Sinica Grid Computing Certification Authority Mercury - wlueng@twgrid.org
+/C=TW/O=AS/OU=GRID/CN=Young-Chung Chang 166731, /C=TW/O=AS/CN=Academia Sinica Grid Computing Certification Authority Mercury - ycchang@twgrid.org
+/C=KR/O=KISTI/O=GRID/O=Chonnam National University/CN=84366271 Nguyen Thi Thanh Hanh, /C=KR/O=KISTI/O=GRID/CN=KISTI Grid Certificate Authority - nguyenhanh040981@yahoo.com
+/C=KR/O=KISTI/O=GRID/O=KISTI/CN=48690174 Jongbae Moon, /C=KR/O=KISTI/O=GRID/CN=KISTI Grid Certificate Authority - jbmoon@kisti.re.kr
+/C=KR/O=KISTI/O=GRID/O=KISTI/CN=21618907 Nam Gyu Kim, /C=KR/O=KISTI/O=GRID/CN=KISTI Grid Certificate Authority - ssgyu@kisti.re.kr
+/DC=es/DC=irisgrid/O=upv/CN=jose-salavert, /DC=es/DC=irisgrid/CN=IRISGridCA - josator@fiv.upv.es
+/C=IT/O=INFN/OU=Personal Certificate/L=Bari/CN=Rosario Megna, /C=IT/O=INFN/CN=INFN CA - rosario.megna@ba.infn.it
+/C=IT/O=INFN/OU=Personal Certificate/L=LNF/CN=Elisabetta Vilucchi, /C=IT/O=INFN/CN=INFN CA - elisabetta.vilucchi@lnf.infn.it
+/C=PT/O=LIPCA/O=IEETA/CN=Luis Filipe Sequeira Alves, /C=PT/O=LIPCA/CN=LIP Certification Authority - luisfalves@ua.pt
+/DC=es/DC=irisgrid/O=ucm/CN=alejandro.lorca, /DC=es/DC=irisgrid/CN=IRISGridCA - alejandro.lorca@fdi.ucm.es
+/C=IT/O=INFN/OU=Personal Certificate/L=HPCC University of Lecce/CN=Maria Mirto, /C=IT/O=INFN/CN=INFN CA - maria.mirto@unisalento.it
+/C=HU/O=NIIF CA/OU=GRID/OU=SZTAKI/CN=Hermann Gabor, /C=HU/O=NIIF/OU=Certificate Authorities/CN=NIIF Root CA - ghermann@sztaki.hu
+/C=GR/O=HellasGrid/OU=uoa.gr/CN=Sharma Anuj, /C=GR/O=HellasGrid/OU=Certification Authorities/CN=HellasGrid CA 2006 - anuj.sharma80@gmail.com
+/O=GRID-FR/C=FR/O=CNRS/OU=I3S/CN=Johan Montagnat, /C=FR/O=CNRS/CN=GRID2-FR - johan@i3s.unice.fr
+/O=GRID-FR/C=FR/O=CNRS/OU=IBCP/CN=Christophe Blanchet, /C=FR/O=CNRS/CN=GRID2-FR - Christophe.Blanchet@ibcp.fr
+/C=CN/O=HEP/O=HIT/OU=CFRCBI/CN=WANYU LIU, /C=CN/O=HEP/CN=gridca-cn/Email=gridca@ihep.ac.cn - liu.wanyu@gmail.com
+/O=GRID-FR/C=VN/O=HUT/OU=IFI/CN=Thanh Tran, /C=FR/O=CNRS/CN=GRID2-FR - ttthanh@ifi.edu.vn
+/O=GRID-FR/C=FR/O=CNRS/OU=CREATIS/CN=Christopher Casta, /C=FR/O=CNRS/CN=GRID2-FR - Christopher.Casta@creatis.insa-lyon.fr
+/O=GRID-FR/C=VN/O=VAST/OU=IOIT/CN=Hieu Vu Trong, /C=FR/O=CNRS/CN=GRID2-FR - vuhieu@ioit.ac.vn
+/O=GRID-FR/C=FR/O=HEALTHGRID/CN=Yannick Legre, /C=FR/O=CNRS/CN=GRID2-FR - yannick.legre@healthgrid.org
+/DC=ch/DC=switch/DC=slcs/O=Universite de Geneve/CN=Xin Zhou 18B0C449, /C=CH/O=Switch - Teleinformatikdienste fuer Lehre und Forschung/CN=SWITCHslcs CA - Xin.Zhou@sim.hcuge.ch
+/C=BE/O=BEGRID/OU=Radioisotopes/OU=ULB/CN=Cloquet, /C=BE/O=BELNET/OU=BEGrid/CN=BEGrid CA/Email=gridca@belnet.be - christophe.cloquet@ulb.ac.be
+/O=GRID-FR/C=FR/O=CNRS/OU=LPC/CN=Lydia Maigne, /C=FR/O=CNRS/CN=GRID2-FR - maigne@clermont.in2p3.fr
+/O=GRID-FR/C=FR/O=CNRS/OU=CREATIS/CN=David Sarrut, /C=FR/O=CNRS/CN=GRID2-FR - david.sarrut@creatis.insa-lyon.fr
+/DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=vkanello/CN=692971/CN=Vassiliki Kanellopoulos, /DC=ch/DC=cern/CN=CERN Trusted Certification Authority - vassiliki.kanellopoulos@cern.ch
+/DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=froman/CN=681507/CN=Faustin Roman, /DC=ch/DC=cern/CN=CERN Trusted Certification Authority - faustin.roman@cern.ch
+/DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=danabl/CN=674066/CN=Daniel Abler, /DC=ch/DC=cern/CN=CERN Trusted Certification Authority - daniel.abler@cern.ch
+/O=GRID-FR/C=FR/O=CNRS/OU=I3S/CN=Ketan Maheshwari, /C=FR/O=CNRS/CN=GRID2-FR - ketan@polytech.unice.fr
+/C=TW/O=AS/OU=GRID/CN=lo kien hock 101073, /C=TW/O=AS/CN=Academia Sinica Grid Computing Certification Authority Mercury - lokienhock@gmail.com
+/O=GRID-FR/C=FR/O=CNRS/OU=CREATIS/CN=Thomas Grenier, /C=FR/O=CNRS/CN=GRID2-FR - thomas.grenier@creatis.insa-lyon.fr
+/O=GRID-FR/C=FR/O=CNRS/OU=CPPM/CN=Didier Benoit, /C=FR/O=CNRS/CN=GRID2-FR - benoit@cppm.in2p3.fr
+/O=GRID-FR/C=FR/O=CNRS/OU=LIRMM/CN=Vincent Lefort, /C=FR/O=CNRS/CN=GRID2-FR - lefort@lirmm.fr
+/O=GRID-FR/C=FR/O=CNRS/OU=LAL/CN=Daniel Jouvenot, /C=FR/O=CNRS/CN=GRID2-FR - jouvenot@lal.in2p3.fr
+/C=GR/O=HellasGrid/OU=ntua.gr/CN=Georgia Polychronaki, /C=GR/O=HellasGrid/OU=Certification Authorities/CN=HellasGrid CA 2006 - gpoly@biosim.ntua.gr
+/O=GRID-FR/C=FR/O=CNRS/OU=ICS/CN=Dragos Horvath, /C=FR/O=CNRS/CN=GRID2-FR - dhorvath@unistra.fr
+/O=GRID-FR/C=FR/O=INSERM/OU=DREC/CN=Thomas Carlier, /C=FR/O=CNRS/CN=GRID2-FR - thomas.carlier@chu-nantes.fr
+/O=GRID-FR/C=VN/O=HUT/OU=IFI/CN=Tung Lam Truong, /C=FR/O=CNRS/CN=GRID2-FR - truong.tung.lam@ifi.edu.vn
+/O=GRID-FR/C=FR/O=CNRS/OU=LPC/CN=Dorine Fouossong Test, /C=FR/O=CNRS/CN=GRID2-FR - dorine.fouossong@clermont.in2p3.fr
+/C=TW/O=AP/OU=GRID/CN=Son Pham Tuan 174125, /C=TW/O=AS/CN=Academia Sinica Grid Computing Certification Authority Mercury - ptson@fit.hcmus.edu.vn
+/C=TW/O=AP/OU=GRID/CN=SON LE HOANG 151911, /C=TW/O=AS/CN=Academia Sinica Grid Computing Certification Authority Mercury - chinhson2002@gmail.com
+/C=TW/O=AP/OU=GRID/CN=thi ha linh le 191470, /C=TW/O=AS/CN=Academia Sinica Grid Computing Certification Authority Mercury - linhlth@ims.vast.ac.vn
+/C=TW/O=AP/OU=GRID/CN=Tran Phuc 169117, /C=TW/O=AS/CN=Academia Sinica Grid Computing Certification Authority Mercury - vphuc@vast-hcm.ac.vn
+/C=TW/O=AP/OU=GRID/CN=Phan Pham 107276, /C=TW/O=AS/CN=Academia Sinica Grid Computing Certification Authority Mercury - Phan@Add-On-Development.com
+/C=TW/O=AP/OU=GRID/CN=TAI LE DUC 117794, /C=TW/O=AS/CN=Academia Sinica Grid Computing Certification Authority Mercury - ldtai@fit.hcmus.edu.vn
+/C=KR/O=KISTI/O=GRID/O=Chonnam National University/CN=65109392 HyunChul Choi, /C=KR/O=KISTI/O=GRID/CN=KISTI Grid Certificate Authority - inloveletter@paran.com
+/C=TW/O=AP/OU=GRID/CN=nguyen thi duyen an 173187, /C=TW/O=AS/CN=Academia Sinica Grid Computing Certification Authority Mercury - nguyenduyenan@gmail.com
+/C=TW/O=AP/OU=GRID/CN=Tung Nguyen Thanh 170760, /C=TW/O=AS/CN=Academia Sinica Grid Computing Certification Authority Mercury - tungnt86@gmail.com
+/C=TW/O=AP/OU=GRID/CN=Quang Minh Dao 136441, /C=TW/O=AS/CN=Academia Sinica Grid Computing Certification Authority Mercury - minhdq-hpcc@mail.hut.edu.vn
+/C=TW/O=AP/OU=GRID/CN=Duc Hung LE 156915, /C=TW/O=AS/CN=Academia Sinica Grid Computing Certification Authority Mercury - hungld86@gmail.com
+/C=TW/O=AP/OU=GRID/CN=Hoang Trinh 118441, /C=TW/O=AS/CN=Academia Sinica Grid Computing Certification Authority Mercury - hoang@iop.vast.ac.vn
+/C=TW/O=AP/OU=GRID/CN=Ong The Anh 121870, /C=TW/O=AS/CN=Academia Sinica Grid Computing Certification Authority Mercury - ongtheanh@yahoo.com
+/C=TW/O=AP/OU=GRID/CN=Le Tuan 130601, /C=TW/O=AS/CN=Academia Sinica Grid Computing Certification Authority Mercury - letuan_2002@yahoo.com
+/C=TW/O=AP/OU=GRID/CN=Cong Son Ho 181353, /C=TW/O=AS/CN=Academia Sinica Grid Computing Certification Authority Mercury - sonhc@ims.vast.ac.vn
+/C=TW/O=AS/OU=GRID/CN=hung Nguyen Ba 162784, /C=TW/O=AS/CN=Academia Sinica Grid Computing Certification Authority Mercury - Hungnb80@yahoo.com.vn
+/C=TW/O=AP/OU=GRID/CN=Hoai Anh Nguyen 195010, /C=TW/O=AS/CN=Academia Sinica Grid Computing Certification Authority Mercury - anhnh@ims.vast.ac.vn
+/C=TW/O=AP/OU=GRID/CN=DUNG NGUYEN DUC 192855, /C=TW/O=AS/CN=Academia Sinica Grid Computing Certification Authority Mercury - dung.nd150988@gmail.com
+/C=TW/O=AP/OU=GRID/CN=Minh-Tuan Dang 103178, /C=TW/O=AS/CN=Academia Sinica Grid Computing Certification Authority Mercury - minhtuan.dang@gmail.com
+/C=TW/O=AP/OU=GRID/CN=Huong Nguyen Thu 167146, /C=TW/O=AS/CN=Academia Sinica Grid Computing Certification Authority Mercury - toita85@gmail.com
+/C=TW/O=AP/OU=GRID/CN=Kien Nguyen Cong 158215, /C=TW/O=AS/CN=Academia Sinica Grid Computing Certification Authority Mercury - nckien@iop.vast.ac.vn
+/C=TW/O=AP/OU=GRID/CN=tuan hong anh 125239, /C=TW/O=AS/CN=Academia Sinica Grid Computing Certification Authority Mercury - honganhtuan1979@yahoo.com
+/O=GRID-FR/C=FR/O=CNRS/OU=LPC/CN=Paul De Vlieger, /C=FR/O=CNRS/CN=GRID2-FR - vlieger@clermont.in2p3.fr
+/C=TW/O=AP/OU=GRID/CN=Thi Quynh Hoa Nguyen 180411, /C=TW/O=AS/CN=Academia Sinica Grid Computing Certification Authority Mercury - hoadhv@gmail.com
+/C=TW/O=AP/OU=GRID/CN=DO VAN KHOAI 188960, /C=TW/O=AS/CN=Academia Sinica Grid Computing Certification Authority Mercury - khoaidovan@yahoo.com
+/C=TW/O=AP/OU=GRID/CN=Nu Pham 110183, /C=TW/O=AS/CN=Academia Sinica Grid Computing Certification Authority Mercury - phamnuvl@gmail.com
+/C=TW/O=AS/OU=GRID/CN=Ngo Hai Anh 133342, /C=TW/O=AS/CN=Academia Sinica Grid Computing Certification Authority Mercury - ngohaianh@ioit.ac.vn
+/C=TW/O=AP/OU=GRID/CN=Phan Doan Viet 149845, /C=TW/O=AS/CN=Academia Sinica Grid Computing Certification Authority Mercury - phandv@gmail.com
+/C=TW/O=AP/OU=GRID/CN=Quang Huy Vu 116511, /C=TW/O=AS/CN=Academia Sinica Grid Computing Certification Authority Mercury - vuquanghuy1984@yahoo.com
+/C=TW/O=AP/OU=GRID/CN=hung Nguyen Ba 181147, /C=TW/O=AS/CN=Academia Sinica Grid Computing Certification Authority Mercury - Hungnb80@yahoo.com.vn
+/C=TW/O=AP/OU=GRID/CN=LINH NGUYEN DUY 188887, /C=TW/O=AS/CN=Academia Sinica Grid Computing Certification Authority Mercury - linhnduy@gmail.com
+/C=TW/O=AP/OU=GRID/CN=Bui Vu Anh 121066, /C=TW/O=AS/CN=Academia Sinica Grid Computing Certification Authority Mercury - vuanh@vnu.edu.vn
+/C=TW/O=AP/OU=GRID/CN=TUAN NGO ANH 110468, /C=TW/O=AS/CN=Academia Sinica Grid Computing Certification Authority Mercury - tuanna@vast-hcm.ac.vn
+/C=IT/O=INFN/OU=Personal Certificate/L=ZA-MERAKA-C4/CN=Fourie Joubert, /C=IT/O=INFN/CN=INFN CA - fourie.joubert@up.ac.za
+/O=GRID-FR/C=FR/O=CNRS/OU=I3S/CN=Alban Gaignard, /C=FR/O=CNRS/CN=GRID2-FR - alban.gaignard@i3s.unice.fr
+/O=GRID-FR/C=FR/O=CNRS/OU=I3S/CN=Javier Rojas Balderrama, /C=FR/O=CNRS/CN=GRID2-FR - javier@i3s.unice.fr
+/O=GRID-FR/C=FR/O=INSERM/OU=LIF/CN=Melanie Pelegrini, /C=FR/O=CNRS/CN=GRID2-FR - Melanie.Pelegrini@imed.jussieu.fr
+/O=GRID-FR/C=FR/O=CNRS/OU=BSAI/CN=Tru Huynh, /C=FR/O=CNRS/CN=GRID2-FR - tru@pasteur.fr
+/O=GRID-FR/C=FR/O=CNRS/OU=CREATIS/CN=Tristan Glatard, /C=FR/O=CNRS/CN=GRID2-FR - glatard@creatis.insa-lyon.fr
+/O=GRID-FR/C=FR/O=CEA/OU=IRFU/CN=Frederic Schaer, /C=FR/O=CNRS/CN=GRID2-FR - frederic.schaer@cea.fr
+/O=GRID-FR/C=FR/O=CNRS/OU=CREATIS/CN=Sorina Camarasu, /C=FR/O=CNRS/CN=GRID2-FR - sorina.camarasu@creatis.insa-lyon.fr
+/O=GRID-FR/C=FR/O=ISCPIF/CN=Romain Reuillon, /C=FR/O=CNRS/CN=GRID2-FR - romain.reuillon@iscpif.fr
+/O=GRID-FR/C=FR/O=CNRS/OU=I3S/CN=Diane Lingrand, /C=FR/O=CNRS/CN=GRID2-FR - lingrand@i3s.unice.fr
+/O=GRID-FR/C=FR/O=CNRS/OU=IGL/CN=Esther Kellenberger, /C=FR/O=CNRS/CN=GRID2-FR - ekellen@unistra.fr
+/O=GRID-FR/C=FR/O=INRA/OU=URH/CN=Matthieu Reichstadt, /C=FR/O=CNRS/CN=GRID2-FR - matthieu.reichstadt@clermont.inra.fr
+/C=MA/O=MaGrid/OU=OUJDA/CN=Yahya Tayalati, /C=MA/O=MaGrid/CN=MaGrid CA - tayalati@cern.ch
+/O=GRID-FR/C=FR/O=CNRS/OU=IPHC/CN=Patrick Guterl, /C=FR/O=CNRS/CN=GRID2-FR - Patrick.Guterl@unistra.fr
+/C=DE/O=GridGermany/OU=Charite - Universitaetsmedizin Berlin/OU=Medizinische Informatik/CN=Dagmar Krefting, /C=DE/O=DFN-Verein/OU=DFN-PKI/CN=DFN-Verein PCA Grid - G01 - dagmar.krefting@charite.de
+/DC=es/DC=irisgrid/O=ific/CN=jorge.cabello, /DC=es/DC=irisgrid/CN=IRISGridCA - jcabello@ific.uv.es
+/O=GRID-FR/C=FR/O=INSERM/OU=SPEM/CN=Benjamin Grenier-Boley, /C=FR/O=CNRS/CN=GRID2-FR - benjamin.grenier-boley@pasteur-lille.fr
+/C=IL/O=IUCC/OU=TAU/OU=CS/CN=Ofer Chay, /C=IL/O=IUCC/CN=IUCC/Email=ca@mail.iucc.ac.il - oferchay@post.tau.ac.il
+/C=IT/O=INFN/OU=Personal Certificate/L=Cagliari/CN=Gian Mario Mereu, /C=IT/O=INFN/CN=INFN CA - gianmario.mereu@ca.infn.it
+/C=TW/O=AP/OU=GRID/CN=HONG HUE CAO 144169, /C=TW/O=AS/CN=Academia Sinica Grid Computing Certification Authority Mercury - chhue@ifi.edu.vn
+/O=GRID-FR/C=FR/O=CNRS/OU=CREATIS/CN=Fabrice Bellet, /C=FR/O=CNRS/CN=GRID2-FR - Fabrice.Bellet@creatis.insa-lyon.fr
+/O=GRID-FR/C=FR/O=INRA/OU=EPIA/CN=David Abrial, /C=FR/O=CNRS/CN=GRID2-FR - dabrial@clermont.inra.fr
+/O=GRID-FR/C=FR/O=CNRS/OU=LPC/CN=Yann Perrot, /C=FR/O=CNRS/CN=GRID2-FR - perrot@clermont.in2p3.fr
+/C=IT/O=INFN/OU=Personal Certificate/L=ZA-UCT/CN=Timothy John Carr, /C=IT/O=INFN/CN=INFN CA - timothy.carr@uct.ac.za
+/O=GRID-FR/C=FR/O=CNRS/OU=CREATIS/CN=Sarra Ben Fredj, /C=FR/O=CNRS/CN=GRID2-FR - sarra.benfredj@creatis.insa-lyon.fr
+/C=CN/O=HEP/O=HIT/OU=CFRCBI/CN=Jianwei Ma, /C=CN/O=HEP/CN=gridca-cn/Email=gridca@ihep.ac.cn - majianwei@hrbust.edu.cn
+/O=GRID-FR/C=FR/O=CNRS/OU=CREATIS/CN=Benjamin Leporq, /C=FR/O=CNRS/CN=GRID2-FR - benjamin.leporq@creatis.insa-lyon.fr
+/O=GRID-FR/C=FR/O=CNRS/OU=LIMOS/CN=Jonathan Passerat-Palmbach, /C=FR/O=CNRS/CN=GRID2-FR - passerat@isima.fr
+/C=TW/O=AP/OU=GRID/CN=Hieu Vu Trong 181281, /C=TW/O=AS/CN=Academia Sinica Grid Computing Certification Authority Mercury - vuhieu@ioit.ac.vn
+/C=TW/O=AS/OU=GRID/CN=Hsi-Kai Wang 144701, /C=TW/O=AS/CN=Academia Sinica Grid Computing Certification Authority Mercury - hsikai.wang@twgrid.org
+/C=HU/O=NIIF CA/OU=GRID/OU=NIIF/CN=Ferenc Otvos/Email=otvos@brc.hu, /C=HU/O=NIIF/OU=Certificate Authorities/CN=NIIF Root CA - otvos@brc.hu
+/O=GRID-FR/C=FR/O=CNRS/OU=IBCP/CN=Jaipehessa Ibecepe, /C=FR/O=CNRS/CN=GRID2-FR - Christophe.Blanchet@ibcp.fr
+/O=GRID-FR/C=FR/O=CNRS/OU=CREATIS/CN=Rafael Silva, /C=FR/O=CNRS/CN=GRID2-FR - rafael.silva@creatis.insa-lyon.fr
+/O=GRID-FR/C=FR/O=CNRS/OU=CREATIS/CN=Herve Liebgott, /C=FR/O=CNRS/CN=GRID2-FR - liebgott@creatis.univ-lyon1.fr
+/C=MA/O=MaGrid/OU=CNRST/CN=Hind Saikouk, /C=MA/O=MaGrid/CN=MaGrid CA - saik.hind@gmail.com
+/O=GRID-FR/C=FR/O=CNRS/OU=LIMOS/CN=Jonathan Caux, /C=FR/O=CNRS/CN=GRID2-FR - jonathan.caux@isima.fr
+/C=MA/O=MaGrid/OU=CNRST/CN=Yassine Toufique, /C=MA/O=MaGrid/CN=MaGrid CA - toufique.yassine@gmail.com
+/O=GRID-FR/C=FR/O=CNRS/OU=CREATIS/CN=Liting Li, /C=FR/O=CNRS/CN=GRID2-FR - ting.li@creatis.insa-lyon.fr
+/C=IT/O=INFN/OU=Personal Certificate/L=Pisa/CN=Federico Calzolari, /C=IT/O=INFN/CN=INFN CA - federico.calzolari@sns.it
+/O=GRID-FR/C=FR/O=CNRS/OU=IECB/CN=Driss Bennani, /C=FR/O=CNRS/CN=GRID2-FR - d.bennani@iecb.u-bordeaux.fr
+/O=GRID-FR/C=FR/O=CNRS/OU=CREATIS/CN=Eduardo Davila, /C=FR/O=CNRS/CN=GRID2-FR - eduardo.davila@creatis.insa-lyon.fr
+/DC=com/DC=quovadisglobal/DC=grid/DC=switch/DC=users/C=CH/O=Universite de Lausanne/CN=Heinz Stockinger, /C=BM/O=QuoVadis Limited/OU=Issuing Certification Authority/CN=QuoVadis Grid ICA - Heinz.Stockinger@isb-sib.ch
+/O=GRID-FR/C=FR/O=CNRS/OU=CPPM/CN=Andrei Tsaregorodtsev, /C=FR/O=CNRS/CN=GRID2-FR - atsareg@in2p3.fr
+/DC=es/DC=irisgrid/O=ciemat/CN=antonio-rubio, /DC=es/DC=irisgrid/CN=IRISGridCA - antonio.rubio@ciemat.es
+/C=KR/O=KISTI/O=GRID/O=National Cancer Center/CN=46072275 Byung Jun Min, /C=KR/O=KISTI/O=GRID/CN=KISTI Grid Certificate Authority - bjmin.kr@gmail.com
+/O=GRID-FR/C=FR/O=CNRS/OU=CREATIS/CN=Patrick Clarysse, /C=FR/O=CNRS/CN=GRID2-FR - patrick.clarysse@creatis.insa-lyon.fr
+/O=GRID-FR/C=FR/O=CNRS/OU=CREATIS/CN=Lihui Wang, /C=FR/O=CNRS/CN=GRID2-FR - lihui.wang@creatis.insa-lyon.fr
+/O=GRID-FR/C=FR/O=HEALTHGRID/CN=Romain Tartiere, /C=FR/O=CNRS/CN=GRID2-FR - romain.tartiere@healthgrid.org
+/C=IT/O=INFN/OU=Personal Certificate/L=Bari/CN=Guido Cuscela, /C=IT/O=INFN/CN=INFN CA - guido.cuscela@ba.infn.it
+/C=GR/O=HellasGrid/OU=cti.gr/CN=Vasilis Gkamas, /C=GR/O=HellasGrid/OU=Certification Authorities/CN=HellasGrid CA 2006 - vgkamas@cti.gr
+/O=GRID-FR/C=FR/O=CNRS/OU=IPHC/CN=Jerome Pansanel, /C=FR/O=CNRS/CN=GRID2-FR - jerome.pansanel@iphc.cnrs.fr
+/O=dutchgrid/O=users/O=uva/OU=amc/CN=Vladimir Korkhov, /C=NL/O=NIKHEF/CN=NIKHEF medium-security certification auth - v.korkhov@amc.uva.nl
+/O=GRID-FR/C=FR/O=CNRS/OU=CREATIS/CN=Pierre Gueth, /C=FR/O=CNRS/CN=GRID2-FR - pierre.gueth@creatis.insa-lyon.fr
+/O=GRID-FR/C=FR/O=CNRS/OU=LPSC/CN=Yannick Arnoud, /C=FR/O=CNRS/CN=GRID2-FR - yannick.arnoud@lpsc.in2p3.fr
+/O=GRID-FR/C=FR/O=CNRS/OU=LPSC/CN=Isabelle Fonteille, /C=FR/O=CNRS/CN=GRID2-FR - fonteille@lpsc.in2p3.fr
+/O=GRID-FR/C=FR/O=CNRS/OU=CREATIS/CN=Loic Grevillot, /C=FR/O=CNRS/CN=GRID2-FR - loic.grevillot@creatis.insa-lyon.fr
+/C=IT/O=INFN/OU=Personal Certificate/L=CNAF/CN=Marco Bencivenni, /C=IT/O=INFN/CN=INFN CA - marco.bencivenni@cnaf.infn.it
+/O=GRID-FR/C=FR/O=CNRS/OU=IGL/CN=Jamel Meslamani, /C=FR/O=CNRS/CN=GRID2-FR - je.meslamani@unistra.fr
+/O=GRID-FR/C=FR/O=ISCPIF/CN=Ivan Junier, /C=FR/O=CNRS/CN=GRID2-FR - i.junier@gmail.com
+/O=GRID-FR/C=FR/O=CNRS/OU=I3S/CN=Michael Perez, /C=FR/O=CNRS/CN=GRID2-FR - cabarcas@polytech.unice.fr
+/O=GRID-FR/C=FR/O=CNRS/OU=CREATIS/CN=Denis Friboulet, /C=FR/O=CNRS/CN=GRID2-FR - denis.friboulet@creatis.insa-lyon.fr
+/O=GRID-FR/C=FR/O=CNRS/OU=IPHC/CN=Yannick Patois, /C=FR/O=CNRS/CN=GRID2-FR - yannick.patois@ires.in2p3.fr
+/O=GRID-FR/C=FR/O=U-PSUD/CN=Dawei Feng, /C=FR/O=CNRS/CN=GRID2-FR - davyfeng.c@gmail.com
+/O=GRID-FR/C=FR/O=INRIA/OU=IRISA/CN=Germain Forestier, /C=FR/O=CNRS/CN=GRID2-FR - germain.forestier@inria.fr
+/O=GRID-FR/C=FR/O=CNRS/OU=I3S/CN=Franck Michel, /C=FR/O=CNRS/CN=GRID2-FR - fmichel@i3s.unice.fr
+/O=GRID-FR/C=FR/O=CNRS/OU=CC-IN2P3/CN=Pascal Calvat, /C=FR/O=CNRS/CN=GRID2-FR - pcalvat@cc.in2p3.fr
+/O=GRID-FR/C=FR/O=CNRS/OU=I3S/CN=Tram Truong Huu, /C=FR/O=CNRS/CN=GRID2-FR - tram@polytech.unice.fr
+/O=GRID-FR/C=FR/O=INSERM/OU=CG/CN=Vinh Truong, /C=FR/O=CNRS/CN=GRID2-FR - vinh.truong@upmc.fr
+/O=GRID-FR/C=FR/O=CNRS/OU=LPC/CN=Trung Tung Doan, /C=FR/O=CNRS/CN=GRID2-FR - doan@clermont.in2p3.fr
+/O=GRID-FR/C=FR/O=CNRS/OU=LIMOS/CN=Sebastien Cipiere, /C=FR/O=CNRS/CN=GRID2-FR - cipiere@isima.fr
+/C=UK/O=eScience/OU=Westminster/L=ComputerScience/CN=tamas kukla, /C=UK/O=eScienceCA/OU=Authority/CN=UK e-Science CA - kukla.tamas@gmail.com
+/O=GRID-FR/C=FR/O=CNRS/OU=LPC/CN=Sebastien Guizard, /C=FR/O=CNRS/CN=GRID2-FR - sebastien.guizard@clermont.in2p3.fr
+/C=HU/O=NIIF CA/OU=GRID/OU=KFKI/CN=Szlavecz Akos, /C=HU/O=NIIF/OU=Certificate Authorities/CN=NIIF Root CA - szlavecz@iit.bme.hu
+/O=GRID-FR/C=FR/O=INSERM/OU=LATIM/CN=Jean-Francois Clement, /C=FR/O=CNRS/CN=GRID2-FR - jean-francois.clement@univ-brest.fr
+/O=GRID-FR/C=FR/O=CNRS/OU=IGS/CN=Sebastien Santini, /C=FR/O=CNRS/CN=GRID2-FR - santini@igs.cnrs-mrs.fr
+/O=GRID-FR/C=FR/O=MAATG/CN=Jerome Revillard, /C=FR/O=CNRS/CN=GRID2-FR - jrevillard@maatg.fr
+/C=DE/O=GridGermany/OU=Charite - Universitaetsmedizin Berlin/OU=PneumoGrid/CN=Svenja Specovius, /C=DE/O=DFN-Verein/OU=DFN-PKI/CN=DFN-Verein PCA Grid - G01 - specoviu@mi.fu-berlin.de
+/O=GRID-FR/C=FR/O=CNRS/OU=I3S/CN=Nadia Cerezo, /C=FR/O=CNRS/CN=GRID2-FR - cerezo@i3s.unice.fr
+/C=BR/O=ICPEDU/O=UFF BrGrid CA/O=CEFET-RJ/OU=DEPES/CN=Diego Carvalho, /C=BR/O=ICPEDU/O=UFF BrGrid CA/CN=UFF Brazilian Grid Certification Authority - d.carvalho@ieee.org
+/O=dutchgrid/O=users/O=uva/OU=amc/CN=Shayan Shahand, /C=NL/O=NIKHEF/CN=NIKHEF medium-security certification auth - s.shahand@amc.uva.nl
+/O=GRID-FR/C=FR/O=CNRS/OU=LPC/CN=Sylvain Planche, /C=FR/O=CNRS/CN=GRID2-FR - planche@clermont.in2p3.fr
+/C=BR/O=ICPEDU/O=UFF BrGrid CA/O=CEFET-RJ/OU=DEPES/CN=Bruno Augusto Morais de Azevedo, /C=BR/O=ICPEDU/O=UFF BrGrid CA/CN=UFF Brazilian Grid Certification Authority - bruno_azevedo@cc.if.ufrj.br
+/O=GRID-FR/C=FR/O=CNRS/OU=LAPLACE/CN=Francois Xavier Arnaud, /C=FR/O=CNRS/CN=GRID2-FR - arnaud@laplace.univ-tlse.fr
+/O=GRID-FR/C=FR/O=LILLE1/OU=CRI/CN=Sebastien Louis, /C=FR/O=CNRS/CN=GRID2-FR - sebastien1.louis@etudiant.univ-lille1.fr
+/O=GRID-FR/C=FR/O=CNRS/OU=GEPV/CN=Sophie Gallina, /C=FR/O=CNRS/CN=GRID2-FR - sophie.gallina@univ-lille1.fr
+/O=GRID-FR/C=FR/O=CNRS/OU=CREATIS/CN=Simon Rit, /C=FR/O=CNRS/CN=GRID2-FR - simon.rit@creatis.insa-lyon.fr
+/C=SI/O=SiGNET/O=IJS/OU=F2/CN=Mojca Miklavec, /C=SI/O=SiGNET/CN=SiGNET CA - mojca.miklavec@ijs.si
+/DC=es/DC=irisgrid/O=upv/CN=erik.torres, /DC=es/DC=irisgrid/CN=IRISGridCA - ertorser@upv.es
+/C=IL/O=IUCC/OU=IUCC/OU=Isragrid/CN=Zeev Vaxman Fisher, /C=IL/O=IUCC/CN=IUCC/Email=ca@mail.iucc.ac.il - zeev.vaxmanfisher@isragrid.org.il
+/O=GRID-FR/C=FR/O=CNRS/OU=CREATIS/CN=Carole Lartizien, /C=FR/O=CNRS/CN=GRID2-FR - carole.lartizien@creatis.insa-lyon.fr
+/DC=es/DC=irisgrid/O=upv/CN=carmen.campos, /DC=es/DC=irisgrid/CN=IRISGridCA - carcamgo@upv.es
+/DC=es/DC=irisgrid/O=upv/CN=alberto.martinez, /DC=es/DC=irisgrid/CN=IRISGridCA - almarpr1@ei.upv.es
+/O=GRID-FR/C=FR/O=CNRS/OU=CREATIS/CN=Frederic Cervenansky, /C=FR/O=CNRS/CN=GRID2-FR - frederic.cervenansky@creatis.insa-lyon.fr
+/O=GRID-FR/C=FR/O=CNRS/OU=CREATIS/CN=Bakary Diarra, /C=FR/O=CNRS/CN=GRID2-FR - bakary.diarra@creatis.univ-lyon1.fr
+/DC=es/DC=irisgrid/O=upv/CN=amanda.calatrava, /DC=es/DC=irisgrid/CN=IRISGridCA - amcaar@ei.upv.es
+/O=GRID-FR/C=FR/O=CNRS/OU=GMM/CN=Stefan Gaget, /C=FR/O=CNRS/CN=GRID2-FR - stefan.gaget@good.ibl.fr
+/C=MA/O=MaGrid/OU=CNRST/CN=Abderrahman El kharrim, /C=MA/O=MaGrid/CN=MaGrid CA - elkharrim@cnrst.ma
+/O=GRID-FR/C=FR/O=CNRS/OU=GEPV/CN=Diala Abu Awad, /C=FR/O=CNRS/CN=GRID2-FR - diala.abu-awad@etudiant.univ-lille1.fr
+/O=GRID-FR/C=FR/O=CNRS/OU=LIMOS/CN=Faouzi Jaziri, /C=FR/O=CNRS/CN=GRID2-FR - faouzi.jaziri@isima.fr
+/O=GRID-FR/C=FR/O=CNRS/OU=IGS/CN=Olivier Poirot, /C=FR/O=CNRS/CN=GRID2-FR - poirot@igs.cnrs-mrs.fr
+/O=GRID-FR/C=FR/O=CNRS/OU=LPC/CN=The Quang Bui, /C=FR/O=CNRS/CN=GRID2-FR - bui@clermont.in2p3.fr
+/DC=es/DC=irisgrid/O=upv/CN=alejandro.lamas, /DC=es/DC=irisgrid/CN=IRISGridCA - allada@ei.upv.es
+/DC=es/DC=irisgrid/O=upv/CN=ana.betoret, /DC=es/DC=irisgrid/CN=IRISGridCA - anbegol@ei.upv.es
+/DC=es/DC=irisgrid/O=upv/CN=Manuel.Pasieka, /DC=es/DC=irisgrid/CN=IRISGridCA - mapa17@posgrado.upv.es
+/O=GRID-FR/C=FR/O=UBP/OU=CIRI/CN=Antoine Mahul, /C=FR/O=CNRS/CN=GRID2-FR - antoine.mahul@univ-bpclermont.fr
+/C=IT/O=INFN/OU=Personal Certificate/L=DZ-eScience/CN=Bendjaballah Nour Ndjoum, /C=IT/O=INFN/CN=INFN CA - nbendj@yahoo.fr
+/C=IL/O=IUCC/OU=IUCC/OU=Isragrid/CN=Paul Podolny, /C=IL/O=IUCC/CN=IUCC/Email=ca@mail.iucc.ac.il - paul.podolny@isragrid.org.il
+/O=GRID-FR/C=FR/O=CNRS/OU=CREATIS/CN=Sebastien Valette, /C=FR/O=CNRS/CN=GRID2-FR - sebastien.valette@creatis.insa-lyon.fr
+/O=GRID-FR/C=FR/O=MAATG/CN=Grenier Baptiste, /C=FR/O=CNRS/CN=GRID2-FR - bgrenier@maatg.fr
+/DC=es/DC=irisgrid/O=upf/CN=xavier.planes, /DC=es/DC=irisgrid/CN=IRISGridCA - xavier.planes@upf.edu
+/C=IL/O=IUCC/OU=IUCC/OU=R&D/CN=mati cohen, /C=IL/O=IUCC/CN=IUCC/Email=ca@mail.iucc.ac.il - mati@hql.co.il
+/C=HU/O=NIIF CA/OU=GRID/CN=Attila Kertesz, /C=HU/O=NIIF/OU=Certificate Authorities/CN=NIIF Root CA - keratt@inf.u-szeged.hu
+/O=GRID-FR/C=FR/O=CNRS/OU=LIMOS/CN=Romain Lardy, /C=FR/O=CNRS/CN=GRID2-FR - lardy@isima.fr
+/O=GRID-FR/C=FR/O=INRIA/OU=IRISA/CN=Bernard Gibaud, /C=FR/O=CNRS/CN=GRID2-FR - bernard.gibaud@irisa.fr
+/C=IT/O=INFN/OU=Personal Certificate/L=ZA-UP/CN=Fourie Joubert, /C=IT/O=INFN/CN=INFN CA - fourie.joubert@up.ac.za
+/O=dutchgrid/O=robots/O=amc/CN=Robot: grid client - Mark Santcroos (Moteur), /C=NL/O=NIKHEF/CN=NIKHEF medium-security certification auth - m.a.santcroos@amc.uva.nl
+/DC=es/DC=irisgrid/O=ciemat/CN=rafael-mayo, /DC=es/DC=irisgrid/CN=IRISGridCA - rafael.mayo@ciemat.es
+/DC=es/DC=irisgrid/O=ciemat/CN=manuel.rodriguez, /DC=es/DC=irisgrid/CN=IRISGridCA - manuel.rodriguez@ciemat.es
+/DC=es/DC=irisgrid/O=ciemat/CN=angelines.alberto.morillas, /DC=es/DC=irisgrid/CN=IRISGridCA - angelines.alberto@ciemat.es
+/O=GRID-FR/C=FR/O=CNRS/OU=CREATIS/CN=William Romero, /C=FR/O=CNRS/CN=GRID2-FR - William.Romero@creatis.insa-lyon.fr
+/O=dutchgrid/O=users/O=uva/OU=amc/CN=Mark Alexander Santcroos, /C=NL/O=NIKHEF/CN=NIKHEF medium-security certification auth - m.a.santcroos@amc.uva.nl
+/C=IT/O=INFN/OU=Personal Certificate/L=ARCEM/CN=Massimo Rizzi, /C=IT/O=INFN/CN=INFN CA - massimo.rizzi@arcem.it
+/C=SK/O=SlovakGrid/O=IEPSAS/CN=Tibor Kozar, /C=SK/O=SlovakGrid/CN=SlovakGrid CA - tibor@saske.sk
+/C=IL/O=IUCC/OU=Bar Ilan/OU=Chemistry/CN=Hanoch Senderowitz, /C=IL/O=IUCC/CN=IUCC/Email=ca@mail.iucc.ac.il - hanoch@biu.ac.il
+/C=CN/O=HEP/O=HIT/OU=CFRCBI/CN=pan jerry, /C=CN/O=HEP/CN=gridca-cn/Email=gridca@ihep.ac.cn - pancong_jerry@126.com
+/C=TW/O=AP/OU=GRID/CN=Minh Quang Dao 153018, /C=TW/O=AS/CN=Academia Sinica Grid Computing Certification Authority Mercury - minhdq-hpcc@mail.hut.edu.vn
+/O=GRID-FR/C=FR/O=ISCPIF/CN=Emmanuel Faure, /C=FR/O=CNRS/CN=GRID2-FR - emmanuel.faure@polytechnique.edu
+/O=GRID-FR/C=FR/O=CNRS/OU=CC-IN2P3/CN=David Bouvet, /C=FR/O=CNRS/CN=GRID2-FR - dbouvet@in2p3.fr
