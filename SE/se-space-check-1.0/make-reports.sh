@@ -1,5 +1,5 @@
 #!/bin/bash
-# This script is make to be run by a cron in order to regularly update the status of SEs
+# This script is made to be run by a cron in order to regularly update the status of SEs
 # supporting biomed.
 
 . /etc/profile
@@ -14,4 +14,3 @@ cd $CHECKER
 ./se-space-check.sh --sort avail --max 15 --no-sum > $HOME/public_html/biomed-top-most-loaded-se.txt
 ./se-space-check.sh --sort avail --reverse --max 15 --no-sum > $HOME/public_html/biomed-top-least-loaded-se.txt
 ./se-space-check.sh --sort %used --reverse > $HOME/public_html/biomed-se-status.txt
-

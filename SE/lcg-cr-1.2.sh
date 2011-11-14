@@ -14,7 +14,7 @@
 #   - Fix error messages
 #   - Don't over-engineer `set -e`
 # 1.2:
-#   - Add options -h and -s (--silent) to reuse it easier in loops to monitor all SEs 
+#   - Add options -h, --vo, and --silent to reuse it easier in loops to monitor all SEs
 
 help()
 {
@@ -24,12 +24,18 @@ help()
   echo
   echo "Usage:"
   echo "$0 [-h|--help]"
-  echo "$0 [-s|--silent] <SE-hostname>"
-  echo "       -h|--help: display this help"
-  echo "       -s|--silent: be as much as possible NOT verbose"
+  echo "$0 [--vo <VO>] [--silent] <SE-hostname>"
+  echo
+  echo "  --vo <VO>: the Virtual Organisation to query. Defaults to biomed."
+  echo
+  echo "  -s, --silent: be as much as possible NOT verbose"
+  echo
+  echo "  -h, --help: display this help"
   echo
   exit 1
 }
+# Set the default VO to register files
+VO=biomed
 
 # Set commands lcg-cr and lcg-del verbose by default
 VERBOSE=-v
@@ -37,6 +43,7 @@ VERBOSE=-v
 while [ ! -z "$1" ]
 do
   case "$1" in
+    --vo ) VO=$2; shift;;
     -s | --silent ) 
         SILENT=true
         VERBOSE=
