@@ -1,5 +1,5 @@
 #!/bin/bash
-# count_space_lcginfosites.sh, v1.0
+# se-space-check.sh, v1.0
 # Author: F. Michel, CNRS I3S, biomed VO support
 #
 # This tool computes the SE data provided by lcg-infosites for biomed VO, 
@@ -16,19 +16,32 @@ help()
   echo
   echo "Usage:"
   echo "$0 [-h|--help]"
-  echo "$0 [[-s|--sort] {name | avail | used | total | %used}] [-r|--reverse] [--no-sum] [--no-header] [[-m|--max] nblines]"
-  echo "       -s, --sort : sort output by name (default), available space,"
-  echo "                    used space, total space, or %age of used space."
-  echo "       -r, --reverse : sort in reverse order"
-  echo "       --no-header : do not display header lines"
-  echo "       --no-sum : do not calculate the final sum of each column"
-  echo "       -m, --max : display only the given number of lines"
-  echo "       -h, --help : display this help"
+  echo "$0 [--vo <VO>] [--sort <sort type>] [--reverse] [--max <nblines>] [--no-sum] [--no-header]"
   echo
-  echo "Example: get all SE sorted by % of used space"
-  echo "   $0 --sort %used"
-  echo "Example: get the top 10 of the least loaded SE with no header nor final sum"
-  echo "   $0 --sort avail --reverse --max 10 --no-header --no-sum"
+  echo "  --vo <VO>: the Virtual Organisation to query. Defaults to biomed."
+  echo
+  echo "  -s, --sort {name | avail | used | total | %used}: sort output by hostname, available space,"
+  echo "      used space, total space, or %age of used space. Defaults to name"
+  echo
+  echo "  --r, --reverse: sort in reverse order"
+  echo
+  echo "  -m, --max <nblines>: display only the given number of lines"
+  echo
+  echo "  --no-header: do not display header lines"
+  echo
+  echo "  --no-sum: do not calculate the final sum of each column"
+  echo
+  echo "  -h, --help: display this help"
+  echo
+  echo "Examples:"
+  echo "Get all SEs supporting VO biomed, sorted by hostname:"
+  echo "   $0"
+  echo
+  echo "Get all SEs supporting VO biomed, sorted by percentage of used space in reverse order:"
+  echo "   $0 --sort %used --reverse"
+  echo
+  echo "Get the top 10 of the least loaded SEs supporting VO vlemed, with no final sum:"
+  echo "   $0 --vo vlemed --sort avail --reverse --max 10 --no-sum"
   echo
   exit 1
 }
@@ -43,6 +56,7 @@ do
   case "$1" in
     -s | --sort ) SORT=$2; shift;;
     -r | --reverse ) REVERSE=-r;;
+    --vo ) VO=$2; shift;;
     --no-header ) NOHEADER=true;;
     --no-sum ) NOSUM=true;;
     -m | --max ) MAX=$2; shift;;
