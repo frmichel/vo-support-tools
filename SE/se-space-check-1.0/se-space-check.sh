@@ -34,13 +34,13 @@ help()
   echo "  -h, --help: display this help"
   echo
   echo "Examples:"
-  echo "Get all SEs supporting VO biomed, sorted by hostname:"
+  echo "Get all biomed SEs sorted by hostname"
   echo "   $0"
   echo
-  echo "Get all SEs supporting VO biomed, sorted by percentage of used space in reverse order:"
+  echo "Get all biomed SEs sorted by % of used space in reverse order:"
   echo "   $0 --sort %used --reverse"
   echo
-  echo "Get the top 10 of the least loaded SEs supporting VO vlemed, with no final sum:"
+  echo "Get the top 10 of the least loaded SEs, for VO vlemed, with no final sum"
   echo "   $0 --vo vlemed --sort avail --reverse --max 10 --no-sum"
   echo
   exit 1
@@ -83,7 +83,8 @@ if test -z "$NOHEADER"; then
 fi
 
 #--- First process: convert into GB, calculate % of used spacer per SE
-lcg-infosites --vo $VO se | awk -f parse-lcg-infosites-se.awk > $TMP_LCGINFOSITES
+#lcg-infosites --vo $VO se | awk -f parse-lcg-infosites-se.awk > $TMP_LCGINFOSITES
+lcg-infosites --vo $VO space | awk -f parse-lcg-infosites-space.awk > $TMP_LCGINFOSITES
 
 #--- Select column to sort
 case "$SORT" in
