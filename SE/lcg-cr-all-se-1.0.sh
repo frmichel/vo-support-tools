@@ -1,5 +1,5 @@
 #!/bin/bash
-# monitor-se-1.2.sh, v1.0
+# lcg-cr-all-se.sh, v1.0
 # Author: F. Michel, CNRS I3S, biomed VO support
 #
 # This script is intended to be used in case Nagios is unavailable, to monitor all SEs supporting 
