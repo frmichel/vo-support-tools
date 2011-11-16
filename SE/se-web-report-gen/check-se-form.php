@@ -4,7 +4,7 @@ logAccess();
 if (isHacker()) {
 ?>
 <body>
-<h1>Your hacking attempt is being blocked. Your address is logged.</h1>
+<h1>Your hacking attempt has been blocked. Your address is logged.</h1>
 </body>
 <?php exit(0);
 }

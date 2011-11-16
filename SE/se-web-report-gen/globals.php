@@ -45,6 +45,11 @@ function logAccess()
 	// Rebuild the root path of the current script
 	$result = explode("/", $_SERVER["SCRIPT_NAME"]);
 
+	if (isHacker())
+		$str = "### HACK ### ";
+	else 
+		$str = "";
+
 	$path = "/";
 	for ($i=0; $i<count($result) - 1; $i++)
 		if ($result[$i] != "")
@@ -54,7 +59,7 @@ function logAccess()
 
 	$fh = fopen($fileName, "a+");
 	if ($fh == true) {
-		$str = makeAccessLogString();
+		$str .= makeAccessLogString();
 		fputs($fh, $str);
 		fclose($fh); 
 	} else {
@@ -98,7 +103,8 @@ function isHacker() {
 	if (($_SERVER['REMOTE_ADDR'] == '222.66.119.2') || 
 		(substr_count(gethostbyaddr($_SERVER['REMOTE_ADDR']), "163data.com.cn") > 0) ||
 		($_SERVER['REMOTE_ADDR'] == '74.125.78.83') || 
-		(substr_count($_SERVER['QUERY_STRING'], "%20and%20char")) ||
+		(substr_count($_SERVER['QUERY_STRING'], "%20and%20")) ||
+		(substr_count($_SERVER['QUERY_STRING'], "%2Band%2B")) ||
 		(substr_count($_SERVER['QUERY_STRING'], "%20%61%6E"))
 	)
 	
