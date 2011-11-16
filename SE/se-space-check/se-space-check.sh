@@ -5,6 +5,11 @@
 # This tool computes the SE data provided by lcg-infosites for biomed VO, 
 # to allow for sorting the result by column, and calculate the sum of each column:
 # available, used and total storage space (in GB), and %age of used space.
+#
+# ChangeLog:
+# 1.0: initial version
+# 1.1: use "lcg-infosites space" instead of "lcg-infosites se" to get new attributes
+#      GlueSAOnline*Size instead of deprecated attributes GlueState*Size
 
 help()
 {
