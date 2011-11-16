@@ -2,8 +2,8 @@
 # lcg-cr-all-se.sh, v1.0
 # Author: F. Michel, CNRS I3S, biomed VO support
 #
-# This script is intended to be used in case Nagios is unavailable, to monitor all SEs supporting 
-# the biomed VO. The list of SEs is taken from the lcg-infosites command.
+# This script is intended to be used in case Nagios is unavailable, to monitor all SEs 
+# supporting the biomed VO. The list of SEs is taken from the lcg-infosites command.
 # Results are written to files named /tmp/monitor-se/YYYYMMDD-HHMMSS.result.
 # It uses the lcg-cr.sh script version >= 1.2.
 
