@@ -1,5 +1,5 @@
 #!/bin/bash
-# se-space-check.sh, v1.1
+# show-se-space.sh, v1.1
 # Author: F. Michel, CNRS I3S, biomed VO support
 #
 # This tool computes the SE data provided by lcg-infosites for biomed VO, 

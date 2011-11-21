@@ -4,11 +4,11 @@
 #
 # This script is intended to be used in case Nagios is unavailable, to monitor all SEs 
 # supporting the biomed VO. The list of SEs is taken from the lcg-infosites command.
-# Results are written to files named /tmp/monitor-se/YYYYMMDD-HHMMSS.result.
+# Results are written to files named /tmp/lcg-ce-all-se/YYYYMMDD-HHMMSS.result.
 # It uses the lcg-cr.sh script version >= 1.2.
 
 VO=biomed
-TMPDIR=/tmp/monitor-se
+TMPDIR=/tmp/lcg-ce-all-se
 mkdir -p $TMPDIR
 
 NOW=`date "+%Y%m%d-%H%M%S"`
