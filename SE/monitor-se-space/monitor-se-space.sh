@@ -24,13 +24,11 @@
 # Threshold of used space over which to run the procedure
 SPACE_THRESHOLD=95
 
-VO=biomed
-VOMS_HOST=voms-biomed.in2p3.fr
-VOMS_PORT=8443
-
 NOW=`date "+%Y%m%d-%H%M%S"`
-WDIR=`pwd`/_exec/$NOW
-mkdir -p $WDIR
+WDIR=`pwd`/$NOW
+
+VO=biomed
+VOMS_USERS=`pwd`/voms-users.txt
 
 TMP_LIST_SE=$WDIR/list-se.txt
 TMP_PARSE_AWK=$WDIR/parse-show-se-space.awk
@@ -45,15 +43,14 @@ help()
   echo
   echo "Usage:"
   echo "$0 [-h|--help]"
-  echo "$0 [--vo <VO>] [--voms-host <hostname>] [--voms-port <port>] [--dir <work directory>] [--threshold <percentage>]"
+  echo "$0 [--vo <VO>] [--voms-users <file name>] [--dir <work directory>] [--threshold <percentage>]"
   echo
   echo "  --vo <VO>: the Virtual Organisation to query. Defaults to biomed."
   echo
-  echo "  --voms-host <hostname>: VOMS server hostname. Defaults to voms-biomed.in2p3.fr."
+  echo "  --voms-users <file name>: list of users extracted from the VOMS server."
+  echo "                            Defaults to './voms-users.txt'."
   echo
-  echo "  --voms-port <post>: VOMS server hostname. Defaults to 8443."
-  echo
-  echo "  --dir <work directory>: where to store results. Defaults to './_exec/<date>'."
+  echo "  --dir <work directory>: where to store results. Defaults to './<date>'."
   echo
   echo "  --threshold <percentage>: percentage of used space over which a SE will be monitored. Defaults to 95."
   echo
@@ -69,38 +66,45 @@ help()
   exit 1
 }
 
+# Check environment
+if test -z "$VO_SUPPORT_TOOLS"; then
+    echo "Please set variable \$VO_SUPPORT_TOOLS before calling $0."
+    exit 1
+fi
+MONITOR_SE_SPACE=$VO_SUPPORT_TOOLS/monitor-se-space
+SHOW_SE_SPACE=$VO_SUPPORT_TOOLS/show-se-space
+
 # Check parameters
 while [ ! -z "$1" ]
 do
   case "$1" in
     --vo ) VO=$2; shift;;
-    --voms-host ) VOMS_HOST=$2; shift;;
-    --voms-port ) VOMS_PORT=$2; shift;;
-    --dir ) WDIR=$2; shift;;
+    --voms-users ) VOMS_USERS=$2; shift;;
+    --dir ) WDIR=$2/$NOW; shift;;
     --threshold ) SPACE_THRESHOLD=$2; shift;;
     -h | --help ) help;;
     * ) help;;
   esac
-
   shift
 done
 
+mkdir -p $WDIR
+
 # Make the list of SEs that use space over the given threshold (95% by default)
-sed "s/@SPACE_THRESHOLD@/$SPACE_THRESHOLD/" parse-show-se-space.awk > $TMP_PARSE_AWK
-cd ../show-se-space
-./show-se-space.sh --vo $VO --sort %used --reverse --max 30 --no-header --no-sum | awk -f $TMP_PARSE_AWK > $TMP_LIST_SE
+sed "s/@SPACE_THRESHOLD@/$SPACE_THRESHOLD/" $MONITOR_SE_SPACE/parse-show-se-space.awk > $TMP_PARSE_AWK
+$SHOW_SE_SPACE/show-se-space.sh --vo $VO --sort %used --reverse --max 30 --no-header --no-sum | awk -f $TMP_PARSE_AWK | sort | uniq > $TMP_LIST_SE
 
 # Run the analisys on each SE in parallel
-cd ../monitor-se-space
 for SEHOSTNAME in `cat $TMP_LIST_SE`
 do
   echo "Starting analysis of SE $SEHOSTNAME..."
-  ./se-heavy-users.sh --vo VO --dir $WDIR $SEHOSTNAME &
-  sleep 10
+  $MONITOR_SE_SPACE/se-heavy-users.sh --vo $VO --voms-users $VOMS_USERS --dir $WDIR $SEHOSTNAME &
+  sleep 5
 done
 echo "Started analysis of all SEs."
 
 # Clean up
 #rm -f $TMP_LIST_SE
 rm -f $TMP_PARSE_AWK
+
 

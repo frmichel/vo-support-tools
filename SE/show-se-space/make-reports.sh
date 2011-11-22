@@ -3,15 +3,19 @@
 # supporting biomed.
 
 . /etc/profile
-
-export HOME=/home/fmichel
-export CHECKER=$HOME/biomed-support-tools/SE/show-se-space
 export PATH=/opt/lcg/bin/lcg-infosites/:$PATH
 
-date "+%Y-%m-%d %H:%M:%S %Z"
+export HOME=/home/fmichel
 
-cd $CHECKER
-./show-se-space.sh --sort avail --max 15 --no-sum > $HOME/public_html/biomed-top-most-loaded-se.txt
-./show-se-space.sh --sort avail --reverse --max 20 --no-sum > $HOME/public_html/biomed-top-least-loaded-se.txt
-./show-se-space.sh --sort %used --reverse > $HOME/public_html/biomed-se-status.txt
+# Check environment
+if test -z "$VO_SUPPORT_TOOLS"; then
+    echo "Please set variable \$VO_SUPPORT_TOOLS before calling $0."
+    exit 1
+fi
+SHOW_SE_SPACE=$VO_SUPPORT_TOOLS/show-se-space
+
+date "+%Y-%m-%d %H:%M:%S %Z"
+$SHOW_SE_SPACE/show-se-space.sh --sort avail --max 15 --no-sum > $HOME/public_html/biomed-top-most-loaded-se.txt
+$SHOW_SE_SPACE/show-se-space.sh --sort avail --reverse --max 20 --no-sum > $HOME/public_html/biomed-top-least-loaded-se.txt
+$SHOW_SE_SPACE/show-se-space.sh --sort %used --reverse > $HOME/public_html/biomed-se-status.txt
 

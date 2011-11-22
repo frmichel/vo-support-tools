@@ -10,6 +10,7 @@
 # 1.0: initial version
 # 1.1: use "lcg-infosites space" instead of "lcg-infosites se" to get new attributes
 #      GlueSAOnline*Size instead of deprecated attributes GlueState*Size
+# 1.2: based on env variable $$SHOW_SE_SPACE to be able to run from anywhere
 
 help()
 {
@@ -51,11 +52,19 @@ help()
   exit 1
 }
 
+# Check environment
+if test -z "$VO_SUPPORT_TOOLS"; then
+    echo "Please set variable \$VO_SUPPORT_TOOLS before calling $0."
+    exit 1
+fi
+SHOW_SE_SPACE=$VO_SUPPORT_TOOLS/show-se-space
+
 VO=biomed
 SORT=name
 TMP_LCGINFOSITES=/tmp/list_se_lcginfosites_$$.txt
 MAX=10000
 
+# Check parameters
 while [ ! -z "$1" ]
 do
   case "$1" in
@@ -70,6 +79,7 @@ do
   esac
   shift
 done
+
 
 if test -z "$NOHEADER"; then
   echo -n "# `date "+%Y-%m-%d %H:%M:%S %Z"`. "
@@ -88,8 +98,7 @@ if test -z "$NOHEADER"; then
 fi
 
 #--- First process: convert into GB, calculate % of used spacer per SE
-#lcg-infosites --vo $VO se | awk -f parse-lcg-infosites-se.awk > $TMP_LCGINFOSITES
-lcg-infosites --vo $VO space | awk -f parse-lcg-infosites-space.awk > $TMP_LCGINFOSITES
+lcg-infosites --vo $VO space | awk -f $SHOW_SE_SPACE/parse-lcg-infosites-space.awk > $TMP_LCGINFOSITES
 
 #--- Select column to sort
 case "$SORT" in
@@ -100,7 +109,7 @@ case "$SORT" in
   %used ) SORT_OPT="-g --key=5";;
 esac
 
-sort $REVERSE $SORT_OPT $TMP_LCGINFOSITES | awk -f pretty-display.awk | head -n $MAX
+sort $REVERSE $SORT_OPT $TMP_LCGINFOSITES | awk -f $SHOW_SE_SPACE/pretty-display.awk | head -n $MAX
 
 #--- Final step: make sums of each column
 if test -z "$NOSUM"; then
@@ -108,7 +117,7 @@ if test -z "$NOSUM"; then
     echo "#--------------------------------------------------------------------------"
   fi
 
-  awk -f final-sums.awk $TMP_LCGINFOSITES | awk -f pretty-display.awk
+  awk -f $SHOW_SE_SPACE/final-sums.awk $TMP_LCGINFOSITES | awk -f $SHOW_SE_SPACE/pretty-display.awk
 
   if test -z "$NOHEADER"; then
     echo "#--------------------------------------------------------------------------"
