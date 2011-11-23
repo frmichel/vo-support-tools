@@ -9,6 +9,7 @@
 
 VO=biomed
 WDIR=`pwd`
+RESDIR=`pwd`
 VOMS_USERS=$WDIR/voms-users.txt
 
 help()
@@ -19,14 +20,18 @@ help()
   echo
   echo "Usage:"
   echo "$0 [-h|--help]"
-  echo "$0 [--vo <VO>] [--voms-users <file name>] [--dir <work directory>] <SE hostname>"
+  echo "$0 [--vo <VO>] [--voms-users <file name>] <SE hostname>"
+  echo "          [--work-dir <work directory>] [--result-dir <result directory>]"
   echo
   echo "  --vo <VO>: the Virtual Organisation to query. Defaults to biomed."
   echo
   echo "  --voms-users <file name>: list of users extracted from the VOMS server."
-  echo "                            Defaults to './voms-users.txt'."
+  echo "          Defaults to './voms-users.txt'."
   echo
-  echo "  --dir <work directory>: where to store results. Defaults to '.'."
+  echo "  --work-dir <work directory>: where to store temporary files. Defaults to '.'."
+  echo
+  echo "  --result-dir <result directory>: where to store result files, that is <hostname>_email."
+  echo "          Defaults to '.'."
   echo
   echo "  -h, --help: display this help"
   echo
@@ -38,8 +43,8 @@ if test -z "$VO_SUPPORT_TOOLS"; then
     echo "Please set variable \$VO_SUPPORT_TOOLS before calling $0."
     exit 1
 fi
-MONITOR_SE_SPACE=$VO_SUPPORT_TOOLS/monitor-se-space
-LFC_BROWSE_SE_BIN=$VO_SUPPORT_TOOLS/lfc-browse-se/LFCBrowseSE
+MONITOR_SE_SPACE=$VO_SUPPORT_TOOLS/SE/monitor-se-space
+LFC_BROWSE_SE_BIN=$VO_SUPPORT_TOOLS/SE/lfc-browse-se/LFCBrowseSE
 
 # Check parameters
 while [ ! -z "$1" ]
@@ -47,7 +52,8 @@ do
   case "$1" in
     --vo ) VO=$2; shift;;
     --voms-users ) VOMS_USERS=$2; shift;;
-    --dir ) WDIR=$2; shift;;
+    --work-dir ) WDIR=$2; shift;;
+    --result-dir ) RESDIR=$2; shift;;
     -h | --help ) help;;
     *) SEHOSTNAME=$1;;
   esac
@@ -86,7 +92,7 @@ date "$DATE_FORMAT" >> $LBS_OUT
 
 # For each user with more than 1GB, get his email address from the VOMS
 RESULT=$WDIR/${SEHOSTNAME}_users
-NOTFOUND=$WDIR/${SEHOSTNAME}_notfound
+NOTFOUND=$WDIR/${SEHOSTNAME}_unknown
 
 awk -f $MONITOR_SE_SPACE/parse-lfcbrowsese.awk $LBS_OUT | while read LINE ; do
   dn=`echo $LINE | cut -d"|" -f1`
@@ -96,10 +102,19 @@ awk -f $MONITOR_SE_SPACE/parse-lfcbrowsese.awk $LBS_OUT | while read LINE ; do
   if test $? -eq 0; then
     # Get the user's email address
     echo -n "$dn|"  >> $RESULT
+    # Complex parsing due to several ambiguous separators: <user's dn>, <CA dn> - <email address>
     echo -n $voms_user | awk '{ printf "%s", gensub("^.+ - ([^ ]+@[^ ]+)$", "\\1", 1); }' >> $RESULT
     echo "|$used"  >> $RESULT
   else
     echo "$dn|$SEHOSTNAME" >> $NOTFOUND
   fi
-
 done
+
+# Convert the result into a file preparing the email to send to users
+RESULT_EMAIL=$RESDIR/${SEHOSTNAME}_email
+mkdir -p $RESDIR
+$MONITOR_SE_SPACE/email-users.sh --vo $VO $RESULT > $RESULT_EMAIL
+
+# Also copy the raw result file to the restul dir
+mv $RESULT $RESDIR
+

@@ -1,11 +1,6 @@
 #!/bin/bash
 # list-voms-users.sh, v1.0
 # Author: F. Michel, CNRS I3S, biomed VO support
-#
-# This script gets the list of users from the VOMS server using the voms-admin command.
-#
-# All parameters default to biomed specific values, but can be specified using the options.
-#
 
 VO=biomed
 VOMS_HOST=voms-biomed.in2p3.fr
@@ -16,6 +11,8 @@ help()
 {
   echo
   echo "This script gets the list of users from the VOMS server using the voms-admin command."
+  echo "The result file is replacedi/created only if the voms-admin commands succeeds, otherwise "
+  echo "the existing file remains unchanged."
   echo
   echo "Usage:"
   echo "$0 [-h|--help]"

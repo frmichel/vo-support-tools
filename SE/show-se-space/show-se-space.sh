@@ -57,7 +57,7 @@ if test -z "$VO_SUPPORT_TOOLS"; then
     echo "Please set variable \$VO_SUPPORT_TOOLS before calling $0."
     exit 1
 fi
-SHOW_SE_SPACE=$VO_SUPPORT_TOOLS/show-se-space
+SHOW_SE_SPACE=$VO_SUPPORT_TOOLS/SE/show-se-space
 
 VO=biomed
 SORT=name

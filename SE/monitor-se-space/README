@@ -1,0 +1,14 @@
+1. Use script list-users-voms.sh to generate file voms-users.txt. That file must be passed to monitor-se-space.sh with the option --voms-users.
+Typically, this file should be generated with a cron like:
+0 1 * * * export VO_SUPPORT_TOOLS=/home/fmichel/biomed-support-tools; $VO_SUPPORT_TOOLS/SE/monitor-se/list-users-voms.sh --vo biomed --voms-host voms-biomed.in2p3.fr -voms-port 8443 --out /tmp/monitor-se/voms-users.txt
+
+2. Run the monitor-se-space.sh script, possibly using a cron, this example runs it once a week on Sundays:
+0 2 * * 0 export VO_SUPPORT_TOOLS=/home/fmichel/biomed-support-tools; $VO_SUPPORT_TOOLS/SE/monitor-se/monitor-se-space.sh --vo biomed --voms-users /tmp/monitor-se/voms-users.txt --work-dir /tmp/monitor-se --result-dir $HOME/public_html/monitor-se --threshold 90
+This will use the following:
+- parse-show-se-space.awk.tpl: template of awk file to filter the output of tool show-se-space.sh 
+- se-heavy-user.sh: run the LFCBrowseSE tools, getthe list of users over 1GB
+  - parse-lfcbrowsese.awk: process the result of LFCBrosweSE --summary
+  - email-users.sh: convert the output of se-heavy-users.sh into +/- an email body
+
+3. Once all SE have been analyzed, use script unknown-users.sh to provide a list of users who have files on SEs but are no longer known in the VOMS server.
+
