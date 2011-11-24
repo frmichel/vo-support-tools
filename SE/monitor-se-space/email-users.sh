@@ -38,7 +38,7 @@ if test -z "$INPUTFILE" ; then
     help
 fi
 
-SEHOSTNAME=`echo $INPUTFILE | sed "s/_users//"i | cut -d"/" -f2`
+SEHOSTNAME=`echo $INPUTFILE | sed "s/_users//" | awk -F"/" '{print $NF}'
 
 echo -n "TO: biomed-technical-shifts@healthgrid.org;"
 awk --field-separator "|" '{ printf " %s;",$2 }' $INPUTFILE

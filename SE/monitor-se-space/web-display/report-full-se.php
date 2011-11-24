@@ -51,14 +51,14 @@
 			<div class="form_bloc">
 				<div class="form_bloc_title font_bold left"><?php print "$seHostName"; ?></div>
 				
-				<div class="form_bloc_title font_small left">Users</div>
+				<div class="form_bloc_sub_title font_small left">Users</div>
 				<div class="left font_medium">
 					<a href="<?php print "$datetime/$seHostName"; ?>_email">Email template</a>
 					<pre><?php include "$datetime/$file"; ?></pre>
 				</div>
 
 				<?php if (file_exists("$datetime/$seHostName"."_unknown")) { ?>
-				<div class="form_bloc_title font_small left">Unknwon users (no longer in the VO)</div>
+				<div class="form_bloc_sub_title font_small left">Unknwon users (no longer in the VO)</div>
 				<div class="left font_medium">
 					<pre><?php include "$datetime/$seHostName"."_unknown"; ?></pre>
 				</div>

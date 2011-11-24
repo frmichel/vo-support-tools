@@ -55,3 +55,9 @@ body#body_form {
 	padding-bottom: 3px;
 	border-bottom-width: 2px; border-bottom-color: #ccc9c0; border-bottom-style: solid;
 }
+.form_bloc_sub_title {
+	color: #666460;
+	margin-bottom: 5px;
+	padding-bottom: 3px;
+	border-bottom-width: 1px; border-bottom-color: #ccc9c0; border-bottom-style: solid;
+}
