@@ -16,7 +16,7 @@
 SPACE_THRESHOLD=95
 
 NOW=`date "+%Y%m%d-%H%M%S"`
-NOW_PRETTY=`date "+%Y-%m-%d %H:%M:%S"`
+NOW_PRETTY=`date`
 WDIR=`pwd`/$NOW
 RESDIR=`pwd`/$NOW
 
@@ -109,8 +109,8 @@ echo "Analysis started."
 # Prepare web report with a title, threshold of used space and date/time 
 mkdir -p $RESDIR
 cat <<EOF >> $RESDIR/INFO.htm
-<h2>Monitoring of $VO SEs</h2>
-<div class="right font_small_bold">Min used space ${SPACE_THRESHOLD}% - $NOW_PRETTY</div>
+Report started $NOW_PRETTY<br>
+Space usage threshold: ${SPACE_THRESHOLD}%
 EOF
 
 # Clean up
