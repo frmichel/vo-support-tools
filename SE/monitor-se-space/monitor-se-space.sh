@@ -12,7 +12,7 @@
 #         Send a mail notification
 
 
-# Threshold of used space over which to run the procedure
+# Default threshold of used space over which to analyse an SE
 SPACE_THRESHOLD=95
 
 NOW=`date "+%Y%m%d-%H%M%S"`
@@ -22,9 +22,6 @@ RESDIR=`pwd`/$NOW
 
 VO=biomed
 VOMS_USERS=`pwd`/voms-users.txt
-
-TMP_LIST_SE=$WDIR/list-se.txt
-TMP_PARSE_AWK=$WDIR/parse-show-se-space.awk
 
 help()
 {
@@ -60,9 +57,10 @@ help()
   echo "   $0"
   echo
   echo "Check SEs supporting VO myVO with used space over 90%"
-  echo "   ./monitor-se-space.sh --vo myVo --voms-hostname voms.myvo.org"
-  echo "                         --voms-port 9999 --threshold 90"
+  echo "   ./monitor-se-space.sh --vo myVo --threshold 90"
+  echo "                         --voms-users /tmp/monitor-se/voms-users.txt"
   echo "                         --work-dir /tmp/monitor-se"
+  echo '                         --result-dir $HOME/public_html/monitor-se'
   echo
   exit 1
 }
@@ -90,14 +88,19 @@ do
   shift
 done
 
+
 mkdir -p $WDIR
 
-# Make the list of SEs that use space over the given threshold (95% by default)
+# Apply the awk template to have the proper filter of %age of used space
+TMP_PARSE_AWK=$WDIR/parse-show-se-space.awk
 sed "s/@SPACE_THRESHOLD@/$SPACE_THRESHOLD/" $MONITOR_SE_SPACE/parse-show-se-space.awk.tpl > $TMP_PARSE_AWK
+
+# Make the list of SEs that use space over the given threshold (95% by default)
+TMP_LIST_SE=$WDIR/list-se.txt
 $SHOW_SE_SPACE/show-se-space.sh --vo $VO --sort %used --reverse --max 30 --no-header --no-sum | awk -f $TMP_PARSE_AWK | sort | uniq > $TMP_LIST_SE
 
 # Run the analisys on each SE in parallel
-echo "Starting analysis of SEs over ${SPACE_THRESHOLD}% of used space:"
+echo "Starting analysis of SEs over ${SPACE_THRESHOLD}% of used space - $NOW_PRETTY"
 for SEHOSTNAME in `cat $TMP_LIST_SE`
 do
   echo "$SEHOSTNAME"

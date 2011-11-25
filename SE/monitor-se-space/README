@@ -1,3 +1,11 @@
+To run the jobs manually:
+
+set variables 
+$VO_SUPPORT_TOOLS, $LFC_HOST
+
+------------------------------------------------
+To run the jobs in cron:
+
 1. Install cron jobs
 
 1.1. Use script list-users-voms.sh to generate file voms-users.txt. That file must be passed to monitor-se-space.sh with the option --voms-users. Typically, this file should be generated with a cron like:
@@ -10,7 +18,7 @@
 
 2. Run the monitor-se-space.sh script, possibly using a cron, this example runs it once a week on Sundays:
 # Monitor the full SEs and get the list of heaviest users
-0 2 * * 0 . /etc/profile; export VO_SUPPORT_TOOLS=/home/fmichel/biomed-support-tools; $VO_SUPPORT_TOOLS/SE/monitor-se-space/monitor-se-space.sh --vo biomed --voms-users /tmp/monitor-se/voms-users.txt --work-dir /tmp/monitor-se --result-dir $HOME/public_html/monitor-se --threshold 80
+0 2 * * 0 . /etc/profile; export LFC_HOST=lfc-biomed.in2p3.fr; export VO_SUPPORT_TOOLS=/home/fmichel/biomed-support-tools; $VO_SUPPORT_TOOLS/SE/monitor-se-space/monitor-se-space.sh --vo biomed --voms-users /tmp/monitor-se/voms-users.txt --work-dir /tmp/monitor-se --result-dir $HOME/public_html/monitor-se --threshold 80 >> /tmp/monitor-se/monitor-se-space.log
 
 This will use the following:
 - parse-show-se-space.awk.tpl: template of awk file to filter the output of tool show-se-space.sh 

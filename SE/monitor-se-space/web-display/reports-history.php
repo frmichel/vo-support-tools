@@ -13,17 +13,21 @@
 	<div class="form_bloc">
 <?php
 	$localdir = opendir(".");
+	$listDirs = array();
 	while ($dir = readdir($localdir))
 	{
-		if (is_dir($dir) && ereg("([0-9]{4})([0-9]{2})([0-9]{2})-([0-9]{2})([0-9]{2})([0-9]{2})", $dir, $date)) {
-			$formatedDate = $date[1]."-".$date[2]."-".$date[3]."&nbsp;".$date[4]."h".$date[5]."m".$date[6]."s";
+		if (is_dir($dir) && ereg("([0-9]{4})([0-9]{2})([0-9]{2})-([0-9]{2})([0-9]{2})([0-9]{2})", $dir, $arDate))
+			$listDirs[$dir] = $arDate;
+	}
+	
+	arsort($listDirs);
+	foreach ($listDirs as $dir => $arDate)
+	{
+		$formatedDate = $arDate[1]."-".$arDate[2]."-".$arDate[3]."&nbsp;".$arDate[4]."h".$arDate[5]."m".$arDate[6]."s";
 ?>		<div class="font_medium line_height_2">
 <?php
 			print "<a href=\"report-full-se.php?datetime=$dir\">$formatedDate</a>";
 			print "</div>";
-			
-		}
-
 	}
 	closedir($localdir);
 ?>
@@ -31,3 +35,4 @@
 </div>
 </body>
 </html>
+

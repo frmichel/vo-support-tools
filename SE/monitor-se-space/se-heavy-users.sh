@@ -64,10 +64,6 @@ if test -z "$SEHOSTNAME" ; then
 fi
 
 # Check additional environment
-if test -z "$LFC_HOME"; then
-    echo "Please set variable LFC_HOME before calling $0, e.g. export LFC_HOME=/grid/biomed/"
-    exit 1
-fi
 if test -z "$LFC_HOST"; then
     echo "Please set variable LFC_HOST before calling $0, e.g. export LFC_HOST=lfc-biomed.in2p3.fr"
     exit 1
@@ -106,7 +102,7 @@ awk -f $MONITOR_SE_SPACE/parse-lfcbrowsese.awk $LBS_OUT | while read LINE ; do
     echo -n $voms_user | awk '{ printf "%s", gensub("^.+ - ([^ ]+@[^ ]+)$", "\\1", 1); }' >> $RESULT
     echo "|$used"  >> $RESULT
   else
-    echo "$dn" >> $NOTFOUND
+    echo "$dn|$used" >> $NOTFOUND
   fi
 done
 
@@ -118,8 +114,8 @@ $MONITOR_SE_SPACE/email-users.sh --vo $VO $RESULT > $RESULT_EMAIL
 # Export the result file to the result dir in a more readable form
 awk --field-separator "|" '{ printf "%-70s %11s\n",$1,$3; }' $RESULT > $RESDIR/${SEHOSTNAME}_users
 
-# Copy the list of unkown users to the result dir
+# Export the list of unkown users to the result dir in a more readable form
 if test -f $NOTFOUND; then
-  cp $NOTFOUND $RESDIR/${SEHOSTNAME}_unknown
+  awk --field-separator "|" '{ printf "%-70s %11s\n",$1,$2; }' $NOTFOUND > $RESDIR/${SEHOSTNAME}_unknown
 fi
 
