@@ -13,4 +13,5 @@ date "+%Y-%m-%d %H:%M:%S %Z"
 $SHOW_SE_SPACE/show-se-space.sh --sort avail --max 15 --no-sum > $HOME/public_html/biomed-top-most-loaded-se.txt
 $SHOW_SE_SPACE/show-se-space.sh --sort avail --reverse --max 20 --no-sum > $HOME/public_html/biomed-top-least-loaded-se.txt
 $SHOW_SE_SPACE/show-se-space.sh --sort %used --reverse > $HOME/public_html/biomed-se-status.txt
+$SHOW_SE_SPACE/show-se-space.sh --multiples --no-sum > $HOME/public_html/biomed-se-multiples.txt
 

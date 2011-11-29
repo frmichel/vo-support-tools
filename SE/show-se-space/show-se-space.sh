@@ -1,5 +1,5 @@
 #!/bin/bash
-# show-se-space.sh, v1.1
+# show-se-space.sh, v1.2
 # Author: F. Michel, CNRS I3S, biomed VO support
 #
 # This tool computes the SE data provided by lcg-infosites for biomed VO, 
@@ -22,7 +22,8 @@ help()
   echo
   echo "Usage:"
   echo "$0 [-h|--help]"
-  echo "$0 [--vo <VO>] [--sort <sort type>] [--reverse] [--max <nblines>] [--no-sum] [--no-header]"
+  echo "$0 [--vo <VO>] [--sort <sort type>] [--reverse] [--max <nblines>] [--multiples]"
+  echo "                [--no-sum] [--no-header]"
   echo
   echo "  --vo <VO>: the Virtual Organisation to query. Defaults to biomed."
   echo
@@ -32,6 +33,8 @@ help()
   echo "  --r, --reverse: sort in reverse order"
   echo
   echo "  -m, --max <nblines>: display only the given number of lines"
+  echo
+  echo "  --multiples: display only multiple entries of the same SE"
   echo
   echo "  --no-header: do not display header lines"
   echo
@@ -71,8 +74,9 @@ do
     -s | --sort ) SORT=$2; shift;;
     -r | --reverse ) REVERSE=-r;;
     --vo ) VO=$2; shift;;
-    --no-header ) NOHEADER=true;;
-    --no-sum ) NOSUM=true;;
+    --no-header ) NOHEADER="true";;
+    --no-sum ) NOSUM="true";;
+    --multiples ) MULTIPLES="true";;
     -m | --max ) MAX=$2; shift;;
     -h | --help ) help;;
     * ) help;;
@@ -84,21 +88,18 @@ done
 if test -z "$NOHEADER"; then
   echo -n "# `date "+%Y-%m-%d %H:%M:%S %Z"`. "
   echo -n "VO $VO. "
-  #echo -n "Sort by \"$SORT\". "
-  #if test -n "$REVERSE"; then
-  #   echo -n "Reverse order. "
-  #fi
-  #if test -n "$MAX"; then
-  #   echo -n "Max $MAX lines. "
-  #fi
   echo
   echo "#--------------------------------------------------------------------------"
   echo "# Hostname                       Available(GB)   Used(GB)  Total(GB)  %Used"
   echo "#--------------------------------------------------------------------------"
 fi
 
-#--- First process: convert into GB, calculate % of used spacer per SE
-lcg-infosites --vo $VO space | awk -f $SHOW_SE_SPACE/parse-lcg-infosites-space.awk > $TMP_LCGINFOSITES
+#--- First process: calculate % of used spacer per SE
+AWK_FILE=$SHOW_SE_SPACE/parse-lcg-infosites-space.awk
+if test -n "$MULTIPLES"; then
+  AWK_FILE=$SHOW_SE_SPACE/parse-lcg-infosites-space-multiples.awk
+fi
+lcg-infosites --vo $VO space | awk -f $AWK_FILE > $TMP_LCGINFOSITES
 
 #--- Select column to sort
 case "$SORT" in
