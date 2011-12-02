@@ -52,10 +52,12 @@ else
 	$withGOCDBsearch = "off";
 
 	if (array_key_exists("hostname", $_GET)) {
-	$hostname = $_GET['hostname'];
+	$hostname = $_GET['hostname'];	
+
 	if ($hostname == "")
 		$error = "Parameter error: SE hostname parameter is mandatory.";
 	else if (! in_array($hostname, $list_se)) {
+	
 		$error = "WARNING: SE ".$hostname." does not support the Biomed VO, the reports may fail.";
 	}
 } else {
