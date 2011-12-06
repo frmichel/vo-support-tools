@@ -109,7 +109,7 @@ done
 # Convert the result into a file preparing the email to send to users
 RESULT_EMAIL=$RESDIR/${SEHOSTNAME}_email
 mkdir -p $RESDIR
-$MONITOR_SE_SPACE/email-users.sh --vo $VO $RESULT > $RESULT_EMAIL
+$MONITOR_SE_SPACE/email-users.sh --vo $VO --users $RESULT --unknown $NOTFOUND > $RESULT_EMAIL
 
 # Export the result file to the result dir in a more readable form
 awk --field-separator "|" '{ printf "%-70s %11s\n",$1,$3; }' $RESULT > $RESDIR/${SEHOSTNAME}_users

@@ -1,5 +1,5 @@
 # This awk script parses the output of LFCBrowseSE, converts the used space
-# of each user into GB, and filters only those users with more than 1GB.
+# of each user into GB, and filters only those users with more than 100 MB.
 # Output looks like:
 #    /O=GRID-FR/C=FR/O=CNRS/OU=I3S/CN=Tristan Glatard|10G
 
@@ -37,8 +37,9 @@
   else
     normSize = 0; # case without unit = bytes, rounded to 0
 
-  # Filter only users with more than 1GB
-  if (normSize>=1)
+  # Filter only users with more than 100 MB
+#  if (normSize>=1)
+  if (normSize>=0.1)
     printf "%s|%.2f GB\n", dn, normSize;
 }
 

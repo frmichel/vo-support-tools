@@ -28,7 +28,7 @@ help()
   echo
   echo "This script monitors the free space the SEs supporting a given VO."
   echo "For all SEs with more than 95% space used, it runs the LFCBrowseSE tool to"
-  echo "collect the VO users who have more than 1 GB of data on that SE, then"
+  echo "collect the VO users who have more than 100 MB of data on that SE, then"
   echo "produces the list of DNs, used space, and email addresses of those users."
   echo
   echo "Usage:"
@@ -97,7 +97,8 @@ sed "s/@SPACE_THRESHOLD@/$SPACE_THRESHOLD/" $MONITOR_SE_SPACE/parse-show-se-spac
 
 # Make the list of SEs that use space over the given threshold (95% by default)
 TMP_LIST_SE=$WDIR/list-se.txt
-$SHOW_SE_SPACE/show-se-space.sh --vo $VO --sort %used --reverse --max 30 --no-header --no-sum | awk -f $TMP_PARSE_AWK | sort | uniq > $TMP_LIST_SE
+#$SHOW_SE_SPACE/show-se-space.sh --vo $VO --sort %used --reverse --max 30 --no-header --no-sum | awk -f $TMP_PARSE_AWK | sort | uniq > $TMP_LIST_SE
+$SHOW_SE_SPACE/show-se-space.sh --vo $VO --sort %used --reverse --no-header --no-sum | awk -f $TMP_PARSE_AWK | sort | uniq > $TMP_LIST_SE
 
 # Run the analisys on each SE in parallel
 echo "Starting analysis of SEs over ${SPACE_THRESHOLD}% of used space - $NOW_PRETTY"
@@ -106,6 +107,7 @@ do
   echo "$SEHOSTNAME"
   $MONITOR_SE_SPACE/se-heavy-users.sh --vo $VO --voms-users $VOMS_USERS --work-dir $WDIR --result-dir $RESDIR $SEHOSTNAME &
   sleep 5
+  #sleep 300
 done
 echo "Analysis started."
 
