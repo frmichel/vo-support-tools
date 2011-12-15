@@ -100,23 +100,22 @@ TMP_LIST_SE=$WDIR/list-se.txt
 #$SHOW_SE_SPACE/show-se-space.sh --vo $VO --sort %used --reverse --max 30 --no-header --no-sum | awk -f $TMP_PARSE_AWK | sort | uniq > $TMP_LIST_SE
 $SHOW_SE_SPACE/show-se-space.sh --vo $VO --sort %used --reverse --no-header --no-sum | awk -f $TMP_PARSE_AWK | sort | uniq > $TMP_LIST_SE
 
+# Prepare web report with a title, threshold of used space and date/time
+mkdir -p $RESDIR
+cat <<EOF >> $RESDIR/INFO.htm
+Report started $NOW_PRETTY<br>
+Space usage threshold: ${SPACE_THRESHOLD}%
+EOF
+
 # Run the analisys on each SE in parallel
 echo "Starting analysis of SEs over ${SPACE_THRESHOLD}% of used space - $NOW_PRETTY"
 for SEHOSTNAME in `cat $TMP_LIST_SE`
 do
   echo "$SEHOSTNAME"
   $MONITOR_SE_SPACE/se-heavy-users.sh --vo $VO --voms-users $VOMS_USERS --work-dir $WDIR --result-dir $RESDIR $SEHOSTNAME &
-  sleep 5
-  #sleep 300
+  sleep 10
 done
 echo "Analysis started."
-
-# Prepare web report with a title, threshold of used space and date/time 
-mkdir -p $RESDIR
-cat <<EOF >> $RESDIR/INFO.htm
-Report started $NOW_PRETTY<br>
-Space usage threshold: ${SPACE_THRESHOLD}%
-EOF
 
 # Clean up
 #rm -f $TMP_LIST_SE

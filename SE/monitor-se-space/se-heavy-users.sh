@@ -2,7 +2,7 @@
 # se-heavy-users.sh, v1.0
 # Author: F. Michel, CNRS I3S, biomed VO support
 #
-# This script looks for users of a the given VO who have more that 1GB of data on the given SE.
+# This script looks for users who have more that 100 MB of data on the given SE.
 # It provides the list of such users as well as their email address.
 #
 # All parameters default to biomed specific values, but can be specified using the options.
@@ -15,7 +15,7 @@ VOMS_USERS=$WDIR/voms-users.txt
 help()
 {
   echo
-  echo "This script looks for users of a the given VO who have more that 1GB of data on the given SE."
+  echo "This script looks for users of the given VO who have more that 100 MB of data on the given SE."
   echo "It provides the list of such users as well as their email address."
   echo
   echo "Usage:"
@@ -63,7 +63,7 @@ if test -z "$SEHOSTNAME" ; then
     help
 fi
 
-# Check additional environment
+#--- Check additional environment
 if test -z "$LFC_HOST"; then
     echo "Please set variable LFC_HOST before calling $0, e.g. export LFC_HOST=lfc-biomed.in2p3.fr"
     exit 1
@@ -75,7 +75,11 @@ fi
 mkdir -p $WDIR/tmp
 LBS_OUT=$WDIR/tmp/$SEHOSTNAME.lst
 
-# Process the SE: get all VO users having files there
+#--- The hostname_status file will help display the status of the analysis on the web report
+RESULT_STATUS=$RESDIR/${SEHOSTNAME}_status
+echo "${SEHOSTNAME}|ongoing" | awk --field-separator "|" '{ printf "%-50s %s\n",$1,$2; }' > $RESULT_STATUS
+
+#--- Process the SE: get all VO users having files there
 touch $LBS_OUT
 echo -n "# Starting LFCBrowseSE at " >> $LBS_OUT
 DATE_FORMAT="+%Y-%m-%d %H:%M:%S %Z"
@@ -86,7 +90,7 @@ $LFC_BROWSE_SE_BIN $SEHOSTNAME --vo $VO --summary 2>&1 >> $LBS_OUT
 echo -n "# LFCBrowseSE completed at " >> $LBS_OUT
 date "$DATE_FORMAT" >> $LBS_OUT
 
-# For each user with more than 1GB, get his email address from the VOMS
+#--- For each user with more than 100 MB, get his email address from the VOMS
 RESULT=$WDIR/${SEHOSTNAME}_users
 NOTFOUND=$WDIR/${SEHOSTNAME}_unknown
 
@@ -106,16 +110,18 @@ awk -f $MONITOR_SE_SPACE/parse-lfcbrowsese.awk $LBS_OUT | while read LINE ; do
   fi
 done
 
-# Convert the result into a file preparing the email to send to users
+#--- Convert the result into a file preparing the email to send to users
 RESULT_EMAIL=$RESDIR/${SEHOSTNAME}_email
 mkdir -p $RESDIR
 $MONITOR_SE_SPACE/email-users.sh --vo $VO --users $RESULT --unknown $NOTFOUND > $RESULT_EMAIL
 
-# Export the result file to the result dir in a more readable form
+#--- Export the result file to the result dir in a more readable form
 awk --field-separator "|" '{ printf "%-70s %11s\n",$1,$3; }' $RESULT > $RESDIR/${SEHOSTNAME}_users
 
-# Export the list of unkown users to the result dir in a more readable form
+#--- Export the list of unkown users to the result dir in a more readable form
 if test -f $NOTFOUND; then
   awk --field-separator "|" '{ printf "%-70s %11s\n",$1,$2; }' $NOTFOUND > $RESDIR/${SEHOSTNAME}_unknown
 fi
+
+echo "<a href=\"#${SEHOSTNAME}\">|${SEHOSTNAME}|</a>|done." | awk --field-separator "|" '{ printf "%s%-51s%s%s\n",$1,$2,$3,$4; }' > $RESULT_STATUS
 

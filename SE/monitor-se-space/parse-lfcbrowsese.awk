@@ -38,7 +38,6 @@
     normSize = 0; # case without unit = bytes, rounded to 0
 
   # Filter only users with more than 100 MB
-#  if (normSize>=1)
   if (normSize>=0.1)
     printf "%s|%.2f GB\n", dn, normSize;
 }
