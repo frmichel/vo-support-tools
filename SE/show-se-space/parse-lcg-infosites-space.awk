@@ -30,7 +30,7 @@ BEGIN { nbHosts=1; }
     }
   }
 
-  # Save current SE or sum values with existing ones of the same host has already been seen
+  # Save current SE or sum values with existing ones if the same host has already been seen
   if (found != 0) {
     values[i, "avail"] += $1;
     values[i, "used"] += $2;

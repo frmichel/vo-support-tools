@@ -8,7 +8,7 @@
 </head>
 
 <body id="body_form">
-<h2>Full SE reports history for biomed VO</h2>
+<h2>SE space reports history for biomed VO</h2>
 
 	<div class="form_bloc">
 <?php

@@ -3,13 +3,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 
 <head>
-  <title>Report of full Storage Elements for VO biomed</title>
+  <title>Storage Elements space report for VO biomed</title>
   <link href="styles.css" rel="stylesheet" type="text/css">
   <meta name="robots" content="noindex">
 </head>
 
 <body id="body_form">
-<h2>Report of full SEs for VO biomed</h2>
+<h2>SE space report for VO biomed</h2>
 
 <?php 
 	// Check parameters
@@ -78,7 +78,7 @@
 			
 			<div class="form_bloc_sub_title font_small left">Users</div>
 			<div class="left font_medium">
-				<a href="<?php print "$datetime/$seHostName"; ?>_email">Email template</a>
+				<a href="<?php print "$datetime/$seHostName"; ?>_email">Full SE email template</a>
 				<pre><?php include "$datetime/$file"; ?></pre>
 			</div>
 

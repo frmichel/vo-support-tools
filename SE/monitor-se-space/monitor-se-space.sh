@@ -1,5 +1,5 @@
 #!/bin/bash
-# monitor-se-space.sh, v1.0
+# monitor-se-space.sh, v1.1
 # Author: F. Michel, CNRS I3S, biomed VO support
 #
 # Algo:
@@ -14,6 +14,7 @@
 
 # Default threshold of used space over which to analyse an SE
 SPACE_THRESHOLD=95
+USER_MIN_SPACE=0.1
 
 NOW=`date "+%Y%m%d-%H%M%S"`
 NOW_PRETTY=`date`
@@ -33,7 +34,7 @@ help()
   echo
   echo "Usage:"
   echo "$0 [-h|--help]"
-  echo "$0 [--vo <VO>] [--voms-users <file name>] [--threshold <percentage>]"
+  echo "$0 [--vo <VO>] [--voms-users <file name>] [--threshold <percentage>] [--user-min-used  <space in GB>]"
   echo "               [--work-dir <work directory>] [--result-dir <result directory>]"  
   echo
   echo "  --vo <VO>: the Virtual Organisation to query. Defaults to biomed."
@@ -50,10 +51,12 @@ help()
   echo
   echo "  --threshold <percentage>: percentage of used space over which a SE will be monitored. Defaults to 95."
   echo
+  echo "  --user-min-used <space in GB>: minimum used space (in GB) for a user to be reported. Defaults to 0.1 = 100 MB."
+  echo
   echo "  -h, --help: display this help"
   echo
   echo "Examples:"
-  echo "Check SEs supporting biomed with used space over 95%, store temp and result files in ./<date>:"
+  echo "Check SEs supporting biomed with used space over 95%, users with more than 100 MB, store temp and result files in current directory.<date>:"
   echo "   $0"
   echo
   echo "Check SEs supporting VO myVO with used space over 90%"
@@ -82,6 +85,7 @@ do
     --work-dir ) WDIR=$2/$NOW; shift;;
     --result-dir ) RESDIR=$2/$NOW; shift;;
     --threshold ) SPACE_THRESHOLD=$2; shift;;
+    --user-min-used ) USER_MIN_SPACE=$2; shift;;
     -h | --help ) help;;
     * ) help;;
   esac
@@ -104,15 +108,16 @@ $SHOW_SE_SPACE/show-se-space.sh --vo $VO --sort %used --reverse --no-header --no
 mkdir -p $RESDIR
 cat <<EOF >> $RESDIR/INFO.htm
 Report started $NOW_PRETTY<br>
-Space usage threshold: ${SPACE_THRESHOLD}%
+SE minimum used space: ${SPACE_THRESHOLD}%<br>
+Users minimum used space: ${USER_MIN_SPACE}GB
 EOF
 
 # Run the analisys on each SE in parallel
-echo "Starting analysis of SEs over ${SPACE_THRESHOLD}% of used space - $NOW_PRETTY"
+echo "Starting analysis of SEs over ${SPACE_THRESHOLD}% of used space, reporting uses consumming over ${USER_MIN_SPACE}GB - $NOW_PRETTY"
 for SEHOSTNAME in `cat $TMP_LIST_SE`
 do
   echo "$SEHOSTNAME"
-  $MONITOR_SE_SPACE/se-heavy-users.sh --vo $VO --voms-users $VOMS_USERS --work-dir $WDIR --result-dir $RESDIR $SEHOSTNAME &
+  $MONITOR_SE_SPACE/se-heavy-users.sh --vo $VO --voms-users $VOMS_USERS --user-min-used $USER_MIN_SPACE --work-dir $WDIR --result-dir $RESDIR $SEHOSTNAME &
   sleep 10
 done
 echo "Analysis started."

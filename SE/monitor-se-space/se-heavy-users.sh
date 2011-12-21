@@ -1,5 +1,5 @@
 #!/bin/bash
-# se-heavy-users.sh, v1.0
+# se-heavy-users.sh, v1.1
 # Author: F. Michel, CNRS I3S, biomed VO support
 #
 # This script looks for users who have more that 100 MB of data on the given SE.
@@ -11,6 +11,7 @@ VO=biomed
 WDIR=`pwd`
 RESDIR=`pwd`
 VOMS_USERS=$WDIR/voms-users.txt
+USER_MIN_SPACE=0.1
 
 help()
 {
@@ -20,8 +21,8 @@ help()
   echo
   echo "Usage:"
   echo "$0 [-h|--help]"
-  echo "$0 [--vo <VO>] [--voms-users <file name>] <SE hostname>"
-  echo "          [--work-dir <work directory>] [--result-dir <result directory>]"
+  echo "$0 [--vo <VO>] [--voms-users <file name>] [--user-min-used  <space in GB>]"
+  echo "          [--work-dir <work directory>] [--result-dir <result directory>] <SE hostname>"
   echo
   echo "  --vo <VO>: the Virtual Organisation to query. Defaults to biomed."
   echo
@@ -32,6 +33,8 @@ help()
   echo
   echo "  --result-dir <result directory>: where to store result files, that is <hostname>_email."
   echo "          Defaults to '.'."
+  echo
+  echo "  --user-min-used <space in GB>: minimum used space (in GB) for a user to be reported. Defaults to 0.1 = 100 MB."
   echo
   echo "  -h, --help: display this help"
   echo
@@ -54,6 +57,7 @@ do
     --voms-users ) VOMS_USERS=$2; shift;;
     --work-dir ) WDIR=$2; shift;;
     --result-dir ) RESDIR=$2; shift;;
+    --user-min-used ) USER_MIN_SPACE=$2; shift;;
     -h | --help ) help;;
     *) SEHOSTNAME=$1;;
   esac
@@ -90,11 +94,14 @@ $LFC_BROWSE_SE_BIN $SEHOSTNAME --vo $VO --summary 2>&1 >> $LBS_OUT
 echo -n "# LFCBrowseSE completed at " >> $LBS_OUT
 date "$DATE_FORMAT" >> $LBS_OUT
 
-#--- For each user with more than 100 MB, get his email address from the VOMS
+#--- For each user with more than x GB, get his email address from the VOMS
 RESULT=$WDIR/${SEHOSTNAME}_users
 NOTFOUND=$WDIR/${SEHOSTNAME}_unknown
 
-awk -f $MONITOR_SE_SPACE/parse-lfcbrowsese.awk $LBS_OUT | while read LINE ; do
+TMP_PARSE_AWK=$WDIR/parse-lfcbrowsese.awk
+sed "s/@SPACE_THRESHOLD@/$USER_MIN_SPACE/" $MONITOR_SE_SPACE/parse-lfcbrowsese.awk.tpl > $TMP_PARSE_AWK
+
+awk -f $TMP_PARSE_AWK $LBS_OUT | while read LINE ; do
   dn=`echo $LINE | cut -d"|" -f1`
   used=`echo $LINE | cut -d"|" -f2`
 
@@ -123,5 +130,9 @@ if test -f $NOTFOUND; then
   awk --field-separator "|" '{ printf "%-70s %11s\n",$1,$2; }' $NOTFOUND > $RESDIR/${SEHOSTNAME}_unknown
 fi
 
-echo "<a href=\"#${SEHOSTNAME}\">|${SEHOSTNAME}|</a>|done." | awk --field-separator "|" '{ printf "%s%-51s%s%s\n",$1,$2,$3,$4; }' > $RESULT_STATUS
+#--- Make the final status line giving the used space percentage and the link to the list of users
+USED_PERCENT=`lcg-infosites --vo $VO space | awk -f $VO_SUPPORT_TOOLS/SE/show-se-space/parse-lcg-infosites-space.awk | grep $SEHOSTNAME | cut -d" "  -f5`
+echo "${SEHOSTNAME}|${USED_PERCENT}% full," | awk --field-separator "|" '{ printf "<a href=\"#%s\">%-51s</a>, %10s completed.\n",$1,$1,$2; }' > $RESULT_STATUS
+
+rm -f $TMP_PARSE_AWK
 
