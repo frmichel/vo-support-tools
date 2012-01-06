@@ -131,7 +131,7 @@ if test -f $NOTFOUND; then
 fi
 
 #--- Make the final status line giving the used space percentage and the link to the list of users
-USED_PERCENT=`lcg-infosites --vo $VO space | awk -f $VO_SUPPORT_TOOLS/SE/show-se-space/parse-lcg-infosites-space.awk | grep $SEHOSTNAME | cut -d" "  -f5`
+USED_PERCENT=`lcg-infosites --vo $VO space | awk -f $VO_SUPPORT_TOOLS/SE/show-se-space/parse-lcg-infosites-space.awk | grep "^$SEHOSTNAME" | cut -d" "  -f5`
 echo "${SEHOSTNAME}|${USED_PERCENT}% full," | awk --field-separator "|" '{ printf "<a href=\"#%s\">%-51s</a>, %10s completed.\n",$1,$1,$2; }' > $RESULT_STATUS
 
 rm -f $TMP_PARSE_AWK
