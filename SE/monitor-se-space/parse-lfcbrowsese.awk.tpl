@@ -12,6 +12,7 @@
 /Distingui/ { next; }
 /========/ { next; }
 /^#/ { next; }
+/^$/ { next; }
 
 {
   # Trim heading and tailing spaces
