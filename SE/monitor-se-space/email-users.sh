@@ -54,13 +54,13 @@ awk --field-separator "|" '{ printf " %s;",$2 }' $INPUTFILE
 echo
 cat <<EOF
 
-SUBJECT: SE $SEHOSTNAME is full, please clean up or migrate your files
+SUBJECT: SE $SEHOSTNAME is full, please clean-up or migrate your files
 
 Dear $VO VO user,
 
-You have stored more than 100 MB of files on SE $SEHOSTNAME, which is almost full. Please take some time to cleanup files you no longer need, or migrate them to some other SE. 
+You have stored more than 100 MB of files on SE $SEHOSTNAME, which is almost full. Please take some time to clean-up files you no longer need, or migrate them to some other SE. 
 
-The list below shows all users with more than 100 MB on that SE. It also shows unknown users (no longer in the VO). If the users are/were part of your project or laboratory, please cleanup those files too or forward ths email to the appropriate person.
+The list below shows all users with more than 100 MB on that SE. It also shows unknown users (no longer in the VO). If the users are/were part of your project or laboratory, please clean-up those files too or forward this email to the appropriate person.
 
 Please don't hesitate to contact us (biomed-technical-shifts@healthgrid.org) in case you experience difficulties in this process.
 

@@ -21,8 +21,14 @@
 	}
 	
 	arsort($listDirs);
+	$lastMonth="0000-00";
 	foreach ($listDirs as $dir => $arDate)
 	{
+        	$currentMonth=$arDate[1]."-".$arDate[2];
+		if ($currentMonth != $lastMonth)
+		        print "<h5 class=\"left\">$currentMonth</h5>\n";
+		$lastMonth = $currentMonth;
+
 		$formatedDate = $arDate[1]."-".$arDate[2]."-".$arDate[3]."&nbsp;".$arDate[4]."h".$arDate[5]."m".$arDate[6]."s";
 ?>		<div class="font_medium line_height_2">
 <?php
