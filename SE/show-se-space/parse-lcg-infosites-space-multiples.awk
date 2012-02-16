@@ -21,7 +21,7 @@ BEGIN { nbHosts=1; }
 /--------/ { next; }
 
 {   
-  # Save current SEa
+  # Save current SE
   hostname = $8
   values[nbHosts, "hostname"] = hostname;
   values[nbHosts, "avail"] = $1;
@@ -50,7 +50,7 @@ END {
       else
         percent = int(100*values[i, "used"]/(total));
 
-      print values[i, "hostname"], values[i, "avail"], values[i, "used"], total, percent;
+      print values[i, "hostname"]"|"values[i, "avail"]"|"values[i, "used"]"|"total"|"percent;
     }
   }
 }

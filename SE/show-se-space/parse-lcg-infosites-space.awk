@@ -53,6 +53,6 @@ END {
     else
       percent = int(100*values[i, "used"]/(total));
 
-    print values[i, "hostname"], values[i, "avail"], values[i, "used"], total, percent;
+    print values[i, "hostname"]"|"values[i, "avail"]"|"values[i, "used"]"|"total"|"percent;
   }
 }

@@ -61,3 +61,23 @@ body#body_form {
 	padding-bottom: 3px;
 	border-bottom-width: 1px; border-bottom-color: #ccc9c0; border-bottom-style: solid;
 }
+
+table#reports_history_tab {
+	border: 0px solid;
+	font-size: 83%; 
+	width: 100%
+	text-align: left;
+}
+
+table#reports_history_tab tr {
+	width: 100%
+}
+table#reports_history_tab td {
+	padding-left: 15px;
+	padding-right: 15px;
+}
+table#reports_history_tab th {
+	padding-left: 15px;
+	padding-right: 15px;
+	border-bottom-width: 1px; border-bottom-color: #ccc9c0; border-bottom-style: solid;
+}

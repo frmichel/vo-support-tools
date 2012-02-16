@@ -1,5 +1,5 @@
 #!/bin/bash
-# show-se-space.sh, v1.2
+# show-se-space.sh, v1.3
 # Author: F. Michel, CNRS I3S, biomed VO support
 #
 # This tool computes the SE data provided by lcg-infosites for biomed VO, 
@@ -11,6 +11,7 @@
 # 1.1: use "lcg-infosites space" instead of "lcg-infosites se" to get new attributes
 #      GlueSAOnline*Size instead of deprecated attributes GlueState*Size
 # 1.2: based on env variable $$SHOW_SE_SPACE to be able to run from anywhere
+# 1.3: get downtimes from the GOCDB to display it along with SE space report
 
 help()
 {
@@ -64,8 +65,10 @@ SHOW_SE_SPACE=$VO_SUPPORT_TOOLS/SE/show-se-space
 
 VO=biomed
 SORT=name
-TMP_LCGINFOSITES=/tmp/list_se_lcginfosites_$$.txt
+TMP_LCGINFOSITES=/tmp/show-se-space/list_se_lcginfosites_$$.txt
 MAX=10000
+
+mkdir -p /tmp/show-se-space
 
 # Check parameters
 while [ ! -z "$1" ]
@@ -89,17 +92,28 @@ if test -z "$NOHEADER"; then
   echo -n "# `date "+%Y-%m-%d %H:%M:%S %Z"`. "
   echo -n "VO $VO. "
   echo
-  echo "#--------------------------------------------------------------------------"
-  echo "# Hostname                       Available(GB)   Used(GB)  Total(GB)  %Used"
-  echo "#--------------------------------------------------------------------------"
+  echo "#---------------------------------------------------------------------------------------------------"
+  echo "# Hostname                       Available(GB)   Used(GB)  Total(GB)  %Used   GOCDB Status"
+  echo "#---------------------------------------------------------------------------------------------------"
 fi
 
-#--- First process: calculate % of used spacer per SE
+#--- First process: calculate % of used space per SE
 AWK_FILE=$SHOW_SE_SPACE/parse-lcg-infosites-space.awk
 if test -n "$MULTIPLES"; then
   AWK_FILE=$SHOW_SE_SPACE/parse-lcg-infosites-space-multiples.awk
 fi
 lcg-infosites --vo $VO space | awk -f $AWK_FILE > $TMP_LCGINFOSITES
+
+
+#--- Get status of SE from the GOCDB (downtimes, not in producton, not monitored)
+echo -n "" > ${TMP_LCGINFOSITES}_tmp
+cat $TMP_LCGINFOSITES | while read LINE; do
+   SE=`echo $LINE | cut -d'|' -f1`
+   SE_STATUS=`grep "$SE" $HOME/public_html/gocdb-se-status.txt | cut -d'|' -f2`
+   echo $LINE'|'$SE_STATUS >> ${TMP_LCGINFOSITES}_tmp
+done
+cp ${TMP_LCGINFOSITES}_tmp $TMP_LCGINFOSITES
+
 
 #--- Select column to sort
 case "$SORT" in
@@ -110,9 +124,9 @@ case "$SORT" in
   %used ) SORT_OPT="-g --key=5";;
 esac
 
-sort $REVERSE $SORT_OPT $TMP_LCGINFOSITES | awk -f $SHOW_SE_SPACE/pretty-display.awk | head -n $MAX
+sort --field-separator="|" $REVERSE $SORT_OPT $TMP_LCGINFOSITES | awk -f $SHOW_SE_SPACE/pretty-display.awk | head -n $MAX
 
-#--- Final step: make sums of each column
+#--- Final step: make sums of each column and display everything in a pretty format
 if test -z "$NOSUM"; then
   if test -z "$NOHEADER"; then
     echo "#--------------------------------------------------------------------------"

@@ -10,7 +10,16 @@
 <body id="body_form">
 <h2>SE space reports history for biomed VO</h2>
 
-	<div class="form_bloc">
+<div class="form_bloc">
+
+	<table id="reports_history_tab">
+		<tr id="tab_header">
+			<th>Month</th>
+			<th>Scan date</th>
+			<th>SE min filling rate</th>
+			<th>User's min space</th>
+		</tr>
+
 <?php
 	$localdir = opendir(".");
 	$listDirs = array();
@@ -24,19 +33,38 @@
 	$lastMonth="0000-00";
 	foreach ($listDirs as $dir => $arDate)
 	{
-        	$currentMonth=$arDate[1]."-".$arDate[2];
+       	$currentMonth=$arDate[1]."-".$arDate[2];
 		if ($currentMonth != $lastMonth)
-		        print "<h5 class=\"left\">$currentMonth</h5>\n";
+				print "		<tr><td>$currentMonth</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>\n";
 		$lastMonth = $currentMonth;
 
+		// Build the date & time string from the directory name
 		$formatedDate = $arDate[1]."-".$arDate[2]."-".$arDate[3]."&nbsp;".$arDate[4]."h".$arDate[5]."m".$arDate[6]."s";
-?>		<div class="font_medium line_height_2">
+		
+		// Get the additional info
+		$minRate = "n.a";
+		$userMinSpace = "n.a";
+		if (file_exists($dir."/INFO.htm")) {
+			$fh = fopen($dir."/INFO.htm", "r");
+			fgets($fh);		// ignore first line
+			fscanf($fh, "SE minimum used space: %s<br>", $minRate);
+			fscanf($fh, "Users minimum used space: %s", $userMinSpace);
+			fclose($fh);
+		}
+?>		<tr>
+			<td>&nbsp;</td>
+			<td><?php
+				print "<a href=\"report-full-se.php?datetime=$dir\">$formatedDate</a>";
+			?></td>
+			<td><?php print $minRate; ?></td>
+			<td><?php print $userMinSpace; ?></td>
+		</tr>
 <?php
-			print "<a href=\"report-full-se.php?datetime=$dir\">$formatedDate</a>";
-			print "</div>";
-	}
+	} // end foreach 
 	closedir($localdir);
 ?>
+
+	</table>
 
 </div>
 </body>
