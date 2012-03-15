@@ -15,7 +15,7 @@ NOW=`date "+%Y%m%d-%H%M%S"`
 TMP_LCGINFOSITES=$TMPDIR/$NOW-list-se.txt
 RESULT=$TMPDIR/$NOW.result
 
-echo > $RESULT
+touch $RESULT
 
 # Build the list of SEs from lcg-infosites: remove header lines and lines with value "n.a"
 lcg-infosites --vo $VO space | egrep -v 'Nearline|Reserved|-----' | awk '{print $8}' | sort | uniq > $TMP_LCGINFOSITES

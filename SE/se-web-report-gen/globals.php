@@ -111,7 +111,8 @@ function isHacker() {
 		($_SERVER['REMOTE_ADDR'] == '74.125.78.83') || 
 		(substr_count($_SERVER['QUERY_STRING'], "%20and%20")) ||
 		(substr_count($_SERVER['QUERY_STRING'], "%2Band%2B")) ||
-		(substr_count($_SERVER['QUERY_STRING'], "%20%61%6E"))
+		(substr_count($_SERVER['QUERY_STRING'], "%20%61%6E")) ||
+		(substr_count($_SERVER['QUERY_STRING'], "passwd"))
 	)
 	
 		return true;
