@@ -1,5 +1,5 @@
 #!/bin/bash
-# check-se-status.sh, v1.0
+# gocdb-se-status.sh, v1.0
 # Author: F. Michel, CNRS I3S, biomed VO support
 #
 # This tool searches the GOCDB for downtime and status information concerning all SEs supporting biomed.

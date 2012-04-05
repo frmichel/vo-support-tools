@@ -1,3 +1,5 @@
 RECV.log
 SENT.log
 TEST.log
+*.swp
+*~
