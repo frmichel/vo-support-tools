@@ -1,0 +1,5 @@
+Executable    = "test_register.sh";
+StdOutput     = "std.out";
+StdError      = "std.err";
+InputSandBox  = {"test_register.sh","lcg-cr.sh"};
+OutputSandbox = {"std.out","std.err"};

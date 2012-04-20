@@ -109,7 +109,7 @@ lcg-infosites --vo $VO space | awk -f $AWK_FILE > $TMP_LCGINFOSITES
 echo -n "" > ${TMP_LCGINFOSITES}_tmp
 cat $TMP_LCGINFOSITES | while read LINE; do
    SE=`echo $LINE | cut -d'|' -f1`
-   SE_STATUS=`grep "$SE" $HOME/public_html/gocdb-se-status.txt | cut -d'|' -f2`
+   SE_STATUS=`grep "$SE" /tmp/show-se-space/gocdb-se-status.txt | cut -d'|' -f3`
    echo $LINE'|'$SE_STATUS >> ${TMP_LCGINFOSITES}_tmp
 done
 cp ${TMP_LCGINFOSITES}_tmp $TMP_LCGINFOSITES

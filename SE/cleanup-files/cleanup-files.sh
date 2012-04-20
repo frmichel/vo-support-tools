@@ -82,10 +82,10 @@ index=0
 for file in `cat $TMP_FILE | egrep "$DN_LIST" | cut -d'[' -f1`; do
 
   # Remove only the replica on that SE
-  #lcg-del -v --connect-timeout 30 --sendreceive-timeout 60 --vo $VO --se $SE lfn:$file
+  lcg-del -v --connect-timeout 30 --sendreceive-timeout 60 --vo $VO --se $SE lfn:$file
 
   # Remove all replicas
-  lcg-del -v --connect-timeout 30 --sendreceive-timeout 60 --bdii-timeout 300 --vo $VO -a lfn:$file
+  #lcg-del -v --connect-timeout 30 --sendreceive-timeout 60 --bdii-timeout 300 --vo $VO -a lfn:$file
 
   let rate="$index * 100 / $nblines"
   echo "$$: done $rate%. $file"

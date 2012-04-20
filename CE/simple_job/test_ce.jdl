@@ -1,0 +1,8 @@
+[
+Executable    = "/bin/hostname";
+StdOutput     = "std.out";
+StdError      = "std.err";
+OutputSandbox = {"std.out","std.err"};
+RetryCount  =  0;
+ShallowRetryCount  =  0;
+]
