@@ -18,7 +18,7 @@ optParser.add_option("--vo", action="store", dest="vo", default="biomed",
                   help="Virtual Organisation to query. Defaults to \"biomed\"")
 optParser.add_option("--bdii", action="store", dest="bdii", default=DEFAULT_TOPBDII,
                   help="top BDII hostname and port. Defaults to " + DEFAULT_TOPBDII)
-optParser.add_option("--only", action="store", dest="only", default=9999,
+optParser.add_option("--limit", action="store", dest="limit", default=9999,
                   help="Max number of SE to check. Defaults to all (9999)")
 
 # -------------------------------------------------------------------------
@@ -28,7 +28,7 @@ optParser.add_option("--only", action="store", dest="only", default=9999,
 (options, args) = optParser.parse_args()
 VO = options.vo
 TOPBDII = options.bdii
-MAX_SE = int(options.only)
+MAX_SE = int(options.limit)
 
 # LDAP Request to get the Storage Element info
 ldapSE = "ldapsearch -x -L -s sub -H ldap://%(TOPBDII)s -b mds-vo-name=local,o=grid \"(&(ObjectClass=GlueSE)(GlueSEUniqueID=%(HOST)s))\" | egrep \"GlueSEImplementationName|GlueSEImplementationVersion\""
@@ -67,7 +67,7 @@ for line in output.splitlines():
 #        'nbOcc': number of SEs with that SRM iplem and version
 result = {}
 
-# Regexp to limit the version number to 2 numbers
+# Regexp to limit the version number to 3 numbers
 matchVer = re.compile("^(\w+.\w+.\w+)")
 
 
@@ -79,7 +79,7 @@ for host in listSE:
     statusSA, outputSA = commands.getstatusoutput(ldapSA % {'TOPBDII': TOPBDII, 'HOST': host, 'VO': VO})
 
     if statusSE <> 0 or statusSA <> 0:
-        print "ldapsearch-se.sh error for SE", host, ":", outputSE, outputSA
+        print "ldapsearch error for SE", host, ":", outputSE, outputSA
         continue;
         
     # Parse the result lines
@@ -127,7 +127,7 @@ for host in listSE:
         result[implemName] = { implemVerCut: {'total': totalSE, 'used': usedSE, 'nbOcc': 1},
                'total': totalSE, 'used': usedSE, 'nbOcc': 1 }
 
-    # --- End of loop on SE hostnames --- 
+# End of loop on SE hostnames
 
 
 # -------------------------------------------------------------------------

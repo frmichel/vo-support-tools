@@ -13,7 +13,8 @@ $ alias ldapsearch='ldapsearch -x -L -s sub -H ldap://cclcgtopbdii01.in2p3.fr:21
 ldapsearch '(&(ObjectClass=GlueSite)(GlueSiteName=IN2P3-CC))' GlueSiteUniqueID
 	==> GlueSiteUniqueID: IN2P3-CC
 
-#--- Find all Storage Elements for this site and get the GlueSEUniqueID
+
+#--- Find all SEs for this site and get the GlueSEUniqueID
 ldapsearch '(&(ObjectClass=GlueSE)(GlueForeignKey=GlueSiteUniqueID=IN2P3-CC))' GlueSEUniqueID
 	==> ccsrm.in2p3.fr, ccsrm02.in2p3.fr
 
@@ -29,3 +30,21 @@ ldapsearch "(GlueVOInfoLocalID=biomed*)" GlueVOInfoPath GlueChunkKey GlueVOInfoA
 
 #--- Find all VOInfo elements for the biomed VO for a SE
 ldapsearch  "(&(GlueVOInfoLocalID=biomed*)(GlueChunkKey=GlueSEUniqueID=ccsrm02.in2p3.fr))"
+
+#--- Find all SEs of type Storm or dCache
+ldapsearch '(&(ObjectClass=GlueSE)(|(GlueSEImplementationName=StoRM)(GlueSEImplementationName=dCache)))' GlueSEUniqueID | egrep "^GlueSEUniqueID"
+
+
+#--- Get details of one CE
+ldapsearch '(&(ObjectClass=GlueCE)(GlueCEUniqueID=sbgce2.in2p3.fr*))'
+ldapsearch '(&(ObjectClass=GlueCE)(GlueCEUniqueID=sbgce2.in2p3.fr:8443/cream-pbs-biomed))'
+
+
+#--- Get the SE-CE binding info
+ldapsearch '(&(ObjectClass=GlueCESEBind)(GlueCESEBindSEUniqueID=sbgse1.in2p3.fr))' GlueCESEBindCEUniqueID GlueCESEBindSEUniqueID
+ldapsearch '(&(ObjectClass=GlueCE)(GlueCEUniqueID=sbgce2.in2p3.fr*))' GlueCEInfoDefaultSE
+
+#--- Get the CEs for which a SE is a close or default SE
+ldapsearch "(|(&(ObjectClass=GlueCESEBind)(GlueCESEBindSEUniqueID=$SE))(&(ObjectClass=GlueCE)(GlueCEInfoDefaultSE=$SE)))" GlueCEUniqueID GlueCESEBindCEUniqueID | egrep "^GlueCEUniqueID|^GlueCESEBindCEUniqueID"
+
+
