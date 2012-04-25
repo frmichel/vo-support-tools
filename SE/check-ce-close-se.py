@@ -25,6 +25,9 @@ optParser.add_option("--bdii", action="store", dest="bdii", default=DEFAULT_TOPB
 optParser.add_option("--limit", action="store", dest="limit", default=9999,
                      help="Max number of SE to check. Defaults to all (9999)")
 
+optParser.add_option("--count-ce", action="store_true", dest="countce",
+                     help="Do not list all refering CEs but just count them")
+
 optParser.add_option("--no-dpm", action="store_true", dest="nodpm",
                      help="Do not check DPM storage elements")
 optParser.add_option("--no-storm", action="store_true", dest="nostorm",
@@ -32,8 +35,8 @@ optParser.add_option("--no-storm", action="store_true", dest="nostorm",
 optParser.add_option("--no-dcache", action="store_true", dest="nodcache",
                      help="Do not check dCache storage elements")
 
-optParser.add_option("--count-ce", action="store_true", dest="countce",
-                     help="Do not list all refering CEs but just count them")
+optParser.add_option("--no-ver", action="store_true", dest="noversion",
+                     help="Do not report SRM implementation version")
 
 # -------------------------------------------------------------------------
 # Definitions, global variables
@@ -48,6 +51,7 @@ LIST_CE = not options.countce
 CHECK_DPM = not options.nodpm
 CHECK_STORM = not options.nostorm
 CHECK_DCACHE = not options.nodcache
+SRM_VER = not options.noversion
 
 # LDAP Request to get the SE SRM implementation name/version, the site name (GlueForeignKey)
 ldapSRMImplem = "ldapsearch -x -L -s sub -H ldap://%(TOPBDII)s -b mds-vo-name=local,o=grid \"(&(ObjectClass=GlueSE)(GlueSEUniqueID=%(HOST)s))\" | egrep \"GlueSEImplementationName|GlueSEImplementationVersion|GlueForeignKey\""
@@ -181,20 +185,29 @@ for host in listSE:
 # Display the results
 # -------------------------------------------------------------------------
 
-formatShort = "%(site)-27s%(host)-37s%(implname)-10s%(implver)-9s%(total)9s %(used)9s"
+formatShort = "%(site)-26s %(host)-36s %(implname)-7s "
+if SRM_VER: formatShort += "%(implver)-7s "
+formatShort += "%(total)9s %(used)9s %(percent)5s"
 if LIST_CE: 
-    format = formatShort + "  %(closeSEof)-33s%(defaultSEof)-33s\n"
+    format = formatShort + "  %(closeSEof)-33s %(defaultSEof)-33s\n"
 else:
     format = formatShort + "  %(closeSEof)8s %(defaultSEof)10s\n"
 
 print "=========================================================================================================================================================================="
-sys.stdout.write(format % {'site':'Site', 'host':'Hostname', 'implname':'Implem.', 'implver':'Version',
-                           'total':'Total', 'used':'Used',
-                           'closeSEof':'Close SE', 'defaultSEof':'Default SE'})
-
-sys.stdout.write(format % {'site':'', 'host':'', 'implname':'', 'implver':'',
-                           'total':'space(GB)', 'used':'space(GB)', 
-                           'closeSEof':'of CE', 'defaultSEof':'of CE'})
+if SRM_VER:
+    sys.stdout.write(format % {'site':'Site', 'host':'Hostname', 'implname':'Implem.', 'implver':'Version',
+                               'total':'Total', 'used':'Used', 'percent':'%age',
+                               'closeSEof':'Close SE', 'defaultSEof':'Default SE'})
+    sys.stdout.write(format % {'site':'', 'host':'', 'implname':'', 'implver':'',
+                               'total':'space(GB)', 'used':'space(GB)', 'percent':'used',
+                               'closeSEof':'of CE', 'defaultSEof':'of CE'})
+else:
+    sys.stdout.write(format % {'site':'Site', 'host':'Hostname', 'implname':'Implem.',
+                               'total':'Total', 'used':'Used', 'percent':'%age',
+                               'closeSEof':'Close SE', 'defaultSEof':'Default SE'})
+    sys.stdout.write(format % {'site':'', 'host':'', 'implname':'',
+                               'total':'space(GB)', 'used':'space(GB)', 'percent':'used',
+                               'closeSEof':'of CE', 'defaultSEof':'of CE'})
 print "=========================================================================================================================================================================="
 
 def sortBySite(el1, el2):
@@ -220,6 +233,7 @@ for host, detail in sortedBySite:
         sys.stdout.write(format % {'host': host, 'site': detail['site'],
                                'implname': detail['implname'], 'implver': detail['implver'],
                                'total': detail['total'], 'used': detail['used'],
+                               'percent': str(int(detail['used'])*100/int(detail['total']))+ "%",
                                'closeSEof': closeSEof, 'defaultSEof': defaultSEof})
 
         # Display other CEs 
@@ -230,7 +244,7 @@ for host, detail in sortedBySite:
             if index < len(detail['defaultSEof']): defaultSEof = detail['defaultSEof'][index]
 
             sys.stdout.write(format % {'host': '', 'site': '', 'implname': '', 'implver': '',
-                                       'total': '', 'used': '',
+                                       'total': '', 'used': '', 'percent':'',
                                        'closeSEof': closeSEof, 'defaultSEof': defaultSEof})
             index += 1        
 
@@ -239,6 +253,7 @@ for host, detail in sortedBySite:
         sys.stdout.write(format % {'host': host, 'site': detail['site'],
                                'implname': detail['implname'], 'implver': detail['implver'],
                                'total': detail['total'], 'used': detail['used'],
+                               'percent': str(int(detail['used'])*100/int(detail['total']))+ "%",
                                'closeSEof': len(detail['closeSEof']),
                                'defaultSEof': len(detail['defaultSEof']) })
 
