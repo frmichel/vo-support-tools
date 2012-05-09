@@ -47,4 +47,6 @@ ldapsearch '(&(ObjectClass=GlueCE)(GlueCEUniqueID=sbgce2.in2p3.fr*))' GlueCEInfo
 #--- Get the CEs for which a SE is a close or default SE
 ldapsearch "(|(&(ObjectClass=GlueCESEBind)(GlueCESEBindSEUniqueID=$SE))(&(ObjectClass=GlueCE)(GlueCEInfoDefaultSE=$SE)))" GlueCEUniqueID GlueCESEBindCEUniqueID | egrep "^GlueCEUniqueID|^GlueCESEBindCEUniqueID"
 
+#--- Get the VO specific stats of the queues that support biomed on a given CE
+ldapsearch '(&(ObjectClass=GlueVOView)(GlueCEAccessControlBaseRule=VO:biomed)(GlueChunkKey=GlueCEUniqueID=sbgce2.in2p3.fr*))'
 
