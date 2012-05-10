@@ -143,6 +143,8 @@ for host in GlueCE.keys():
 # -------------------------------------------------------------------------
 
 def sortBySite(el1, el2):
+    # el1 and el2 are tuples (key, value) returned by GlueCE.iteritems(). 
+    # The key el1[0] is the CE hostname, while el1[1]['Site'] is used for sorting.
     if el1[1]['Site'] > el2[1]['Site']: return 1
     if el1[1]['Site'] < el2[1]['Site']: return -1
     return 0
