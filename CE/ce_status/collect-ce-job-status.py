@@ -43,8 +43,8 @@ DEBUG = options.debug
 
 ldapSearch = "ldapsearch -x -L -s sub -H ldap://%(TOPBDII)s -b mds-vo-name=local,o=grid "
 
-attributes = "GlueCEImplementationName GlueCEImplementationVersion GlueCEStateTotalJobs GlueCEStateWaitingJobs GlueCEStateRunningJobs GlueCEStateFreeJobSlots GlueCEPolicyMaxTotalJobs GlueCEPolicyMaxWaitingJobs GlueCEPolicyMaxRunningJobs GlueCEStateWorstResponseTime GlueCEStateWorstResponseTime"
-attributesGrep = "\"GlueCEImplementationName|GlueCEImplementationVersion|GlueCEStateTotalJobs|GlueCEStateWaitingJobs|GlueCEStateRunningJobs|GlueCEStateFreeJobSlots|GlueCEPolicyMaxTotalJobs|GlueCEPolicyMaxWaitingJobs|GlueCEPolicyMaxRunningJobs|GlueCEStateWorstResponseTime|GlueCEStateWorstResponseTime\""
+attributes = "GlueCEStateStatus GlueCEImplementationName GlueCEImplementationVersion GlueCEStateTotalJobs GlueCEStateWaitingJobs GlueCEStateRunningJobs GlueCEStateFreeJobSlots GlueCEPolicyMaxTotalJobs GlueCEPolicyMaxWaitingJobs GlueCEPolicyMaxRunningJobs GlueCEStateWorstResponseTime GlueCEStateWorstResponseTime"
+attributesGrep = "\"GlueCEStateStatus|GlueCEImplementationName|GlueCEImplementationVersion|GlueCEStateTotalJobs|GlueCEStateWaitingJobs|GlueCEStateRunningJobs|GlueCEStateFreeJobSlots|GlueCEPolicyMaxTotalJobs|GlueCEPolicyMaxWaitingJobs|GlueCEPolicyMaxRunningJobs|GlueCEStateWorstResponseTime|GlueCEStateWorstResponseTime\""
 
 ldapCE = ldapSearch + "\'(&(ObjectClass=GlueCE)(GlueCEUniqueID=%(CE)s))\' " + attributes + " | egrep " + attributesGrep
 
@@ -58,6 +58,8 @@ ldapVOView = ldapSearch + "\'(&(ObjectClass=GlueVOView)(GlueChunkKey=GlueCEUniqu
 # -------------------------------------------------------------------------
 
 def fillGlueObject(glueObject, attrib, value):
+        if attrib == "GlueCEStateStatus":
+            glueObject['Status'] = value.strip()
         if attrib == "GlueCEImplementationName":
             glueObject['ImplName'] = value.strip()
         if attrib == "GlueCEImplementationVersion":
@@ -93,8 +95,9 @@ nbCE = 0
 for line in output.splitlines():
     if ("CE     " not in line) and ("Service      " not in line) and ("----------" not in line):
         host, site = line.split()
-        GlueCE[host] = {'Site': site, 'ImplName':'', 'ImplVer':'', 'Total':'', 'Waiting':'', 'Running':'', 'FreeSlots':'', 
-                    'MaxTotal':'', 'MaxWaiting':'', 'MaxRunning':'', 'WRT':'', 'ERT':''}
+        GlueCE[host] = {'Site': site, 'Status':'', 'ImplName':'', 'ImplVer':'', 
+                        'Total':'', 'Waiting':'', 'Running':'', 'FreeSlots':'', 
+                        'MaxTotal':'', 'MaxWaiting':'', 'MaxRunning':'', 'WRT':'', 'ERT':''}
     if nbCE > MAX_CE: break;
     nbCE += 1
 
@@ -152,7 +155,7 @@ def sortBySite(el1, el2):
 # Sort CEs by site name
 sortedGlueCE = sorted(GlueCE.iteritems(), sortBySite)
 
-print "# Site; CE; ImplName; ImplVer; CE Total; VO Total; CE Waiting; VO Waiting; CE Running; VO Running; CE FreeSlots; VO FreeSlots; CE MaxTotal; VO MaxTotal; CE MaxWaiting; VO MaxWaiting; CE MaxRunning; VO MaxRunning; CE WRT; VO WRT; CE ERT; VO ERT"
+print "# Site; CE; ImplName; ImplVer; CE Total; VO Total; CE Waiting; VO Waiting; CE Running; VO Running; CE FreeSlots; VO FreeSlots; CE MaxTotal; VO MaxTotal; CE MaxWaiting; VO MaxWaiting; CE MaxRunning; VO MaxRunning; CE WRT; VO WRT; CE ERT; VO ERT; CE Status"
 for host, detail in sortedGlueCE:
     sys.stdout.write(detail['Site'] + "; " + host + "; ")
     sys.stdout.write(detail['ImplName'] + "; " + detail['ImplVer'] + "; ")
@@ -164,5 +167,6 @@ for host, detail in sortedGlueCE:
     sys.stdout.write(detail['MaxWaiting'] + "; " + VOView[host]['MaxWaiting'] + "; ")
     sys.stdout.write(detail['MaxRunning'] + "; " + VOView[host]['MaxRunning'] + "; ")
     sys.stdout.write(detail['WRT'] + "; " + VOView[host]['WRT'] + "; ")
-    sys.stdout.write(detail['ERT'] + "; " + VOView[host]['ERT'])
+    sys.stdout.write(detail['ERT'] + "; " + VOView[host]['ERT'] + "; ")
+    sys.stdout.write(detail['Status'])
     print

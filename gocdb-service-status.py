@@ -30,11 +30,11 @@ a given VO (defaults to biomed).""")
 optParser.add_option("--vo", action="store", dest="vo", default="biomed",
                   help="Virtual Organisation to query. Defaults to \"biomed\"")
 optParser.add_option("--nose", action="store_true", dest="noSe", default=False,
-                  help="Check status of Storage Elements")
+                  help="Do not check status of Storage Elements")
 optParser.add_option("--noce", action="store_true", dest="noCe", default=False,
-                  help="Check status of Computing Elements")
+                  help="Do not check status of Computing Elements")
 optParser.add_option("--nowms", action="store_true", dest="noWms", default=False,
-                  help="Check status of Workload Management Systems")
+                  help="Do not check status of Workload Management Systems")
 optParser.add_option("--pretty", action="store_true", dest="pretty", default=False,
                   help="Format output for human reader")
 
