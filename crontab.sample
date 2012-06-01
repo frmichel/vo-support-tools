@@ -1,0 +1,28 @@
+# Renew the proxy certificate every 8 hours 
+0 0,8,16 * * * /home/fmichel/biomed-support-tools/renew-proxy.sh 2>&1 >> /tmp/monitor-se/renew-proxy.log
+
+#----------------------------------------------------------------------------
+
+# Refresh the SE space availability reports every 30 min
+*/30 * * * * /home/fmichel/biomed-support-tools/SE/show-se-space/make-biomed-reports.sh >> /tmp/show-se-space/show-se-space.log
+
+# Refresh the list of service nodes that are not running from the GOCDB (downtime, not in prod, not monitored)
+10,40 * * * * . /etc/profile; export VO_SUPPORT_TOOLS=/home/fmichel/biomed-support-tools; $VO_SUPPORT_TOOLS/gocdb-service-status.py --pretty > /tmp/gocdb-service-status-$$.txt; mv /tmp/gocdb-service-status-$$.txt $HOME/public_html/gocdb-service-status.txt
+
+# Generate the current list of biomed SEs used by the se-web-report-generator tool, once every night
+0 3 * * * . /etc/profile; /home/fmichel/biomed-support-tools/SE/se-web-report-gen/make-list-se.sh > /tmp/make-list-se.log
+
+#----------------------------------------------------------------------------
+# Monitoring of the full SEs
+
+# Refresh the list of users from the VOMS every day
+0 1 * * * . /etc/profile; export VO_SUPPORT_TOOLS=/home/fmichel/biomed-support-tools; $VO_SUPPORT_TOOLS/SE/monitor-se-space/list-users-voms.sh --out /tmp/monitor-se/voms-users.txt > /tmp/monitor-se/voms-users.log
+
+# Monitor the full SEs and get the list of heaviest users
+0 2 * * 0,3 . /etc/profile; export LFC_HOST=lfc-biomed.in2p3.fr; export VO_SUPPORT_TOOLS=/home/fmichel/biomed-support-tools; $VO_SUPPORT_TOOLS/SE/monitor-se-space/monitor-se-space.sh --voms-users /tmp/monitor-se/voms-users.txt --work-dir /tmp/monitor-se --result-dir $HOME/public_html/monitor-se --threshold 80 --user-min-used 0 >> /tmp/monitor-se/monitor-se-space.log
+
+#----------------------------------------------------------------------------
+# Monitoring CEs
+10 0,4,8,12,16,20 * * * . /etc/profile; export VO_SUPPORT_TOOLS=/home/fmichel/biomed-support-tools; $VO_SUPPORT_TOOLS/CE/monitor-ce/run-collect-ce-job-status.sh
+
+

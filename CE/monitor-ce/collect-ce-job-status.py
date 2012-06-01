@@ -14,7 +14,7 @@ from optparse import OptionParser
 
 DEFAULT_TOPBDII = "cclcgtopbdii01.in2p3.fr:2170"
 
-optParser = OptionParser(version="%prog 1.0", description="""List all CEs supporting the given VO, and
+optParser = OptionParser(version="%prog 1.1", description="""List all CEs supporting the given VO, and
 display different data about the CE (waiting, running jobs...), read from 2 different BDII objects: the GLueCE
 and the VOView, in order to check differences and the choices that sites do about data they publish.
 The output is displayed in CSV format.""")
@@ -50,6 +50,12 @@ ldapCE = ldapSearch + "\'(&(ObjectClass=GlueCE)(GlueCEUniqueID=%(CE)s))\' " + at
 
 ldapVOView = ldapSearch + "\'(&(ObjectClass=GlueVOView)(GlueChunkKey=GlueCEUniqueID=%(CE)s)(GlueCEAccessControlBaseRule=VO:%(VO)s))\' " + attributes + " | egrep " + attributesGrep
 
+try:  
+   os.environ["VO_SUPPORT_TOOLS"]
+except KeyError: 
+    print "Please set variable $VO_SUPPORT_TOOLS before calling " + sys.argv[0]
+    sys.exit(1)
+
 
 # -------------------------------------------------------------------------
 # Function fillGlueObject
@@ -58,8 +64,7 @@ ldapVOView = ldapSearch + "\'(&(ObjectClass=GlueVOView)(GlueChunkKey=GlueCEUniqu
 # -------------------------------------------------------------------------
 
 def fillGlueObject(glueObject, attrib, value):
-        if attrib == "GlueCEStateStatus":
-            glueObject['Status'] = value.strip()
+        glueObject['Status'] = ''
         if attrib == "GlueCEImplementationName":
             glueObject['ImplName'] = value.strip()
         if attrib == "GlueCEImplementationVersion":
@@ -84,11 +89,22 @@ def fillGlueObject(glueObject, attrib, value):
             glueObject['ERT'] = value.strip()
 
 # -------------------------------------------------------------------------
+# Make the list of CE which status is not normal in GOCDB
+# -------------------------------------------------------------------------
+
+if DEBUG: print "Retreiving CE with a specific status in GOCDB:"
+GOCDBCE = {}
+status, output = commands.getstatusoutput("$VO_SUPPORT_TOOLS/gocdb-service-status.py --nose --nowms")
+for line in output.splitlines():
+    service, host, status = line.rsplit('|')
+    GOCDBCE[host] = status
+    if DEBUG: print host + ": " + status
+
+# -------------------------------------------------------------------------
 # Make the list of CE from the BDII
 # -------------------------------------------------------------------------
 
 GlueCE = {}
-
 status, output = commands.getstatusoutput("lcg-infosites --vo biomed ce -v 4")
 
 nbCE = 0
@@ -118,6 +134,11 @@ for host in GlueCE.keys():
     for line in output.splitlines():
         attrib, value = line.split(":")
         fillGlueObject(GlueCE[host], attrib, value)
+        # Add the status information read from the database
+        for gocdbhost in GOCDBCE:
+            if host.find(gocdbhost) != -1:
+                GlueCE[host]['Status'] = GOCDBCE[gocdbhost]
+                break
 
 # -------------------------------------------------------------------------
 # For each object VOView retrieve attributes about jobs

@@ -201,9 +201,9 @@ if WMS:
         if match <> None: listWMS.append(match.group(1))
 
 if DEBUG:
-    print "SEs:", listSE
-    print "CEs:", listCE
-    print "WMS:", listWMS
+    if SE: print "SEs:", listSE
+    if CE: print "CEs:", listCE
+    if WMS: print "WMS:", listWMS
 
 # Loop on all nodes and check the GOCDB for each one
 if PRETTY:
