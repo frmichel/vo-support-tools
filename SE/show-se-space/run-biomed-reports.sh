@@ -1,6 +1,6 @@
 #!/bin/bash
 # This script allows to run the show-se-space.sh script from a cron job, like:
-# */10 * * * * /path/biomed-support-tools/SE/show-se-space/make-reports.sh >> /tmp/show-se-space.log
+# */10 * * * * /path/biomed-support-tools/SE/show-se-space/run-biomed-reports.sh >> /tmp/show-se-space.log
 
 . /etc/profile
 export PATH=/opt/lcg/bin/lcg-infosites/:$PATH

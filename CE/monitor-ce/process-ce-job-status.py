@@ -3,7 +3,7 @@
 # to make statistics about the ratio of running jobs / (running + waiting jobs).
 # CE which status in not normal production are ignored: draining until v1.0, and downtime, 
 # not in production or not monitored from v1.1 on.
-# Currently 3 files are produced: job_service_ratio.csv, job_service_ratio_day_night.csv
+# Currently 3 files are produced: service_ratio.csv, service_ratio_day_night.csv
 # and distrib_ce_by_service_ratio.csv.
 #
 # With no option at all, it processes all data files from the local dir, and writes the output files to
@@ -21,7 +21,7 @@ from optparse import OptionParser
 optParser = OptionParser(version="%prog 1.1", description="""This tools exploits the csv data files produced by script collect-ce-job-status.py,
 to make statistics about the ratio of running jobs / (running + waiting jobs).
 CE which status in not normal production are ignored.
-Currently 3 files are produced: job_service_ratio.csv, job_service_ratio_day_night.csv and distrib_ce_by_service_ratio.csv.
+Currently 3 files are produced: service_ratio.csv, service_ratio_day_night.csv and distrib_ce_by_service_ratio.csv.
 With no option at all, this tool processes all data files from the local dir, and writes the output files to
 the local dir.
 """)
@@ -39,7 +39,7 @@ optParser.add_option("--output-dir", action="store", dest="output_dir", default=
                      help="Directory where to write output files. Defaults to '.'.")
 
 optParser.add_option("--decimal-mark", action="store", dest="decimal_mark", default=',',
-                     help="The decimal marker. Default to comma (','), but some tools may need the dot instead")
+                     help="The decimal marker. Defaults to comma (','), but some tools may need the dot instead")
 
 optParser.add_option("--debug", action="store_true", dest="debug",
                      help="Add debug traces")
@@ -218,7 +218,7 @@ if DEBUG: print "Loaded", len(dataFiles), "files."
 # -------------------------------------------------------------------------
 if DEBUG: print "Computing the average ratio R/(R+W) as a function of time..."
 
-outputFile = OUTPUT_DIR + os.sep + "job_service_ratio.csv"
+outputFile = OUTPUT_DIR + os.sep + "service_ratio.csv"
 outputf = open(outputFile, 'wb')
 writer = csv.writer(outputf, delimiter=';')
 writer.writerow(["# Date time", "Date", "Hour", "Waiting", "Running", "R/(R+W)"])
@@ -237,7 +237,7 @@ outputf.close()
 # -------------------------------------------------------------------------
 if DEBUG: print "Computing the average ratio R/(R+W) by time of day..."
 
-outputFile = OUTPUT_DIR + os.sep + "job_service_ratio_day_night.csv"
+outputFile = OUTPUT_DIR + os.sep + "service_ratio_day_night.csv"
 outputf = open(outputFile, 'wb')
 writer = csv.writer(outputf, delimiter=';')
 writer.writerow(["# Date", "Wait 0h", "Run 0h", "R/(R+W) 0h", "Wait 4h", "Run 4h", "R/(R+W) 4h", "Wait 8h", "Run 8h", "R/(R+W) 8h", "Wait 12h", "Run 12h", "R/(R+W) 12h", "Wait 16h", "Run 16h", "R/(R+W) 16h", "Wait 20h", "Run 20h", "R/(R+W) 20h", "Avg Wait night", "Avg Run night", "Avg R/(R+W) night", "Avg Wait day", "Avg Run day", "Avg R/(R+W) day"])

@@ -5,6 +5,7 @@
 # This tool computes the SE data provided by lcg-infosites for biomed VO, 
 # to allow for sorting the result by column, and calculate the sum of each column:
 # available, used and total storage space (in GB), and %age of used space.
+# It also provides the GOCDB status of the SE.
 #
 # ChangeLog:
 # 1.0: initial version
@@ -20,6 +21,7 @@ help()
   echo "Computes the SE data provided by lcg-infosites for biomed VO,"
   echo "to allow for sorting the result by column, and calculate the sum of each column:"
   echo "available, used and total storage space (in GB), and %age of used space."
+  echo "The GOCDB status of the SE is also provided to help support teams."
   echo
   echo "Usage:"
   echo "$0 [-h|--help]"

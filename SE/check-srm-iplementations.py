@@ -97,7 +97,7 @@ for host in listSE:
             usedSE += int(value.strip())
 
     # Consistency checks: ignore 0 of negative values
-    if totalSE <= 0 or usedSE <= 0: 
+    if totalSE <= 0 or usedSE < 0: 
         print "Skipping " + host + " due to inconsistent data."
         continue
 
