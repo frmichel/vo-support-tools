@@ -1,5 +1,5 @@
 #!/bin/bash
-# monitor-se-space.sh, v1.1
+# scan-se.sh, v1.1
 # Author: F. Michel, CNRS I3S, biomed VO support
 #
 # Algo:
@@ -60,7 +60,7 @@ help()
   echo "   $0"
   echo
   echo "Check SEs supporting VO myVO with used space over 90%"
-  echo "   ./monitor-se-space.sh --vo myVo --threshold 90"
+  echo "   ./scan-se.sh --vo myVo --threshold 90"
   echo "                         --voms-users /tmp/monitor-se/voms-users.txt"
   echo "                         --work-dir /tmp/monitor-se"
   echo '                         --result-dir $HOME/public_html/monitor-se'
@@ -73,7 +73,7 @@ if test -z "$VO_SUPPORT_TOOLS"; then
     echo "Please set variable \$VO_SUPPORT_TOOLS before calling $0."
     exit 1
 fi
-MONITOR_SE_SPACE=$VO_SUPPORT_TOOLS/SE/monitor-se-space
+MONITOR_SE_SPACE=$VO_SUPPORT_TOOLS/SE/scan-se
 SHOW_SE_SPACE=$VO_SUPPORT_TOOLS/SE/show-se-space
 
 # Check parameters
