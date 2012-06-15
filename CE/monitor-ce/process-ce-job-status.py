@@ -221,7 +221,7 @@ if DEBUG: print "Computing the average ratio R/(R+W) as a function of time..."
 outputFile = OUTPUT_DIR + os.sep + "service_ratio.csv"
 outputf = open(outputFile, 'wb')
 writer = csv.writer(outputf, delimiter=';')
-writer.writerow(["# Date time", "Date", "Hour", "Waiting", "Running", "R/(R+W)"])
+writer.writerow(["# Date time", "Waiting", "Running", "R/(R+W)"])
 
 for (fileName, datetime, date, hour, rows, sum_VO_Waiting, sum_VO_Running) in dataFiles:
     R = float(sum_VO_Running)

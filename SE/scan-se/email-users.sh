@@ -49,7 +49,7 @@ fi
 SEHOSTNAME=`echo $INPUTFILE | sed "s/_users//" | awk -F"/" '{print $NF}'`
 
 # Write the list of email addresses
-echo -n "TO: biomed-technical-shifts@healthgrid.org;"
+echo -n "TO: biomed-issues-followup@googlegroups.com;"
 awk --field-separator "|" '{ printf " %s;",$2 }' $INPUTFILE
 echo
 cat <<EOF
@@ -62,7 +62,7 @@ You have stored more than 100 MB of files on SE $SEHOSTNAME, which is almost ful
 
 The list below shows all users with more than 100 MB on that SE. It also shows unknown users (no longer in the VO). If the users are/were part of your project or laboratory, please clean-up those files too or forward this email to the appropriate person.
 
-Please don't hesitate to contact us (biomed-technical-shifts@healthgrid.org) in case you experience difficulties in this process.
+Please don't hesitate to contact us (biomed-technical-support@googlegroups.com) in case you experience difficulties in this process.
 
 Also, note that it is not recommended to try to move many files in parallel: due to scalability issues of the SE, only a limited number of concurrent connections can be initiated.
 
