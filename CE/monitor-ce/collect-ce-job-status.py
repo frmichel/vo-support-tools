@@ -96,9 +96,10 @@ if DEBUG: print "Retreiving CE with a specific status in GOCDB:"
 GOCDBCE = {}
 status, output = commands.getstatusoutput("$VO_SUPPORT_TOOLS/gocdb-service-status.py --nose --nowms")
 for line in output.splitlines():
-    service, host, status = line.rsplit('|')
-    GOCDBCE[host] = status
-    if DEBUG: print host + ": " + status
+    if line.find('|') != -1:
+        service, host, status = line.rsplit('|')
+        GOCDBCE[host] = status
+        if DEBUG: print host + ": " + status
 
 # -------------------------------------------------------------------------
 # Make the list of CE from the BDII

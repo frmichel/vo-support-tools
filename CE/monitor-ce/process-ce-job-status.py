@@ -214,7 +214,7 @@ for fileName in files:
 if DEBUG: print "Loaded", len(dataFiles), "files."
 
 # -------------------------------------------------------------------------
-# Compute the average ratio R/(R+W) as a function of time
+# Compute the ratio R/(R+W) as a function of time
 # -------------------------------------------------------------------------
 if DEBUG: print "Computing the average ratio R/(R+W) as a function of time..."
 
@@ -223,6 +223,7 @@ outputf = open(outputFile, 'wb')
 writer = csv.writer(outputf, delimiter=';')
 writer.writerow(["# Date time", "Waiting", "Running", "R/(R+W)"])
 
+# Loop on all data files that were acquired
 for (fileName, datetime, date, hour, rows, sum_VO_Waiting, sum_VO_Running) in dataFiles:
     R = float(sum_VO_Running)
     W = float(sum_VO_Waiting)
@@ -233,9 +234,9 @@ outputf.close()
 
 
 # -------------------------------------------------------------------------
-# Compute the average ratio R/(R+W) by time of day
+# Compute the average ratio R/(R+W) during day (12h, 16h, 20h) or night (0h, 4h, 8h)
 # -------------------------------------------------------------------------
-if DEBUG: print "Computing the average ratio R/(R+W) by time of day..."
+if DEBUG: print "Computing the average ratio R/(R+W) during day or night..."
 
 outputFile = OUTPUT_DIR + os.sep + "service_ratio_day_night.csv"
 outputf = open(outputFile, 'wb')
@@ -254,6 +255,7 @@ for theDate in listDates:
     R0 = R4 = R8 = R12 = R16 = R20 = 0.0
     ratio0 = ratio4 = ratio8 = ratio12 = ratio16 = ratio20 = 0.0
 
+    # Loop on all files that we have at the given date
     for (fileName, datetime, date, hour, rows, sum_VO_Waiting, sum_VO_Running) in dataFiles:
         if date == theDate:
             R = float(sum_VO_Running)
@@ -299,7 +301,6 @@ for theDate in listDates:
                       int((W12+W16+W20)/3), int((R12+R16+R20)/3),str(round(ratioDay, 4)).replace('.', DECIMAL_MARK)                      
                     ])
 # end loop on all single dates
-
 outputf.close()
 
 # -------------------------------------------------------------------------
@@ -313,9 +314,11 @@ writer = csv.writer(outputf, delimiter=';')
 
 writer.writerow(["# Date time", "Nb queues", "0", "0 to 0,5", "0,5 to 1", "1", "n/a"])
 
+# Loop on all data files that were acquired
 for (fileName, datetime, date, hour, rows, sum_VO_Waiting, sum_VO_Running) in dataFiles:
 
     nb_0 = nb_0_05 = nb_05_1 = nb_1 = nb_na = 0.0
+    # Loop on all rows of the file
     for (hostname, structRow) in rows.iteritems():
         W = float(structRow['VO_Waiting'])
         R = float(structRow['VO_Running'])
@@ -329,6 +332,7 @@ for (fileName, datetime, date, hour, rows, sum_VO_Waiting, sum_VO_Running) in da
             else: 
                 if ratio >= 0.5 and ratio <= 1: nb_05_1 += 1
             if ratio == 1: nb_1 += 1
+
     nbQ = len(rows)
     writer.writerow([datetime, nbQ, 
                      str(round(nb_0/nbQ, 4)).replace('.', DECIMAL_MARK), 
@@ -338,4 +342,54 @@ for (fileName, datetime, date, hour, rows, sum_VO_Waiting, sum_VO_Running) in da
                      str(round(nb_na/nbQ, 4)).replace('.', DECIMAL_MARK) 
                      ])
 
+outputf.close()
+
+
+# -------------------------------------------------------------------------
+# Compute the list of CEs queues based on the number of times each has been seen with 0 running jobs
+# -------------------------------------------------------------------------
+if DEBUG: print "Compute the list of worst CEs queues..."
+
+outputFile = OUTPUT_DIR + os.sep + "service_ratio_bad.csv"
+outputf = open(outputFile, 'wb')
+writer = csv.writer(outputf, delimiter=';')
+writer.writerow(["CE queue", "nb measures", "Avg Running", "Avg Waiting", "Avg W/R" , "Avg R/(R+W)" , "nb times R=0 and W>0", "% times R=0 and W>0", "nb times R+W=0", "% times R+W=0"])
+
+# Loop on all data files that were acquired
+queues = {}
+for (fileName, datetime, date, hour, rows, sum_VO_Waiting, sum_VO_Running) in dataFiles:
+
+    # Loop on all rows of the file
+    for (hostname, structRow) in rows.iteritems():
+
+        if hostname not in queues: 
+            queues[hostname] = {'Running': 0, 'Waiting': 0, 'nb_measures':0, 'nb_0':0, 'nb_na': 0}
+
+        W = float(structRow['VO_Waiting'])
+        R = float(structRow['VO_Running'])
+        queues[hostname]['nb_measures'] += 1
+        queues[hostname]['Waiting'] += W
+        queues[hostname]['Running'] += R
+        if R+W == 0: queues[hostname]['nb_na'] += 1
+        else:
+            if R == 0: queues[hostname]['nb_0'] += 1
+
+for hostname in queues:
+    R = float(queues[hostname]['Running'])
+    W = float(queues[hostname]['Waiting'])
+    W_div_R = "n.a"
+    if R != 0: W_div_R = str(round(W/R, 2)).replace('.', DECIMAL_MARK)
+    ratio = "n.a"
+    if R+W != 0: ratio = str(round(R/(W+R), 2)).replace('.', DECIMAL_MARK)
+    nb = queues[hostname]['nb_measures']
+    nb_0 = queues[hostname]['nb_0']
+    nb_na = queues[hostname]['nb_na']
+    writer.writerow([hostname, nb, 
+                     str(round(R/nb, 2)).replace('.', DECIMAL_MARK),
+                     str(round(W/nb, 2)).replace('.', DECIMAL_MARK),
+                     W_div_R,
+                     ratio,
+                     nb_0, str(round(float(nb_0)/nb, 4)).replace('.', DECIMAL_MARK), 
+                     nb_na, str(round(float(nb_na)/nb, 4)).replace('.', DECIMAL_MARK)
+                     ])
 outputf.close()
