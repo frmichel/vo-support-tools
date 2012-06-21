@@ -346,14 +346,15 @@ outputf.close()
 
 
 # -------------------------------------------------------------------------
-# Compute the list of CEs queues based on the number of times each has been seen with 0 running jobs
+# TRy to figure good and bad CEs: compute the list of CEs queues based on the 
+# number of times each has been seen with 0 running jobs, or no activity...
 # -------------------------------------------------------------------------
 if DEBUG: print "Compute the list of worst CEs queues..."
 
 outputFile = OUTPUT_DIR + os.sep + "service_ratio_bad.csv"
 outputf = open(outputFile, 'wb')
 writer = csv.writer(outputf, delimiter=';')
-writer.writerow(["CE queue", "nb measures", "Avg Running", "Avg Waiting", "Avg W/R" , "Avg R/(R+W)" , "nb times R=0 and W>0", "% times R=0 and W>0", "nb times R+W=0", "% times R+W=0"])
+writer.writerow(["Site", "CE queue", "nb measures", "Avg Running", "Avg Waiting", "Avg W/R" , "Avg R/(R+W)" , "Average deviation R/(R+W)", "nb times R/(R+W)<=0.1", "% times R/(R+W)<=0.1", "nb times R+W=0", "% times R+W=0"])
 
 # Loop on all data files that were acquired
 queues = {}
@@ -363,7 +364,7 @@ for (fileName, datetime, date, hour, rows, sum_VO_Waiting, sum_VO_Running) in da
     for (hostname, structRow) in rows.iteritems():
 
         if hostname not in queues: 
-            queues[hostname] = {'Running': 0, 'Waiting': 0, 'nb_measures':0, 'nb_0':0, 'nb_na': 0}
+            queues[hostname] = {'Site': structRow['Site'], 'Running': 0, 'Waiting': 0, 'nb_measures':0, 'nb_inf_01': 0, 'nb_na': 0, 'avgRatio': -1.0, 'sumDeviation': 0.0, 'nbDeviation': 0}
 
         W = float(structRow['VO_Waiting'])
         R = float(structRow['VO_Running'])
@@ -372,24 +373,49 @@ for (fileName, datetime, date, hour, rows, sum_VO_Waiting, sum_VO_Running) in da
         queues[hostname]['Running'] += R
         if R+W == 0: queues[hostname]['nb_na'] += 1
         else:
-            if R == 0: queues[hostname]['nb_0'] += 1
+            if R/(R+W) <= 0.1: queues[hostname]['nb_inf_01'] += 1
 
+# Compute the average R/(R+W)
 for hostname in queues:
     R = float(queues[hostname]['Running'])
     W = float(queues[hostname]['Waiting'])
+    if R+W != 0: 
+        queues[hostname]['avgRatio'] = R/(W+R)
+
+# Compute the average deviation of R/(R+W)
+for (fileName, datetime, date, hour, rows, sum_VO_Waiting, sum_VO_Running) in dataFiles:
+    for (hostname, structRow) in rows.iteritems():
+        W = float(structRow['VO_Waiting'])
+        R = float(structRow['VO_Running'])
+        if R+W != 0: 
+            queues[hostname]['sumDeviation'] += abs(R/(R+W) - queues[hostname]['avgRatio'])
+            queues[hostname]['nbDeviation'] += 1
+
+# Print the results in the output file
+for hostname in queues:
+    R = float(queues[hostname]['Running'])
+    W = float(queues[hostname]['Waiting'])
+
     W_div_R = "n.a"
     if R != 0: W_div_R = str(round(W/R, 2)).replace('.', DECIMAL_MARK)
+
     ratio = "n.a"
-    if R+W != 0: ratio = str(round(R/(W+R), 2)).replace('.', DECIMAL_MARK)
+    if queues[hostname]['avgRatio'] != -1.0: 
+        ratio = str(round(queues[hostname]['avgRatio'], 2)).replace('.', DECIMAL_MARK)
+
+    deviation_ratio = "n.a"
+    if queues[hostname]['nbDeviation'] != 0: 
+        deviation_ratio = str(round(queues[hostname]['sumDeviation'] / queues[hostname]['nbDeviation'], 4)).replace('.', DECIMAL_MARK)
+
     nb = queues[hostname]['nb_measures']
-    nb_0 = queues[hostname]['nb_0']
+    nb_inf_01 = queues[hostname]['nb_inf_01']
     nb_na = queues[hostname]['nb_na']
-    writer.writerow([hostname, nb, 
+    writer.writerow([queues[hostname]['Site'], hostname, nb, 
                      str(round(R/nb, 2)).replace('.', DECIMAL_MARK),
                      str(round(W/nb, 2)).replace('.', DECIMAL_MARK),
                      W_div_R,
-                     ratio,
-                     nb_0, str(round(float(nb_0)/nb, 4)).replace('.', DECIMAL_MARK), 
+                     ratio, deviation_ratio,
+                     nb_inf_01, str(round(float(nb_inf_01)/nb, 4)).replace('.', DECIMAL_MARK), 
                      nb_na, str(round(float(nb_na)/nb, 4)).replace('.', DECIMAL_MARK)
                      ])
 outputf.close()
