@@ -3,8 +3,8 @@
 # to make statistics about the ratio of running jobs / (running + waiting jobs).
 # CE which status in not normal production are ignored: draining until v1.0, and downtime, 
 # not in production or not monitored from v1.1 on.
-# Currently 3 files are produced: service_ratio.csv, service_ratio_day_night.csv
-# and distrib_ce_by_service_ratio.csv.
+# Currently the following files are produced: running_ratio.csv, running_ratio_day_night.csv,
+# ce_grouped_by_running_ratio.csv, running_ratio_bad.csv, and distribute_ce_by_running_ratio.csv
 #
 # With no option at all, it processes all data files from the local dir, and writes the output files to
 # the local dir.
@@ -21,8 +21,8 @@ from optparse import OptionParser
 optParser = OptionParser(version="%prog 1.1", description="""This tools exploits the csv data files produced by script collect-ce-job-status.py,
 to make statistics about the ratio of running jobs / (running + waiting jobs).
 CE which status in not normal production are ignored.
-Currently 3 files are produced: service_ratio.csv, service_ratio_day_night.csv and distrib_ce_by_service_ratio.csv.
-With no option at all, this tool processes all data files from the local dir, and writes the output files to
+Currently the following files are produced: running_ratio.csv, running_ratio_day_night.csv, ce_grouped_by_running_ratio.csv, running_ratio_bad.csv,
+and distribute_ce_by_running_ratio.csv. With no option at all, this tool processes all data files from the local dir, and writes the output files to
 the local dir.
 """)
 
@@ -216,9 +216,9 @@ if DEBUG: print "Loaded", len(dataFiles), "files."
 # -------------------------------------------------------------------------
 # Compute the ratio R/(R+W) as a function of time
 # -------------------------------------------------------------------------
-if DEBUG: print "Computing the average ratio R/(R+W) as a function of time..."
+if DEBUG: print "Computing the mean ratio R/(R+W) as a function of time..."
 
-outputFile = OUTPUT_DIR + os.sep + "service_ratio.csv"
+outputFile = OUTPUT_DIR + os.sep + "running_ratio.csv"
 outputf = open(outputFile, 'wb')
 writer = csv.writer(outputf, delimiter=';')
 writer.writerow(["# Date time", "Waiting", "Running", "R/(R+W)"])
@@ -234,14 +234,14 @@ outputf.close()
 
 
 # -------------------------------------------------------------------------
-# Compute the average ratio R/(R+W) during day (12h, 16h, 20h) or night (0h, 4h, 8h)
+# Compute the mean ratio R/(R+W) during day (12h, 16h, 20h) or night (0h, 4h, 8h)
 # -------------------------------------------------------------------------
-if DEBUG: print "Computing the average ratio R/(R+W) during day or night..."
+if DEBUG: print "Computing the mean ratio R/(R+W) during day or night..."
 
-outputFile = OUTPUT_DIR + os.sep + "service_ratio_day_night.csv"
+outputFile = OUTPUT_DIR + os.sep + "running_ratio_day_night.csv"
 outputf = open(outputFile, 'wb')
 writer = csv.writer(outputf, delimiter=';')
-writer.writerow(["# Date", "Wait 0h", "Run 0h", "R/(R+W) 0h", "Wait 4h", "Run 4h", "R/(R+W) 4h", "Wait 8h", "Run 8h", "R/(R+W) 8h", "Wait 12h", "Run 12h", "R/(R+W) 12h", "Wait 16h", "Run 16h", "R/(R+W) 16h", "Wait 20h", "Run 20h", "R/(R+W) 20h", "Avg Wait night", "Avg Run night", "Avg R/(R+W) night", "Avg Wait day", "Avg Run day", "Avg R/(R+W) day"])
+writer.writerow(["# Date", "Wait 0h", "Run 0h", "R/(R+W) 0h", "Wait 4h", "Run 4h", "R/(R+W) 4h", "Wait 8h", "Run 8h", "R/(R+W) 8h", "Wait 12h", "Run 12h", "R/(R+W) 12h", "Wait 16h", "Run 16h", "R/(R+W) 16h", "Wait 20h", "Run 20h", "R/(R+W) 20h", "Mean Wait night", "Mean Run night", "Mean R/(R+W) night", "Mean Wait day", "Mean Run day", "Mean R/(R+W) day"])
 
 # First, build the list of dates when we have data
 listDates = []
@@ -304,11 +304,12 @@ for theDate in listDates:
 outputf.close()
 
 # -------------------------------------------------------------------------
-# Compute the distribution of CEs by ratio R/(R+W) as a function of time
+# Compute the distribution of CEs by ratio R/(R+W) as a function of time:
+# between 0 and 0,5, and between 0,5 and 1
 # -------------------------------------------------------------------------
 if DEBUG: print "Computing the distribution of CEs by ratio R/(R+W) as a function of time..."
 
-outputFile = OUTPUT_DIR + os.sep + "distrib_ce_by_service_ratio.csv"
+outputFile = OUTPUT_DIR + os.sep + "ce_grouped_by_running_ratio.csv"
 outputf = open(outputFile, 'wb')
 writer = csv.writer(outputf, delimiter=';')
 
@@ -346,25 +347,32 @@ outputf.close()
 
 
 # -------------------------------------------------------------------------
-# TRy to figure good and bad CEs: compute the list of CEs queues based on the 
+# Try to figure out good and bad CEs: compute the list of CEs queues based on the 
 # number of times each has been seen with 0 running jobs, or no activity...
 # -------------------------------------------------------------------------
 if DEBUG: print "Compute the list of worst CEs queues..."
 
-outputFile = OUTPUT_DIR + os.sep + "service_ratio_bad.csv"
+outputFile = OUTPUT_DIR + os.sep + "running_ratio_bad.csv"
 outputf = open(outputFile, 'wb')
 writer = csv.writer(outputf, delimiter=';')
-writer.writerow(["Site", "CE queue", "nb measures", "Avg Running", "Avg Waiting", "Avg W/R" , "Avg R/(R+W)" , "Average deviation R/(R+W)", "nb times R/(R+W)<=0.1", "% times R/(R+W)<=0.1", "nb times R+W=0", "% times R+W=0"])
+writer.writerow(["Site", "CE queue", "nb measures", "Mean Running", "Mean Waiting", "Mean W/R" , "Avg R/(R+W)" , "Mean deviation R/(R+W)", "% times R/(R+W)<=0.1", "% times R+W=0"])
 
-# Loop on all data files that were acquired
+# Loop on all data files that were acquired in dataFiles, and build a new table 'queues' that consolidates data per CE queue
 queues = {}
 for (fileName, datetime, date, hour, rows, sum_VO_Waiting, sum_VO_Running) in dataFiles:
 
     # Loop on all rows of the file
     for (hostname, structRow) in rows.iteritems():
 
-        if hostname not in queues: 
-            queues[hostname] = {'Site': structRow['Site'], 'Running': 0, 'Waiting': 0, 'nb_measures':0, 'nb_inf_01': 0, 'nb_na': 0, 'avgRatio': -1.0, 'sumDeviation': 0.0, 'nbDeviation': 0}
+        if hostname not in queues: 			# add only one entry for each CE queue
+            queues[hostname] = {
+                    'Site': structRow['Site'], 'Running': 0, 'Waiting': 0, 
+                    'nb_measures':0, 			# number of measures of that CE queue over the period
+                    'nb_inf_01': 0, 'nb_na': 0, 	# number of measures with R/(R+W)<0.1, or R/(R+W) not calculable 
+                    'avgRatio': -1.0, 			# mean ratio R/(R+W)
+                    'sumDeviation': 0.0,		# sum of the deviation from the mean value of R/(R+W)
+                    'nbDeviation': 0			# nb of values summed in sumDeviation (to calculate the mean deviation)
+                     }	
 
         W = float(structRow['VO_Waiting'])
         R = float(structRow['VO_Running'])
@@ -375,14 +383,14 @@ for (fileName, datetime, date, hour, rows, sum_VO_Waiting, sum_VO_Running) in da
         else:
             if R/(R+W) <= 0.1: queues[hostname]['nb_inf_01'] += 1
 
-# Compute the average R/(R+W)
+# Compute the mean R/(R+W)
 for hostname in queues:
     R = float(queues[hostname]['Running'])
     W = float(queues[hostname]['Waiting'])
     if R+W != 0: 
         queues[hostname]['avgRatio'] = R/(W+R)
 
-# Compute the average deviation of R/(R+W)
+# Compute the mean deviation of R/(R+W)
 for (fileName, datetime, date, hour, rows, sum_VO_Waiting, sum_VO_Running) in dataFiles:
     for (hostname, structRow) in rows.iteritems():
         W = float(structRow['VO_Waiting'])
@@ -401,7 +409,7 @@ for hostname in queues:
 
     ratio = "n.a"
     if queues[hostname]['avgRatio'] != -1.0: 
-        ratio = str(round(queues[hostname]['avgRatio'], 2)).replace('.', DECIMAL_MARK)
+        ratio = str(round(queues[hostname]['avgRatio'], 4)).replace('.', DECIMAL_MARK)
 
     deviation_ratio = "n.a"
     if queues[hostname]['nbDeviation'] != 0: 
@@ -411,11 +419,55 @@ for hostname in queues:
     nb_inf_01 = queues[hostname]['nb_inf_01']
     nb_na = queues[hostname]['nb_na']
     writer.writerow([queues[hostname]['Site'], hostname, nb, 
-                     str(round(R/nb, 2)).replace('.', DECIMAL_MARK),
-                     str(round(W/nb, 2)).replace('.', DECIMAL_MARK),
-                     W_div_R,
-                     ratio, deviation_ratio,
-                     nb_inf_01, str(round(float(nb_inf_01)/nb, 4)).replace('.', DECIMAL_MARK), 
-                     nb_na, str(round(float(nb_na)/nb, 4)).replace('.', DECIMAL_MARK)
+                     str(round(R/nb, 4)).replace('.', DECIMAL_MARK),		# mean R
+                     str(round(W/nb, 4)).replace('.', DECIMAL_MARK),		# mean W
+                     W_div_R,							# mean W/R
+                     ratio, deviation_ratio,					# mean R/(R+W) and std deviation
+                     str(round(float(nb_inf_01)/nb, 4)).replace('.', DECIMAL_MARK), # % of measures of R/(R+W) < 0.1
+                     str(round(float(nb_na)/nb, 4)).replace('.', DECIMAL_MARK)	# % of measures of R+W=0 n.a
                      ])
 outputf.close()
+
+# -------------------------------------------------------------------------
+# Compute the distribution of CE queues by ratio R/(R+W)
+# This reuses the 'queues' computed in the previous section
+# -------------------------------------------------------------------------
+if DEBUG: print "Compute the distribution of CE queues by ratio R/(R+W)"
+
+outputFile = OUTPUT_DIR + os.sep + "distribute_ce_by_running_ratio.csv"
+outputf = open(outputFile, 'wb')
+writer = csv.writer(outputf, delimiter=';')
+writer.writerow(["0.0 to 0.1", "0.1 to 0.2", "0.2 to 0.3", "0.3 to 0.4", "0.4 to 0.5", "0.5 to 0.6", "0.6 to 0.7", "0.7 to 0.8", "0.8 to 0.9", "0.9 to 1.0", "n.a"])
+
+# Loop on all data files that were acquired in dataFiles, and build a new table 'queues' that consolidates data per CE queue
+distrib = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+for hostname in queues:
+    ratio = queues[hostname]['avgRatio']
+    if ratio >= 0.0 and ratio < 0.1: distrib[0] += 1
+    if ratio >= 0.1 and ratio < 0.2: distrib[1] += 1
+    if ratio >= 0.2 and ratio < 0.3: distrib[2] += 1
+    if ratio >= 0.3 and ratio < 0.4: distrib[3] += 1
+    if ratio >= 0.4 and ratio < 0.5: distrib[4] += 1
+    if ratio >= 0.5 and ratio < 0.6: distrib[5] += 1
+    if ratio >= 0.6 and ratio < 0.7: distrib[6] += 1
+    if ratio >= 0.7 and ratio < 0.8: distrib[7] += 1
+    if ratio >= 0.8 and ratio < 0.9: distrib[8] += 1
+    if ratio >= 0.9 and ratio < 1.0: distrib[9] += 1
+    if ratio == -1.0: distrib[10] += 1
+
+writer.writerow([
+    str(round(distrib[0]/len(queues), 4)).replace('.', DECIMAL_MARK),
+    str(round(distrib[1]/len(queues), 4)).replace('.', DECIMAL_MARK),
+    str(round(distrib[2]/len(queues), 4)).replace('.', DECIMAL_MARK),
+    str(round(distrib[3]/len(queues), 4)).replace('.', DECIMAL_MARK),
+    str(round(distrib[4]/len(queues), 4)).replace('.', DECIMAL_MARK),
+    str(round(distrib[5]/len(queues), 4)).replace('.', DECIMAL_MARK),
+    str(round(distrib[6]/len(queues), 4)).replace('.', DECIMAL_MARK),
+    str(round(distrib[7]/len(queues), 4)).replace('.', DECIMAL_MARK),
+    str(round(distrib[8]/len(queues), 4)).replace('.', DECIMAL_MARK),
+    str(round(distrib[9]/len(queues), 4)).replace('.', DECIMAL_MARK),
+    str(round(distrib[10]/len(queues), 4)).replace('.', DECIMAL_MARK),
+                ]) 
+outputf.close()
+
+

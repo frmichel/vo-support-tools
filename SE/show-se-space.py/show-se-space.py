@@ -1,4 +1,8 @@
 #!/usr/bin/python
+# This tools is initially inspired by the other ../show-se-space script, but is finally focused on some
+# other need: list SEs of a VO, either in human readable or csv format, and check not only the SE filling
+# rate but also the percentage of space that it provides to the whole VO.
+# 
 # For each SE that supports a VO, this tool lists the site, SRM version, the total and used space on that SE, 
 # the filling rate of that SE, the %age of total and used space that this SE provides to the VO.
 

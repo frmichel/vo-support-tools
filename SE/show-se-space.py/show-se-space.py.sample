@@ -1,0 +1,105 @@
+Skipping epgse1.ph.bham.ac.uk due to inconsistent data: totalSE=-13012, usedSE=-14578
+Skipping epgse1.ph.bham.ac.uk due to inconsistent data: totalSE=-13012, usedSE=-14578
+Skipping lxse-dc01.jinr.ru due to inconsistent data: totalSE=0, usedSE=0
+Skipping se2.ppgrid1.rhul.ac.uk due to inconsistent data: totalSE=959, usedSE=-3875
+==================================================================================================================================================
+Site                     Hostname                            SRM       Free    Used   Total   Filling    % of VO    % of VO
+                                                             implem   space   space   space      rate  total sp.   used sp.
+                                                                       (GB)    (GB)    (GB)                                
+==================================================================================================================================================
+egee.irb.hr              egee2.irb.hr                        DPM       1583    1369    2952    46.38%      0.08%      0.07%
+HG-03-AUTH               se01.afroditi.hellasgrid.gr         DPM       1155    5746    6901    83.26%      0.18%      0.28%
+IN2P3-IRES               sbgse1.in2p3.fr                     DPM      95168  606021  701189    86.43%     18.77%     29.46%
+GR-10-UOI                se01.grid.uoi.gr                    DPM        334     605     939    64.43%      0.03%      0.03%
+BG02-IM                  se001.imbm.bas.bg                   DPM        929     239    1168    20.46%      0.03%      0.01%
+PSNC                     se.reef.man.poznan.pl               DPM      15581    6840   22421    30.51%      0.60%      0.33%
+INFN-PADOVA              prod-se-02.pd.infn.it               DPM       9906    2096   12002    17.46%      0.32%      0.10%
+INFN-PADOVA              prod-se-01.pd.infn.it               StoRM     3000       0    3000     0.00%      0.08%      0.00%
+CNR-ILC-PISA             gridse.ilc.cnr.it                   DPM         79     352     431    81.67%      0.01%      0.02%
+HG-01-GRNET              se01.isabella.grnet.gr              DPM       2683    3168    5851    54.14%      0.16%      0.15%
+BG05-SUGrid              se001.grid.uni-sofia.bg             DPM       1525     402    1927    20.86%      0.05%      0.02%
+MK-03-FINKI              se.hpgcc.finki.ukim.mk              DPM       3878     252    4130     6.10%      0.11%      0.01%
+INFN-PISA                gridsrm.pi.infn.it                  StoRM       30      21      51    41.18%      0.00%      0.00%
+HG-06-EKT                se01.athena.hellasgrid.gr           dCache    8549      41    8590     0.48%      0.23%      0.00%
+NIKHEF-ELPROD            tbn18.nikhef.nl                     DPM       3022    1374    4396    31.26%      0.12%      0.07%
+AUVERGRID                cirigridse01.univ-bpclermont.fr     DPM       2900    3931    6831    57.55%      0.18%      0.19%
+HG-04-CTI-CEID           se01.kallisto.hellasgrid.gr         DPM       2621    2663    5284    50.40%      0.14%      0.13%
+INFN-TORINO              se-srm-00.to.infn.it                StoRM     3430      70    3500     2.00%      0.09%      0.00%
+M3PEC                    se0.m3pec.u-bordeaux1.fr            DPM       5167    6139   11306    54.30%      0.30%      0.30%
+MSFG-OPEN                lptadpmsv.msfg.fr                   DPM      10294     535   10829     4.94%      0.29%      0.03%
+DESY-HH                  dcache-se-desy.desy.de              dCache    7774    2940   10714    27.44%      0.29%      0.14%
+UKI-SCOTGRID-GLASGOW     svr018.gla.scotgrid.ac.uk           DPM      17056    8017   25073    31.97%      0.67%      0.39%
+GR-04-FORTH-ICS          grid002.ics.forth.gr                StoRM      750       0     750     0.00%      0.02%      0.00%
+UNIV-LILLE               sereine.univ-lille1.fr              DPM      83409   34698  118107    29.38%      3.16%      1.69%
+UKI-NORTHGRID-LANCS-HEP  fal-pygrid-30.lancs.ac.uk           DPM      10224    5984   16208    36.92%      0.43%      0.29%
+IEETA                    axon-g05.ieeta.pt                   DPM        278     238     516    46.12%      0.01%      0.01%
+INFN-FERRARA             grid2.fe.infn.it                    StoRM      120       0     120     0.00%      0.00%      0.00%
+ITWM                     fornax-se2.itwm.fhg.de              DPM        936     146    1082    13.49%      0.03%      0.01%
+ITWM                     fornax-se.itwm.fhg.de               DPM       1771     393    2164    18.16%      0.06%      0.02%
+TR-03-METU               eymir.grid.metu.edu.tr              DPM       8926  164586  173512    94.86%      4.65%      8.00%
+egee.fesb.hr             se1-egee.fesb.hr                    DPM        988     126    1114    11.31%      0.03%      0.01%
+MD-02-IMI                node08-02.imi.renam.md              DPM        213      51     264    19.32%      0.01%      0.00%
+UKI-LT2-Brunel           dc2-grid-64.brunel.ac.uk            DPM     152358  445259  597617    74.51%     16.00%     21.65%
+UKI-LT2-Brunel           dgc-grid-50.brunel.ac.uk            DPM      29029    2875   31904     9.01%      0.85%      0.14%
+ATLAND                   atlandse.fis.puc.cl                 DPM        250      14     264     5.30%      0.01%      0.00%
+UKI-SCOTGRID-DURHAM      se01.dur.scotgrid.ac.uk             DPM       5736    9887   15623    63.28%      0.42%      0.48%
+UKI-NORTHGRID-LIV-HEP    hepgrid11.ph.liv.ac.uk              DPM       2318    3157    5475    57.66%      0.15%      0.15%
+BG01-IPP                 se001.ipp.acad.bg                   dCache    1016     443    1459    30.36%      0.04%      0.02%
+INFN-CATANIA             prod-se-02.ct.infn.it               StoRM    14000       0   14000     0.00%      0.37%      0.00%
+HG-02-IASA               se01.marie.hellasgrid.gr            DPM       5280    4720   10000    47.20%      0.27%      0.23%
+UNIANDES                 moboro.uniandes.edu.co              DPM        406     121     527    22.96%      0.01%      0.01%
+IN2P3-CC                 ccsrm02.in2p3.fr                    dCache    1852     347    2199    15.78%      0.06%      0.02%
+IFCA-LCG2                storm.ifca.es                       StoRM     1000       0    1000     0.00%      0.03%      0.00%
+UKI-NORTHGRID-MAN-HEP    bohr3226.tier2.hep.manchester.ac.uk DPM      84666    4129   88795     4.65%      2.38%      0.20%
+LIP-Coimbra              storm.gridc.lip.pt                  StoRM      324       1     325     0.31%      0.01%      0.00%
+IISAS-Bratislava         se.ui.savba.sk                      DPM       1766     203    1969    10.31%      0.05%      0.01%
+UKI-LT2-QMUL             se03.esc.qmul.ac.uk                 StoRM      993       7    1000     0.70%      0.03%      0.00%
+GR-06-IASA               se02.marie.hellasgrid.gr            DPM        211     190     401    47.38%      0.01%      0.01%
+GARR-01-DIR              gridsrv3-4.dir.garr.it              DPM       1680     464    2144    21.64%      0.06%      0.02%
+ru-Moscow-SINP-LCG2      lcg59.sinp.msu.ru                   DPM       2699     151    2850     5.30%      0.08%      0.01%
+GRISU-UNINA              grisuse.scope.unina.it              DPM       3945     849    4794    17.71%      0.13%      0.04%
+RAL-LCG2                 srm-biomed.gridpp.rl.ac.uk          CASTOR  399328      99  399427     0.02%     10.69%      0.00%
+UKI-LT2-IC-HEP           gfe02.grid.hep.ph.ic.ac.uk          dCache   51844    5773   57617    10.02%      1.54%      0.28%
+NCG-INGRID-PT            srm01.ncg.ingrid.pt                 StoRM      389     111     500    22.20%      0.01%      0.01%
+INFN-TRIESTE             gridsrm.ts.infn.it                  StoRM      885     116    1001    11.59%      0.03%      0.01%
+CESGA                    se2.egi.cesga.es                    DPM       4998    3335    8333    40.02%      0.22%      0.16%
+CIEMAT-LCG2              srm.ciemat.es                       dCache     651     670    1321    50.72%      0.04%      0.03%
+EFDA-JET                 grid001.jet.efda.org                DPM       8800    1500   10300    14.56%      0.28%      0.07%
+UKI-SOUTHGRID-RALPP      heplnx204.pp.rl.ac.uk               dCache   12457    7843   20300    38.64%      0.54%      0.38%
+IN2P3-LPSC               lpsc-se-dpm-server.in2p3.fr         DPM      57944   13157   71101    18.50%      1.90%      0.64%
+UPV-GRyCAP               ngiesse.i3m.upv.es                  DPM          0     478     478   100.00%      0.01%      0.02%
+MK-01-UKIM_II            grid-se.ii.edu.mk                   DPM        900    1264    2164    58.41%      0.06%      0.06%
+INFN-ROMA3               storm-01.roma3.infn.it              StoRM       92     113     205    55.12%      0.01%      0.01%
+TR-10-ULAKBIM            torik1.ulakbim.gov.tr               DPM     311518  513918  825436    62.26%     22.10%     24.98%
+RUG-CIT                  se.grid.rug.nl                      dCache     170      98     268    36.57%      0.01%      0.00%
+UKI-NORTHGRID-SHEF-HEP   lcgse0.shef.ac.uk                   DPM       5532    4781   10313    46.36%      0.28%      0.23%
+WCSS64                   darkmass.wcss.wroc.pl               DPM        292     137     429    31.93%      0.01%      0.01%
+LIP-Lisbon               se05.lip.pt                         DPM         24      81     105    77.14%      0.00%      0.00%
+CYFRONET-LCG2            dpm.cyf-kr.edu.pl                   DPM      29717   21085   50802    41.50%      1.36%      1.03%
+IN2P3-CPPM               marsedpm.in2p3.fr                   DPM      98562    5769  104331     5.53%      2.79%      0.28%
+UA-KNU                   arc.univ.kiev.ua                    DPM       1371     793    2164    36.65%      0.06%      0.04%
+SCAI                     scaise-2.scai.fraunhofer.de         DPM       3350    1379    4729    29.16%      0.13%      0.07%
+csUCCie                  gridstore.ucc.ie                    DPM       1178      90    1268     7.10%      0.03%      0.00%
+HG-07-StratusLab         vm134.grnet.stratuslab.eu           DPM       1888    1209    3097    39.04%      0.08%      0.06%
+OBSPM                    se-dpm-server-grid.obspm.fr         DPM       3116    2707    5823    46.49%      0.16%      0.13%
+INFN-CAGLIARI            grid003.ca.infn.it                  DPM         36       9      45    20.00%      0.00%      0.00%
+csTCDie                  gridstore.cs.tcd.ie                 DPM       4184    8571   12755    67.20%      0.34%      0.42%
+IN2P3-LPC                clrlcgse01.in2p3.fr                 DPM       5045    1521    6566    23.16%      0.18%      0.07%
+CY-01-KIMON              plethon.grid.ucy.ac.cy              DPM       1626    1973    3599    54.82%      0.10%      0.10%
+BEIJING-LCG2             ccsrm.ihep.ac.cn                    DPM        140     446     586    76.11%      0.02%      0.02%
+BG04-ACAD                se03.grid.acad.bg                   dCache     977     123    1100    11.18%      0.03%      0.01%
+UNINA-EGEE               se.scope.unina.it                   DPM      16475     566   17041     3.32%      0.46%      0.03%
+egee.srce.hr             se1-egee.srce.hr                    DPM       2283     204    2487     8.20%      0.07%      0.01%
+IBCP-GBIO                grive12.ibcp.fr                     DPM       2025     368    2393    15.38%      0.06%      0.02%
+ICM                      se.polgrid.pl                       DPM        366    3792    4158    91.20%      0.11%      0.18%
+GRIF                     grid05.lal.in2p3.fr                 DPM      12167   60617   72784    83.28%      1.95%      2.95%
+GRIF                     node12.datagrid.cea.fr              DPM       1912    1779    3691    48.20%      0.10%      0.09%
+GRIF                     polgrid4.in2p3.fr                   DPM       6076   28791   34867    82.57%      0.93%      1.40%
+TR-05-BOUN               reyhan.grid.boun.edu.tr             DPM        444     294     738    39.84%      0.02%      0.01%
+BG03-NGCC                se.ngcc.acad.bg                     dCache     806     894    1700    52.59%      0.05%      0.04%
+HG-05-FORTH              se01.ariagni.hellasgrid.gr          DPM       2500     719    3219    22.34%      0.09%      0.03%
+TUDresden-ZIH            ophelia.zih.tu-dresden.de           dCache      82      25     107    23.36%      0.00%      0.00%
+CIEMAT-TIC               se01-tic.ciemat.es                  DPM      10731   24910   35641    69.89%      0.95%      1.21%
+UPorto                   hades.up.pt                         DPM        341     741    1082    68.48%      0.03%      0.04%
+GR-01-AUTH               se01.grid.auth.gr                   DPM        703    2249    2952    76.19%      0.08%      0.11%
+SAMPA                    sampase.if.usp.br                   DPM        112       9     121     7.44%      0.00%      0.00%

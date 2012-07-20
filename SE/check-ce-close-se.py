@@ -119,7 +119,11 @@ for host in listSE:
 
     # Loop on the output of the 2 ldap requests
     for line in output.splitlines():
-        attrib, value = line.split(":")
+        #attrib, value = line.split(":")
+        listStr = []
+        listStr = line.split(":")
+        attrib = listStr[0]
+        value = listStr[1]
 
         # The site line is formated like this: GlueForeignKey: GlueSiteUniqueID=INFN-PISA
         if attrib == "GlueForeignKey":
