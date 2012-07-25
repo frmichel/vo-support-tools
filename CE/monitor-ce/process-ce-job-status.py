@@ -71,7 +71,7 @@ if not os.path.isdir(OUTPUT_DIR):
 # it returns False if:
 # - any number of jobs for the VO (total, running or waiting) has
 #   a default value starting with '4444' or is empty,
-# - the CE is is in status downtime, not i production, not monitired, or draining
+# - the CE is is in status downtime, not in production, not monitired, or draining
 # Returns true in any other case.
 # -------------------------------------------------------------------------
 def dataQualityCheck(structRow):

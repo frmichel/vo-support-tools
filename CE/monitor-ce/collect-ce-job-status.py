@@ -1,9 +1,18 @@
 #!/usr/bin/python
 # List all CEs supporting the given VO, and display different data about the CE: site name, waiting, 
-# running jobs, available slots.
+# running jobs, available slots. The status is collected from the BDII (draining, closed), and from
+# the GOCDB (downtime, not monitored, not in production).
 # The data is read from 2 different BDII objects: the GLueCE (global CE perspective) and the VOView (VO perspective),
 # in order to check differences and the choices that sites do about data they publish.
 # The output is displayed in CSV format, sorted by site name.
+#
+# Author: F. Michel, CNRS I3S, biomed VO support
+#
+# ChangeLog:
+# 1.0: initial version
+# 1.1: retrieve the status from the GOCDB
+# 1.2: fix bugs in the LDAP queries, retrive the status from the service-status.py tool to get both the status
+#      from the GOCDB and the BDII
 
 import sys
 import os
@@ -14,8 +23,8 @@ from optparse import OptionParser
 
 DEFAULT_TOPBDII = "cclcgtopbdii01.in2p3.fr:2170"
 
-optParser = OptionParser(version="%prog 1.1", description="""List all CEs supporting the given VO, and
-display different data about the CE (waiting, running jobs...), read from 2 different BDII objects: the GLueCE
+optParser = OptionParser(version="%prog 1.2", description="""List all CEs supporting the given VO, and
+display different data about the CE (status, waiting and running jobs...), read from 2 different BDII objects: the GlueCE
 and the VOView, in order to check differences and the choices that sites do about data they publish.
 The output is displayed in CSV format.""")
 
@@ -64,7 +73,6 @@ except KeyError:
 # -------------------------------------------------------------------------
 
 def fillGlueObject(glueObject, attrib, value):
-        glueObject['Status'] = ''
         if attrib == "GlueCEImplementationName":
             glueObject['ImplName'] = value.strip()
         if attrib == "GlueCEImplementationVersion":
@@ -88,13 +96,17 @@ def fillGlueObject(glueObject, attrib, value):
         if attrib == "GlueCEStateWorstResponseTime":
             glueObject['ERT'] = value.strip()
 
+        # The status is ignored as already retrieved by the service-status.py tool
+        #if attrib == "GlueCEStateStatus" and value.strip() != "Production":
+        #    glueObject['Status'] = value.strip().lower()
+
 # -------------------------------------------------------------------------
 # Make the list of CE which status is not normal in GOCDB
 # -------------------------------------------------------------------------
 
 if DEBUG: print "Retreiving CE with a specific status in GOCDB:"
 GOCDBCE = {}
-status, output = commands.getstatusoutput("$VO_SUPPORT_TOOLS/gocdb-service-status.py --nose --nowms")
+status, output = commands.getstatusoutput("$VO_SUPPORT_TOOLS/service-status.py --nose --nowms")
 for line in output.splitlines():
     if line.find('|') != -1:
         service, host, status = line.rsplit('|')
@@ -105,63 +117,58 @@ for line in output.splitlines():
 # Make the list of CE from the BDII
 # -------------------------------------------------------------------------
 
-GlueCE = {}
+listCE = []
 status, output = commands.getstatusoutput("lcg-infosites --vo biomed ce -v 4")
 
 nbCE = 0
 for line in output.splitlines():
     if ("CE     " not in line) and ("Service      " not in line) and ("----------" not in line):
         host, site = line.split()
-        GlueCE[host] = {'Site': site, 'Status':'', 'ImplName':'', 'ImplVer':'', 
-                        'Total':'', 'Waiting':'', 'Running':'', 'FreeSlots':'', 
-                        'MaxTotal':'', 'MaxWaiting':'', 'MaxRunning':'', 'WRT':'', 'ERT':''}
+        listCE.append(host)
     if nbCE > MAX_CE: break;
     nbCE += 1
 
 # -------------------------------------------------------------------------
-# For each object GlueCE retrieve attributes about jobs
+# For each object GlueCE, retrieve attributes about jobs and status
 # -------------------------------------------------------------------------
 
-for host in GlueCE.keys():
-    if DEBUG:
-        print "Checking GlueCE " + host + "..."
+GlueCE = {}
+for host in listCE:
+    if DEBUG: print "Checking GlueCE " + host + "..."
     status, output = commands.getstatusoutput(ldapCE % {'TOPBDII': TOPBDII, 'CE': host})
-    if status <> 0:
-        print "# ldapsearch error for CE", host, ":", output
-        print "# LDAP request:", ldapCE % {'TOPBDII': TOPBDII, 'CE': host}
-        continue;
-        
-    # Loop on the output of the ldap request
-    for line in output.splitlines():
-        attrib, value = line.split(":")
-        fillGlueObject(GlueCE[host], attrib, value)
-        # Add the status information read from the database
+    if len(output) != 0:
+        GlueCE[host] = {'Site': site, 'Status':'', 'ImplName':'', 'ImplVer':'', 
+                        'Total':'', 'Waiting':'', 'Running':'', 'FreeSlots':'', 
+                        'MaxTotal':'', 'MaxWaiting':'', 'MaxRunning':'', 'WRT':'', 'ERT':''}
+        # Read the GlueCE object attributes read from the ldap request
+        for line in output.splitlines():
+            attrib, value = line.split(":")
+            fillGlueObject(GlueCE[host], attrib, value)
+
+        # Add the status information read from the GOCDB database, if any
         for gocdbhost in GOCDBCE:
             if host.find(gocdbhost) != -1:
-                GlueCE[host]['Status'] = GOCDBCE[gocdbhost]
+                if GlueCE[host]['Status'] != "": 
+                    GlueCE[host]['Status'] += ", " + GOCDBCE[gocdbhost]
+                else:
+                    GlueCE[host]['Status'] += GOCDBCE[gocdbhost]
                 break
 
 # -------------------------------------------------------------------------
-# For each object VOView retrieve attributes about jobs
+# For each object VOView, retrieve attributes about jobs
 # -------------------------------------------------------------------------
 
 VOView = {}
-for host in GlueCE.keys():
-    if DEBUG:
-        print "Checking VOView " + host + "..."
+for host in listCE:
+    if DEBUG: print "Checking VOView " + host + "..."
     status, output = commands.getstatusoutput(ldapVOView % {'TOPBDII': TOPBDII, 'CE': host, 'VO': VO})
-    if status <> 0:
-        print "# ldapsearch error for CE", host, ":", output
-        print "# LDAP request:", ldapVOView % {'TOPBDII': TOPBDII, 'CE': host, 'VO': VO}
-        continue;
-        
-    VOView[host] = {'ImplName':'', 'ImplVer':'', 'Total':'', 'Waiting':'', 'Running':'', 'FreeSlots':'', 
-                    'MaxTotal':'', 'MaxWaiting':'', 'MaxRunning':'', 'WRT':'', 'ERT':''}
-
-    # Loop on the output of the ldap request
-    for line in output.splitlines():
-        attrib, value = line.split(":")
-        fillGlueObject(VOView[host], attrib, value)
+    if len(output) != 0:
+        VOView[host] = {'ImplName':'', 'ImplVer':'', 'Total':'', 'Waiting':'', 'Running':'', 'FreeSlots':'', 
+                        'MaxTotal':'', 'MaxWaiting':'', 'MaxRunning':'', 'WRT':'', 'ERT':''}
+        # Read the VOView object attributes read from the ldap request
+        for line in output.splitlines():
+            attrib, value = line.split(":")
+            fillGlueObject(VOView[host], attrib, value)
 
 # -------------------------------------------------------------------------
 # Display the results
