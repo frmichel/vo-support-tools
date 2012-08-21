@@ -11,7 +11,7 @@ TMP_FILE=/tmp/show-se-space/tmp_file
 export HOME=/home/fmichel
 
 # Generate the list of SE with downtime of specific status in the GOCDB
-$VO_SUPPORT_TOOLS/gocdb-service-status.py --noce --nowms > /tmp/show-se-space/gocdb-se-status.txt
+$VO_SUPPORT_TOOLS/service-status.py --noce --nowms > /tmp/show-se-space/se-status.txt
 
 date "+%Y-%m-%d %H:%M:%S %Z"
 $SHOW_SE_SPACE/show-se-space.sh --sort avail --max 30 --no-sum > $TMP_FILE

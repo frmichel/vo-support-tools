@@ -5,14 +5,14 @@
 # This tool computes the SE data provided by lcg-infosites for biomed VO, 
 # to allow for sorting the result by column, and calculate the sum of each column:
 # available, used and total storage space (in GB), and %age of used space.
-# It also provides the GOCDB status of the SE.
+# It also provides the GOCDB/BDII status of the SE.
 #
 # ChangeLog:
 # 1.0: initial version
 # 1.1: use "lcg-infosites space" instead of "lcg-infosites se" to get new attributes
 #      GlueSAOnline*Size instead of deprecated attributes GlueState*Size
 # 1.2: based on env variable $$SHOW_SE_SPACE to be able to run from anywhere
-# 1.3: get downtimes from the GOCDB to display it along with SE space report
+# 1.3: get downtimes from the GOCDB/BDII to display it along with SE space report
 
 help()
 {
@@ -21,7 +21,7 @@ help()
   echo "Computes the SE data provided by lcg-infosites for biomed VO,"
   echo "to allow for sorting the result by column, and calculate the sum of each column:"
   echo "available, used and total storage space (in GB), and %age of used space."
-  echo "The GOCDB status of the SE is also provided to help support teams."
+  echo "The GOCDB and BDII status of the SE is also provided to help support teams."
   echo
   echo "Usage:"
   echo "$0 [-h|--help]"
@@ -95,7 +95,7 @@ if test -z "$NOHEADER"; then
   echo -n "VO $VO. "
   echo
   echo "#---------------------------------------------------------------------------------------------------"
-  echo "# Hostname                       Available(GB)   Used(GB)  Total(GB)  %Used   GOCDB Status"
+  echo "# Hostname                       Available(GB)   Used(GB)  Total(GB)  %Used   Status"
   echo "#---------------------------------------------------------------------------------------------------"
 fi
 
@@ -107,11 +107,11 @@ fi
 lcg-infosites --vo $VO space | awk -f $AWK_FILE > $TMP_LCGINFOSITES
 
 
-#--- Get status of SE from the GOCDB (downtimes, not in producton, not monitored)
+#--- Get status of SE from the GOCDB (downtimes, not in producton, not monitored), BDII (draining, closed)
 echo -n "" > ${TMP_LCGINFOSITES}_tmp
 cat $TMP_LCGINFOSITES | while read LINE; do
    SE=`echo $LINE | cut -d'|' -f1`
-   SE_STATUS=`grep "$SE" /tmp/show-se-space/gocdb-se-status.txt | cut -d'|' -f3`
+   SE_STATUS=`grep "$SE" /tmp/show-se-space/se-status.txt | cut -d'|' -f3`
    echo $LINE'|'$SE_STATUS >> ${TMP_LCGINFOSITES}_tmp
 done
 cp ${TMP_LCGINFOSITES}_tmp $TMP_LCGINFOSITES

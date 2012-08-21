@@ -1,5 +1,5 @@
 #!/bin/bash
-# This script is a wrapper around the cleanup-files.sh: it will run it in parralel using a set of files with SRMs to remove.
+# This script is a wrapper around the cleanup-files.sh: it will run it in parralel using a set of files with files to remove.
 # The set of files is typically built by applying the split command the the output of "LFCBrowseSE --sfn --dn".
 # Constraint: all files must be named after the scheme "<SE hostname>_files_*".
 #

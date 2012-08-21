@@ -7,7 +7,7 @@
 */30 * * * * /home/fmichel/biomed-support-tools/SE/show-se-space/run-biomed-reports.sh >> /tmp/show-se-space/show-se-space.log
 
 # Refresh the list of service nodes that are not running from the GOCDB (downtime, not in prod, not monitored)
-10,40 * * * * . /etc/profile; export VO_SUPPORT_TOOLS=/home/fmichel/biomed-support-tools; $VO_SUPPORT_TOOLS/gocdb-service-status.py --pretty > /tmp/gocdb-service-status-$$.txt; mv /tmp/gocdb-service-status-$$.txt $HOME/public_html/gocdb-service-status.txt
+10,40 * * * * . /etc/profile; export VO_SUPPORT_TOOLS=/home/fmichel/biomed-support-tools; $VO_SUPPORT_TOOLS/service-status.py --pretty > /tmp/service-status-$$.txt; mv /tmp/service-status-$$.txt $HOME/public_html/service-status.txt
 
 # Generate the current list of biomed SEs used by the se-web-report-generator tool, once every night
 0 3 * * * . /etc/profile; /home/fmichel/biomed-support-tools/SE/se-web-report-gen/make-list-se.sh > /tmp/make-list-se.log
