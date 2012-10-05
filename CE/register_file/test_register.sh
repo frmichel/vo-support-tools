@@ -5,5 +5,5 @@ export LFC_HOME=/grid/biomed/fmichel
 
 chmod 755 lcg-cr.sh
 
-./lcg-cr.sh tbn18.nikhef.nl 
+./lcg-cr.sh srm-biomed.gridpp.rl.ac.uk
 

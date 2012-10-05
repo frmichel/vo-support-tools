@@ -45,7 +45,7 @@ fi
 echo "Using queue $QUEUE."
 OUTPUT=/tmp/jobsubmit_$$.output
 set -xe
-glite-wms-job-submit -a -e $WMS -r $QUEUE $VO_SUPPORT_TOOLS/CE/test_register.jdl > $OUTPUT
+glite-wms-job-submit -a -e $WMS -r $QUEUE $VO_SUPPORT_TOOLS/CE/register_file/test_register.jdl > $OUTPUT
 set +xe
 
 #--- Save the job id
