@@ -31,3 +31,6 @@
 # Monitoring CEs
 10 0,4,8,12,16,20 * * * . /etc/profile; export VO_SUPPORT_TOOLS=/home/fmichel/biomed-support-tools; $VO_SUPPORT_TOOLS/CE/monitor-ce/run-collect-ce-job-status.sh
 
+# Find out all CEs with badly published number of jobs (with default numbers 4444...)
+*/30 * * * * . /etc/profile; export VO_SUPPORT_TOOLS=/home/fmichel/biomed-support-tools; $VO_SUPPORT_TOOLS/CE/find-ce-4444.sh > /tmp/ce-4444-$$.txt; mv /tmp/ce-4444-$$.txt $HOME/public_html/ce-4444.txt
+
