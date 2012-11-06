@@ -2,6 +2,11 @@
 # Retrieve the number and size of storage elements available for a VO (defaults to biomed),
 # sorted by SRM implementation and version. Cumulative values of used and total sizes are
 # calculated per SRM flavour and version.
+#
+# ChangeLog:
+# 1.0: initial version
+# 1.1: fix issue in LDAP attributes parsing: AttributeName: value, where the value sometimes
+#      also contains a ':'
 
 import sys
 import os
@@ -11,7 +16,7 @@ from optparse import OptionParser
 
 DEFAULT_TOPBDII = "cclcgtopbdii01.in2p3.fr:2170"
 
-optParser = OptionParser(version="%prog 1.0", description="""Retrieve the number and size of storage 
+optParser = OptionParser(version="%prog 1.1", description="""Retrieve the number and size of storage 
 elements available for a VO (defaults to biomed), sorted by SRM implementation and version""")
 
 optParser.add_option("--vo", action="store", dest="vo", default="biomed",
@@ -70,6 +75,8 @@ result = {}
 # Regexp to limit the version number to 3 numbers
 matchVer = re.compile("^(\w+.\w+.\w+)")
 
+# Regexp to match one line of the result of an LDAP request formatted as: "Attribute: value"
+matchLdapResp = re.compile("^(\w+): (.+)$")
 
 # -------------------------------------------------------------------------
 # For each SE, run an ldap request to get implementation names/versions and storage sizes
@@ -86,7 +93,13 @@ for host in listSE:
     output = outputSE + "\n" + outputSA
     totalSE = usedSE = 0
     for line in output.splitlines():
-        attrib, value = line.split(":")
+        match = matchLdapResp.match(line)
+        if match <> None: 
+            attrib = match.group(1)
+            value = match.group(2)
+        else:
+            attrib, value = line.split(":")
+
         if attrib == "GlueSEImplementationName":
             implemName = value.strip()
         if attrib == "GlueSEImplementationVersion":
