@@ -11,8 +11,9 @@
 # ChangeLog:
 # 1.0: initial version
 # 1.1: retrieve the status from the GOCDB
-# 1.2: fix bugs in the LDAP queries, retrive the status from the service-status.py tool to get both the status
+# 1.2: 2012-07:25 - fix bugs in the LDAP queries, retrive the status from the service-status.py tool to get both the status
 #      from the GOCDB and the BDII
+# 1.3: 2012-11-08 - fix bug in the site: always set with the same value
 
 import sys
 import os
@@ -117,6 +118,7 @@ for line in output.splitlines():
 # Make the list of CE from the BDII
 # -------------------------------------------------------------------------
 
+GlueCE = {}
 listCE = []
 status, output = commands.getstatusoutput("lcg-infosites --vo biomed ce -v 4")
 
@@ -125,6 +127,9 @@ for line in output.splitlines():
     if ("CE     " not in line) and ("Service      " not in line) and ("----------" not in line):
         host, site = line.split()
         listCE.append(host)
+        GlueCE[host] = {'Site': site, 'Status':'', 'ImplName':'', 'ImplVer':'', 
+                        'Total':'', 'Waiting':'', 'Running':'', 'FreeSlots':'', 
+                        'MaxTotal':'', 'MaxWaiting':'', 'MaxRunning':'', 'WRT':'', 'ERT':''}
     if nbCE > MAX_CE: break;
     nbCE += 1
 
@@ -132,14 +137,11 @@ for line in output.splitlines():
 # For each object GlueCE, retrieve attributes about jobs and status
 # -------------------------------------------------------------------------
 
-GlueCE = {}
 for host in listCE:
     if DEBUG: print "Checking GlueCE " + host + "..."
     status, output = commands.getstatusoutput(ldapCE % {'TOPBDII': TOPBDII, 'CE': host})
     if len(output) != 0:
-        GlueCE[host] = {'Site': site, 'Status':'', 'ImplName':'', 'ImplVer':'', 
-                        'Total':'', 'Waiting':'', 'Running':'', 'FreeSlots':'', 
-                        'MaxTotal':'', 'MaxWaiting':'', 'MaxRunning':'', 'WRT':'', 'ERT':''}
+
         # Read the GlueCE object attributes read from the ldap request
         for line in output.splitlines():
             attrib, value = line.split(":")

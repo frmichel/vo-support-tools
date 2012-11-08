@@ -3,3 +3,4 @@ SENT.log
 TEST.log
 *.swp
 *~
+*.pyc
