@@ -1,15 +1,18 @@
 #!/usr/bin/python
 # This tools exploits the csv data files produced by script collect-ce-job-status.py,
 # to make statistics about the ratio of running jobs / (running + waiting jobs).
-# CE which status in not normal production are ignored: draining until v1.0, and downtime, 
-# not in production or not monitored from v1.1 on.
-# Currently the following files are produced: running_ratio.csv, running_ratio_day_night.csv,
-# ce_grouped_by_running_ratio.csv, running_ratio_bad.csv, and distribute_ce_by_running_ratio.csv
+# CEs which status in not normal production are ignored: draining until v1.0, and downtime, 
+# GOCDB status 'not in production' or 'not monitored' from v1.1 on.
+# The following files are produced in directory results/ :
+# running_ratio.csv, running_ratio_day_night.csv, ce_grouped_by_running_ratio.csv, 
+# running_ratio_bad.csv, distribute_ce_by_running_ratio.csv,
+# and one file per CE queue in results/CE.
 #
-# With no option at all, it processes all data files from the local dir, and writes the output files to
-# the local dir.
+# With no option at all, this script processes all data files from the local dir, and writes the output files to
+# the <local dir>/results.
 #
 # ChangeLog:
+# 1.1: 2012-08-25 - take into account the status from the GOCDB to ignore CEs
 # 2.0: 2012-11-08 - reorganise code in several modules
 
 import sys
@@ -22,10 +25,12 @@ from operator import itemgetter, attrgetter
 from optparse import OptionParser
 
 import globvars
+import processors.running_ratio
 import processors.running_ratio_day_night
 import processors.distribute_ce_by_running_ratio
 import processors.running_ratio_slices
 import processors.running_ratio_bad
+import processors.running_ratio_per_ce
 
 optParser = OptionParser(version="%prog 2.0", description="""This tools exploits the csv data files produced by script collect-ce-job-status.py,
 to make statistics about the ratio of running jobs / (running + waiting jobs).
@@ -231,45 +236,29 @@ if globvars.DEBUG: print "Loaded", len(dataFiles), "files."
 
 
 # -------------------------------------------------------------------------
-# Compute the mean ratio R/(R+W) as a function of time
-# -------------------------------------------------------------------------
-if globvars.DEBUG: print "Computing the mean ratio R/(R+W) as a function of time..."
-
-outputFile = globvars.OUTPUT_DIR + os.sep + "running_ratio.csv"
-outputf = open(outputFile, 'wb')
-writer = csv.writer(outputf, delimiter=';')
-writer.writerow(["# Date time", "Waiting", "Running", "R/(R+W)"])
-
-# Loop on all data files that were acquired
-for (fileName, datetime, date, hour, rows, sum_VO_Waiting, sum_VO_Running) in dataFiles:
-    R = float(sum_VO_Running)
-    W = float(sum_VO_Waiting)
-    if R+W > 0:
-        writer.writerow([datetime, sum_VO_Waiting, sum_VO_Running, str(round(R/(R+W), 4)).replace('.', globvars.DECIMAL_MARK) ])
-
-outputf.close()
-
+# Compute the running ratio R/(R+W) as a function of time
+processors.running_ratio.process(dataFiles)
 
 # -------------------------------------------------------------------------
 # Compute the mean ratio R/(R+W) during day time (12h, 16h, 20h)
 # or night time (0h, 4h, 8h), as a function of time
-# -------------------------------------------------------------------------
 processors.running_ratio_day_night.process(dataFiles)
 
 # -------------------------------------------------------------------------
 # Compute the distribution of CE queues by ratio R/(R+W)
-# -------------------------------------------------------------------------
 processors.distribute_ce_by_running_ratio.process(dataFiles)
 
 # -------------------------------------------------------------------------
 # Compute the number of CEs grouped by ratio R/(R+W) as a function of time:
 # between 0 and 0,5, and between 0,5 and 1
-# -------------------------------------------------------------------------
 processors.running_ratio_slices.process(dataFiles)
 
 # -------------------------------------------------------------------------
 # Try to figure out good and bad CEs: compute the list of CE queues based on the 
 # number of times each one has been seen with 0 running jobs, or no activity...
-# -------------------------------------------------------------------------
 processors.running_ratio_bad.process(dataFiles)
+
+# -------------------------------------------------------------------------
+# Compute the running ratio per CE as a function of time
+processors.running_ratio_per_ce.process(dataFiles)
 

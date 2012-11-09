@@ -41,7 +41,7 @@ def process(dataFiles):
 	DEBUG = globvars.DEBUG
 	OUTPUT_DIR = globvars.OUTPUT_DIR
 
-	print "Computing the mean ratio R/(R+W) during day or night..."
+	print "Computing the mean ratio R/(R+W) grouped by day or night as a function of time..."
 
 	outputFile = OUTPUT_DIR + os.sep + "running_ratio_day_night.csv"
 	outputf = open(outputFile, 'wb')

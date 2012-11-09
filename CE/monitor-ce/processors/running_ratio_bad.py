@@ -81,7 +81,7 @@ def process(dataFiles):
 	# Try to figure out good and bad CEs: compute the list of CE queues based on the 
 	# number of times each one has been seen with 0 running jobs, or no activity...
 	# -------------------------------------------------------------------------
-	print "Compute the list of bad and good CE queues..."
+	print "Computing the list of bad and good CE queues..."
 
 	outputFile = OUTPUT_DIR + os.sep + "running_ratio_bad.csv"
 	outputf = open(outputFile, 'wb')
@@ -153,6 +153,9 @@ def process(dataFiles):
 	    nb = queues[hostname]['nb_measures']
 	    nb_inf_01 = queues[hostname]['nb_inf_01']
 	    nb_na = queues[hostname]['nb_na']
+
+	    #if "ce01.grid.auth.gr" in hostname:
+	    #    print "nb = " + str(nb) + " - nb_inf_01 = " + str(nb_inf_01) + " - nb_na = " + str(nb_na)
 
 	    meanR = str(round(R/nb, 4)).replace('.', DECIMAL_MARK)
 	    meanW = str(round(W/nb, 4)).replace('.', DECIMAL_MARK)
