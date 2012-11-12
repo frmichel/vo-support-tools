@@ -52,7 +52,7 @@ def process(dataFiles):
 	    if DEBUG: print "Loading test results from MonCE..."
 
 	    # Open the file with a csv reader
-	    fileName = "results/extract-monce-data.csv"
+	    fileName = "results/monce-results-per-ce.csv"
 	    inputf = open(fileName, 'rb')
 	    reader = csv.reader(inputf, delimiter=';')
 	    if DEBUG: print "Loading file", fileName

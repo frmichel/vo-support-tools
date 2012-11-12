@@ -1,12 +1,15 @@
 #!/usr/bin/python
 #
-# This tool exploits the data of csv files produced by script collect-ce-job-status.py, to 
+# This tool exploits the data of csv files produced by script collect-ce-job-status.py,
 # to compute the running ratio R/(R+W) for each CE, as a function of time.
 #
-# Results are stored in files named results/CE/<site name>_<CE queue>.csv.
+# Results are stored in files named results/CE/<CE queue>.csv.
 
+import sys
 import os
 import csv
+
+from operator import itemgetter, attrgetter
 
 import globvars
 
@@ -64,10 +67,8 @@ def process(dataFiles):
 
 	# Then for each CE, make a csv file that records the data per date: W, R, R/(R+W)
 	for (hostname, data) in queues.iteritems():
-	    ceFileName = data['Site'] + "_" + hostname
-	    ceFileName = ceFileName.replace(':', '_')
-	    ceFileName = ceFileName.replace('/', '_')
-	    outputFile = OUTPUT_DIR + os.sep + "CE" + os.sep + ceFileName + ".csv"
+	    ceFileName = hostname.replace(':', '_').replace('/', '_')
+	    outputFile = OUTPUT_DIR + os.sep + "CE" + os.sep + ceFileName + "_running_ratio.csv"
 	    outputf = open(outputFile, 'wb')
 	    writer = csv.writer(outputf, delimiter=';')
 	    writer.writerow(["# Date time", "Waiting", "Running", "R/(R+W)"])

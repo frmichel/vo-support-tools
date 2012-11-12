@@ -1,18 +1,19 @@
 #!/bin/bash
 # This file extracts data from the biomed_stats MySQL database, and generates a csv file with the following columns:
 # CE host name and queue; number of tests OK, number of errors, number of timeouts, total time spent waiting for ok tests.
-# The database must be populated with the results from the MonCE tool make by Patrick Guterl (IPHC).
+#
+# The database must be populated with the results from the MonCE tool made by Patrick Guterl (IPHC).
 #
 # Usage:
-# - populate the database with the backup file: "mysql --user biomed --password biomed_stats < backup_PGT.sql"
-# - in extract-monce-data.sh, set FROM_DATE and TO_DATE to select the timeslot
-# - cd to the directory with extract-monce-data.sh file and run it. It will ask for the MySQL root password.
-# - the result file is into ~/results/extract-monce-data.csv
- 
+# - populate the database with the backup file, e.g. "mysql --user biomed --password biomed_stats < backup_PGT.sql"
+# - in extract-monce-results-per-ce.sh, set variables FROM_DATE and TO_DATE to select the timeslot
+# - cd to the directory with extract-monce-results-per-ce.sh file and run it. It will ask for the MySQL root password.
+# - the result file is into ~/results/monce-results-per-ce.csv
+
 FROM_DATE="2012-08-29 00:00:00"
 TO_DATE="2012-09-30 23:59:59"
 
-RESULT_FILE=/tmp/extract-monce-data.csv
+RESULT_FILE=/tmp/monce-results-per-ce.csv
 
 # First remove the last result file in case it exists, as root because it is created by the DIRAC user (that runs mysql)
 ssh root@localhost "\rm -f $RESULT_FILE"
