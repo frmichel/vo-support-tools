@@ -1,6 +1,6 @@
 #!/bin/bash
 # This file extracts data from the biomed_stats MySQL database, and generates a csv file with the following columns:
-# date; total number of OK; number of tests OK; number of errors; number of timeouts; average time spent waiting for ok tests;
+# date; total number of tests; number of tests OK; number of errors; number of timeouts; average time spent waiting for ok tests;
 # % of test OK; % of errors; % of test timeouts
 #
 # The database must be populated with the results from the MonCE tool made by Patrick Guterl (IPHC).
