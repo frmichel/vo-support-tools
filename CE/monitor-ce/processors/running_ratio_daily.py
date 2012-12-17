@@ -1,9 +1,10 @@
 #!/usr/bin/python
 #
 # This tools exploits the data of csv files produced by script collect-ce-job-status.py, to 
-# compute the running ratio R/(R+W) as a function of time
+# compute the running ratio R/(R+W) as a function of time. Time meaning days: each day, the 
+# mean measure is computed, as opposed to running_ratio.py that provides 6 measures per day.
 #
-# Results are stored in file running_ratio.csv.
+# Results are stored in file running_ratio_daily.csv.
 
 import os
 import csv
@@ -51,8 +52,8 @@ def process(dataFiles):
 	    dataPerDate[date]['Waiting'] += W
 	    dataPerDate[date]['Running'] += R
 
-	print "Computing the mean ratio R/(R+W) as a function of time..."
-	outputFile = globvars.OUTPUT_DIR + os.sep + "running_ratio.csv"
+	print "Computing the mean ratio R/(R+W) as a function of time (daily)..."
+	outputFile = globvars.OUTPUT_DIR + os.sep + "running_ratio_daily.csv"
 	outputf = open(outputFile, 'wb')
 	writer = csv.writer(outputf, delimiter=';')
 	writer.writerow(["# Date", "Waiting", "Running", "R/(R+W)"])

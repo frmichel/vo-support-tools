@@ -26,6 +26,7 @@ from optparse import OptionParser
 
 import globvars
 import processors.running_ratio
+import processors.running_ratio_daily
 import processors.running_ratio_day_night
 import processors.distribute_ce_by_running_ratio
 import processors.running_ratio_slices
@@ -89,16 +90,19 @@ if not os.path.isdir(globvars.OUTPUT_DIR):
 # it returns False if:
 # - any number of jobs for the VO (total, running or waiting) has
 #   a default value starting with '4444' or is empty,
+# - any number of jobs for the VO is a negative value
 # - the CE is is in status downtime, not in production, not monitired, or draining
 # Returns true in any other case.
 # -------------------------------------------------------------------------
 def dataQualityCheck(structRow):
     status = structRow['CE_Status'].lower()
+    run = structRow['VO_Running']
+    wait = structRow['VO_Waiting']
     if (
-        structRow['VO_Running'].startswith('4444') or
-        structRow['VO_Waiting'].startswith('4444') or
-        structRow['VO_Running'] == '' or
-        structRow['VO_Waiting'] == '' or
+        run.startswith('4444') or
+        wait.startswith('4444') or
+        run == '' or wait == '' or
+        int(run) < 0 or int(wait) < 0 or
 
         status.find('downtime') != -1 or
         status.find('not in production') != -1 or
@@ -238,11 +242,12 @@ if globvars.DEBUG: print "Loaded", len(dataFiles), "files."
 # -------------------------------------------------------------------------
 # Compute the running ratio R/(R+W) as a function of time
 processors.running_ratio.process(dataFiles)
+processors.running_ratio_daily.process(dataFiles)
 
 # -------------------------------------------------------------------------
-# Compute the mean ratio R/(R+W) during day time (12h, 16h, 20h)
+# Compute the mean running ratio R/(R+W) during day time (12h, 16h, 20h)
 # or night time (0h, 4h, 8h), as a function of time
-processors.running_ratio_day_night.process(dataFiles)
+# processors.running_ratio_day_night.process(dataFiles)
 
 # -------------------------------------------------------------------------
 # Compute the distribution of CE queues by ratio R/(R+W)
@@ -259,6 +264,6 @@ processors.running_ratio_slices.process(dataFiles)
 processors.running_ratio_bad.process(dataFiles)
 
 # -------------------------------------------------------------------------
-# Compute the running ratio per CE as a function of time
+# Compute the running ratio R/(R+W) per CE as a function of time
 processors.running_ratio_per_ce.process(dataFiles)
 
