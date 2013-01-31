@@ -1,7 +1,7 @@
 
 
 # Populate the biomed_stats database with a dump file:
-"mysql --user biomed --password biomed_stats < backup_PGT.sql"
+"mysql --user biomed --password biomed_stats < monCE.sql"
 
 # In extract-monce-results-per-ce.sh and extract-monce-results-per-date.sh, set FROM_DATE and TO_DATE to select the timeslot
 
@@ -11,5 +11,5 @@
 # monce-results-per-date.csv is to be used as is (inserted into an excel sheet).
 # monce-results-per-ce.csv is used in processors/running_ratio_bad.py to consolidate data from both sources:
 # process the data of MonCE with the data about running ratio R/(R+W):
-./process-ce-job-status.py --input-dir ../../../public_html/monitor-ce --from 20120829 --to 20120930 --monce
+./process-ce-job-status.py --input-dir ../../../public_html/monitor-ce --from 20121113 --to 20121216 --monce
 

@@ -10,8 +10,8 @@
 # - cd to the directory with extract-monce-results-per-ce.sh file and run it. It will ask for the MySQL root password.
 # - the result file is into ~/results/monce-results-per-ce.csv
 
-FROM_DATE="2012-08-29 00:00:00"
-TO_DATE="2012-09-30 23:59:59"
+FROM_DATE="2012-11-13 00:00:00"
+TO_DATE="2012-12-16 23:59:59"
 
 RESULT_FILE=/tmp/monce-results-per-ce.csv
 
