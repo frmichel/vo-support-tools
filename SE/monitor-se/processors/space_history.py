@@ -1,6 +1,6 @@
 #!/usr/bin/python
 #
-# This tools exploits the data of csv files produced by script show-se-space.py, to 
+# This tools exploits the data of csv files produced by script collect-se-space.py, to 
 # generate a simple history of the filling rate of each SE
 #
 # Results are stored in file space_history.csv.

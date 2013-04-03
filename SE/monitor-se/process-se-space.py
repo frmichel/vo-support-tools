@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# This tools exploits the csv data files produced by script show-se-space.py,
+# This tools exploits the csv data files produced by script collect-se-space.py,
 # to make statistics about the space used on storage elements.
 # The following file(s) is/are produced in directory results/ :
 # space_history.csv: generate a simple history of the filling rate of each SE
@@ -23,7 +23,7 @@ import globvars
 import processors.space_history
 
 optParser = OptionParser(version="%prog 1.0", description="""This tools exploits the csv data files produced 
-by script show-se-space.py, to show a time representation of the filling rate of SEs.
+by script collect-se-space.py, to show a time representation of the filling rate of SEs.
 With no option at all, this tool processes all data files from the local dir, and writes the output files to
 the local dir.
 """)
