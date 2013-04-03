@@ -13,7 +13,8 @@
 #
 # ChangeLog:
 # 1.1: 2012-08-25 - take into account the status from the GOCDB to ignore CEs
-# 2.0: 2012-11-08 - reorganise code in several modules
+# 2.0: 2012-11-08 - refactor code in several modules
+# 2.1: 2013-03-27 - ignore files of size 0
 
 import sys
 import os
@@ -33,7 +34,7 @@ import processors.running_ratio_slices
 import processors.running_ratio_bad
 import processors.running_ratio_per_ce
 
-optParser = OptionParser(version="%prog 2.0", description="""This tools exploits the csv data files produced by script collect-ce-job-status.py,
+optParser = OptionParser(version="%prog 2.1", description="""This tools exploits the csv data files produced by script collect-ce-job-status.py,
 to make statistics about the ratio of running jobs / (running + waiting jobs).
 CE which status in not normal production are ignored.
 Currently the following files are produced: running_ratio.csv, running_ratio_day_night.csv, ce_grouped_by_running_ratio.csv, running_ratio_bad.csv,
@@ -120,7 +121,9 @@ sortedDir = sorted(os.listdir(globvars.DATA_DIR))
 for fileName in sortedDir:
     if fileName.endswith('csv'):
         if fileName[:8] >= globvars.FROM_DATE and fileName[:8] <= globvars.TO_DATE:
-            files.append(globvars.DATA_DIR + os.sep + fileName)
+            # It happens that some file are of size 0 (error at colelct time?): ignore them
+            if os.stat(globvars.DATA_DIR + os.sep + fileName).st_size > 0:
+                files.append(globvars.DATA_DIR + os.sep + fileName)
 
 # -------------------------------------------------------------------------
 # Load all selected csv files, and compute per file sums of waiting and running jobs

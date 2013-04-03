@@ -5,13 +5,13 @@
 # The database must be populated with the results from the MonCE tool made by Patrick Guterl (IPHC).
 #
 # Usage:
-# - populate the database with the backup file, e.g. "mysql --user biomed --password biomed_stats < backup_PGT.sql"
+# - populate the database with the backup file, e.g. "mysql --user biomed --password biomed_stats < monCE.sql"
 # - in extract-monce-results-per-ce.sh, set variables FROM_DATE and TO_DATE to select the timeslot
 # - cd to the directory with extract-monce-results-per-ce.sh file and run it. It will ask for the MySQL root password.
 # - the result file is into ~/results/monce-results-per-ce.csv
 
 FROM_DATE="2012-11-13 00:00:00"
-TO_DATE="2012-12-16 23:59:59"
+TO_DATE="2013-03-27 23:59:59"
 
 RESULT_FILE=/tmp/monce-results-per-ce.csv
 

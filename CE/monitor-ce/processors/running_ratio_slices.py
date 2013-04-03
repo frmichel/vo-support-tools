@@ -2,7 +2,7 @@
 #
 # This tools exploits the data of csv files produced by script collect-ce-job-status.py, to 
 # compute the number of CEs grouped by slice of ratio R/(R+W) as a function of time:
-# between 0 and 0,5, and between 0,5 and 1, exactly 1 or not calculabe.
+# between 0 and 0,5, and between 0,5 and 1, exactly 1 or not calculable.
 #
 # Results are stored in file running_ratio_slices.csv.
 

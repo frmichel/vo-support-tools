@@ -1,10 +1,11 @@
 #!/usr/bin/python
 #
-# This tools exploits the data of csv files produced by script collect-ce-job-status.py, to 
+# This tools exploits the data of csv files produced by script collect-ce-job-status.py,
 # to figure out good and bad CEs: compute the list of CE queues based on the 
 # number of times each one has been seen with 0 running jobs, or no activity...
-# optionally it loads test results of tool MonCE that runs jobs on CE regularly, and adds these
-# results as additional columns of the result file.
+# Optionally it loads test results of tool MonCE that runs jobs on CE regularly, and adds these
+# results as additional columns of the result file. The results from MonCE should be present 
+# in file ~/results/monce-results-per-ce.csv.
 #
 # Results are stored in file running_ratio_bad.csv.
 
