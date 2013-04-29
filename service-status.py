@@ -17,6 +17,7 @@
 # ChangeLog:
 # 1.0: initial version
 # 1.1: rename to service-status.py, retrieve the status from both the GOCDB and the BDII
+# 1.2: in the query to the GOCDB, fix bug with a passphrase that contains space characters
 
 import sys
 import os
@@ -29,7 +30,7 @@ from xml.sax.handler import ContentHandler
 
 DEFAULT_TOPBDII = "cclcgtopbdii01.in2p3.fr:2170"
 
-optParser = OptionParser(version="%prog 1.1", description="""This tool retrieves status information
+optParser = OptionParser(version="%prog 1.2", description="""This tool retrieves status information
 from the GOCDB (downtime, not monitored, not in production), and the BDII (draining, closed)
 for all CEs, SEs and WMSs supporting a given VO (defaults to biomed), that are not in normal production status.""")
 
@@ -90,7 +91,7 @@ ldapSE = ldapSearch + "\'(&(ObjectClass=GlueSE)(GlueSEUniqueID=%(SE)s))\' " + at
 
 # The curl is used instead of Python std lib like HTTPSConnection,
 # as it does not support key pass phrase nor timeouts (in Python 2.4)
-CURL_CMD="curl --silent --insecure --connect-timeout 30 --max-time 60 --pass `cat " + KEY_PASS + "` --cert " + CERT_FILE + " --key " + KEY_FILE + " --url "
+CURL_CMD="curl --silent --insecure --connect-timeout 30 --max-time 60 --pass \"`cat " + KEY_PASS + "`\" --cert " + CERT_FILE + " --key " + KEY_FILE + " --url "
 
 GOCDB_DOWNTIME_URL = "https://goc.egi.eu/gocdbpi/private/?method=get_downtime&ongoing_only=yes&topentity="
 GOCDB_SERVICE_URL="https://goc.egi.eu/gocdbpi/private/?method=get_service_endpoint&hostname="

@@ -12,7 +12,10 @@ To run the jobs in cron:
 # Refresh the list of users from the VOMS every day
 0 1 * * * . /etc/profile; export VO_SUPPORT_TOOLS=/home/fmichel/biomed-support-tools; $VO_SUPPORT_TOOLS/SE/scan-se/list-users-voms.sh --vo biomed --voms-host voms-biomed.in2p3.fr --voms-port 8443 --out /tmp/monitor-se/voms-users.txt > /tmp/monitor-se/voms-users.log
 
-1.2. Use script $VO_SUPPORT_TOOLS/renew-proxy.sh to renew your proxy certificate regularly:
+1.2. Generate the list of SE with downtime or any non-production status in the GOCDB and BDII. This will be used in turn by script SE/show-se-space.sh that is used by scan-se.sh
+$VO_SUPPORT_TOOLS/service-status.py --noce --nowms > /tmp/show-se-space/se-status.txt
+
+1.3. Use script $VO_SUPPORT_TOOLS/renew-proxy.sh to renew your proxy certificate regularly:
 # Renew the proxy certificate every 8 hours
 0 0,8,16 * * * /path/biomed-support-tools/renew-proxy.sh 2>&1 >> /tmp/monitor-se/renew-proxy.log
 
