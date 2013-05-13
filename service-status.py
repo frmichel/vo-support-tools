@@ -17,7 +17,9 @@
 # ChangeLog:
 # 1.0: initial version
 # 1.1: rename to service-status.py, retrieve the status from both the GOCDB and the BDII
-# 1.2: in the query to the GOCDB, fix bug with a passphrase that contains space characters
+# 1.2: look for downtime status in gocdb by service type (CREAM-CE or CE for CE, SRM for SE, WMS for WMS)
+#      look for not in production or not monitored status in gocdb by service type (CREAM-CE or CE for CE, SRM for SE, WMS for WMS)
+#      look for draining or closed status in BDII using a by vo ldap search for CE
 
 import sys
 import os
@@ -30,7 +32,7 @@ from xml.sax.handler import ContentHandler
 
 DEFAULT_TOPBDII = "cclcgtopbdii01.in2p3.fr:2170"
 
-optParser = OptionParser(version="%prog 1.2", description="""This tool retrieves status information
+optParser = OptionParser(version="%prog 1.1", description="""This tool retrieves status information
 from the GOCDB (downtime, not monitored, not in production), and the BDII (draining, closed)
 for all CEs, SEs and WMSs supporting a given VO (defaults to biomed), that are not in normal production status.""")
 
@@ -86,8 +88,9 @@ TOPBDII = options.bdii
 ldapSearch = "ldapsearch -x -LLL -s sub -H ldap://%(TOPBDII)s -b mds-vo-name=local,o=grid "
 attributes = "GlueCEStateStatus GlueSEStatus"
 attributesGrep = "\"GlueCEStateStatus|GlueSEStatus\""
-ldapCE = ldapSearch + "\'(&(ObjectClass=GlueCE)(GlueCEUniqueID=%(CE)s*))\' " + attributes + " | egrep " + attributesGrep
+ldapCE = ldapSearch + "\'(&(ObjectClass=GlueCE)(GlueCEUniqueID=%(CE)s*)(|(GlueCEAccessControlBaseRule=VO:"+VO+"*)(GlueCEAccessControlBaseRule="+VO+"*)))\' " + attributes + " | egrep " + attributesGrep
 ldapSE = ldapSearch + "\'(&(ObjectClass=GlueSE)(GlueSEUniqueID=%(SE)s))\' " + attributes + " | egrep " + attributesGrep
+
 
 # The curl is used instead of Python std lib like HTTPSConnection,
 # as it does not support key pass phrase nor timeouts (in Python 2.4)
@@ -100,42 +103,95 @@ GOCDB_SERVICE_URL="https://goc.egi.eu/gocdbpi/private/?method=get_service_endpoi
 serviceStatus = []
 isInProduction = False
 isMonitored = False
+isServiceType = False
+isServiceEndpoint = False
+serviceEndpointFound = False
+serviceType=""
+serviceMonitored=""
+serviceProduction=""
+service=""
+
+#Lists of services corresponding to the 3 different types of hosts (CE, SE and WMS) 
+#required for the GOCDB XML parser
+#N.B. The services in the list must be writtent in low case
+CE_SERVICES=["ce","cream-ce"]
+SE_SERVICES=["srm"]
+WMS_SERVICES=["wms"]
+
 
 now = time.strftime('%Y-%m-%d %H:%M:%S %Z',time.localtime())  
 
 
 # -------------------------------------------------------------------------
-# SAX handler for GOCDB downtime response: simple detects the presence of
-# a downtimes elements in the xml stream
+# SAX handler for GOCDB downtime response: detects the presence of a
+# downtime element in the xml stream corresponding to a service of 
+# the list associated to the type of host (CE, SE or WMS)
 # -------------------------------------------------------------------------
 class SaxDowntimeHandle(ContentHandler):
 
-    def startElement(self, name, attrs):
-        global serviceStatus
-        if name.lower() == "downtime" and "downtime" not in serviceStatus: 
-            serviceStatus.append("downtime")
+    #Function analysing the start tag
+    def startElement(self,name,attrs):
+	global serviceStatus, isServiceType
+	isServiceType=False
+	if name.lower()=="service_type": isServiceType=True
+
+    #Function analysing the content of the tag
+    def characters(self,content):
+	global serviceStatus, isServiceType, service
+	if isServiceType:
+	    if (((service == "CE") and (content.lower() in CE_SERVICES)) or ((service == "SE") and (content.lower() in SE_SERVICES)) or ((service == "WMS") and (content.lower() in WMS_SERVICES))):
+		if "downtime" not in serviceStatus:
+		    serviceStatus.append("downtime")
+
 
 # -------------------------------------------------------------------------
 # SAX handler for GOCDB service response: looks for elements IN_PRODUCTION
-# or NODE_MONITORED with value N (=No)
+# or NODE_MONITORED with value N (=No) associated to a SERVICE_TYPE tag
+# which content corresponds to the type of host (CE, SE or WMS
 # -------------------------------------------------------------------------
 class SaxServiceHandle(ContentHandler):
 
+    #Function analysing the start tag
     def startElement(self, name, attrs):
-        global isInProduction, isMonitored, serviceStatus
-        isInProduction = False
-        if name.lower() == "in_production": isInProduction = True
-        isMonitored = False
-        if name.lower() == "node_monitored": isMonitored = True
+	global isServiceEndpoint, isServiceType, isInProduction, isMonitored, serviceEndpointFound, serviceType, serviceMonitored, serviceProduction, serviceStatus
 
-    def characters(self, content):
-        global serviceStatus
-        if isInProduction and content.lower() == "n": 
-            if "not in production" not in serviceStatus: 
-                serviceStatus.append("not in production")
-        if isMonitored and content.lower() == "n": 
-            if "not monitored" not in serviceStatus: 
-                serviceStatus.append("not monitored")
+	isServiceEndpoint=False
+	if name.lower() == "service_endpoint": 
+	    isServiceEndpoint=True
+	    serviceEndpointFound=True
+	    serviceType=""
+	    serviceMonitored=""
+	    serviceProduction=""
+	isServiceType=False
+	if name.lower() == "service_type": isServiceType=True
+	isInProduction=False
+	if name.lower() == "in_production": isInProduction=True
+	isMonitored=False
+	if name.lower() == "node_monitored": isMonitored=True
+
+    #Function analysing the content of the tag
+    def characters(self,content):
+	global isServiceEndpoint, isServiceType, isInProduction, isMonitored, serviceEndpointFound, serviceType, serviceMonitored, serviceProduction, serviceStatus
+
+	if serviceEndpointFound:
+	    if isServiceType: serviceType=content.lower()
+	    if isInProduction: serviceProduction=content.lower()
+	    if isMonitored: serviceMonitored=content.lower()
+
+    #Function for the closing of the tag
+    def endElement(self, name):
+	global isServiceEndpoint, isServiceType, isInProduction, isMonitored, serviceEndpointFound, serviceType, serviceMonitored, serviceProduction, serviceStatus
+
+	if name.lower() == "service_endpoint":
+	    if (((service == "CE") and (serviceType in CE_SERVICES)) or ((service == "SE") and (serviceType in SE_SERVICES)) or ((service == "WMS") and (serviceType in WMS_SERVICES))):
+		if serviceProduction == "n": 
+		    if "not in production" not in serviceStatus: 
+			serviceStatus.append("not in production")
+		if serviceMonitored == "n": 
+		    if "not monitored" not in serviceStatus: 
+			serviceStatus.append("not monitored")
+	    serviceEndpointFound=False
+
 
 # -------------------------------------------------------------------------
 # Send the requests to the GOCDB, parses the XML response, 
@@ -166,7 +222,9 @@ def checkGocdbStatus(host):
         parseString(output, SaxServiceHandle())
 
 # -------------------------------------------------------------------------
-# Checks the status of a CE in the BDII and stores the result in var serviceStatus
+# Checks the status of a CE in the BDII for a given vo and put the result 
+# in var serviceStatus. If a queue at least has a status != production
+# the whole host is considered not in production for the given vo 
 # Param:
 #   host: hostname of the node to check
 # -------------------------------------------------------------------------
@@ -174,11 +232,14 @@ def checkCEStatus(host):
     if DEBUG: print "Checking GlueCE " + host + "..."
     status, output = commands.getstatusoutput(ldapCE % {'TOPBDII': TOPBDII, 'CE': host})
     if len(output) != 0:
-        # Loop on the output of the ldap request
-        line = output.splitlines()[0]
-        attrib, value = line.split(":")
-        if value.strip() != "Production":
-            serviceStatus.append(value.strip().lower())
+	found=False
+	lines=output.splitlines()
+	for i in range(len(lines)):
+	    if not found:
+		attrib,value = lines[i].split(":")
+		if value.strip() != "Production":
+		    serviceStatus.append(value.strip().lower())
+		    found=True
 
 # -------------------------------------------------------------------------
 # Checks the status of an SE in the BDII and stores the result in var serviceStatus
