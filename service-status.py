@@ -344,10 +344,6 @@ if SE:
     for line in output.splitlines():
         if ("Reserved" not in line) and ("Nearline" not in line) and ("----------" not in line):
             listSE.append(line.split()[-1])
-    listSE.append("atlandse.fis.puc.cl")
-    listSE.append("axon-g05.ieeta.pt")
-    listSE.append("moboro.uniandes.edu.co")
-	
 
 
 if CE:
