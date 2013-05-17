@@ -20,6 +20,9 @@
 # 1.2: look for downtime status in gocdb by service type (CREAM-CE or CE for CE, SRM for SE, WMS for WMS)
 #      look for not in production or not monitored status in gocdb by service type (CREAM-CE or CE for CE, SRM for SE, WMS for WMS)
 #      look for draining or closed status in BDII using a by vo ldap search for CE
+# 1.3: look for suspended site certification status in the GOCDB for CE, SE and WMS
+
+
 
 import sys
 import os
@@ -98,18 +101,28 @@ CURL_CMD="curl --silent --insecure --connect-timeout 30 --max-time 60 --pass \"`
 
 GOCDB_DOWNTIME_URL = "https://goc.egi.eu/gocdbpi/private/?method=get_downtime&ongoing_only=yes&topentity="
 GOCDB_SERVICE_URL="https://goc.egi.eu/gocdbpi/private/?method=get_service_endpoint&hostname="
+GOCDB_SITE_URL="https://goc.egi.eu/gocdbpi/private/?method=get_site&sitename="
+
 
 # Global variables used during xml parsing
 serviceStatus = []
 isInProduction = False
 isMonitored = False
 isServiceType = False
+isSiteName = False
+isCertificationStatus=False
 isServiceEndpoint = False
 serviceEndpointFound = False
 serviceType=""
 serviceMonitored=""
 serviceProduction=""
 service=""
+siteName=""
+siteNameTemp=""
+certificationStatusFound=False
+certificationStatus=""
+
+
 
 #Lists of services corresponding to the 3 different types of hosts (CE, SE and WMS) 
 #required for the GOCDB XML parser
@@ -147,14 +160,15 @@ class SaxDowntimeHandle(ContentHandler):
 # -------------------------------------------------------------------------
 # SAX handler for GOCDB service response: looks for elements IN_PRODUCTION
 # or NODE_MONITORED with value N (=No) associated to a SERVICE_TYPE tag
-# which content corresponds to the type of host (CE, SE or WMS
+# which content corresponds to the type of host (CE, SE or WMS)
+# This class also retrieve the parent site name associated to the given 
+# used in the SaxSiteHandle class
 # -------------------------------------------------------------------------
 class SaxServiceHandle(ContentHandler):
 
     #Function analysing the start tag
     def startElement(self, name, attrs):
-	global isServiceEndpoint, isServiceType, isInProduction, isMonitored, serviceEndpointFound, serviceType, serviceMonitored, serviceProduction, serviceStatus
-
+	global isServiceEndpoint, isServiceType, isInProduction, isMonitored, isSiteName, serviceEndpointFound, serviceType, serviceMonitored, serviceProduction, serviceStatus, siteName, siteNameTemp
 	isServiceEndpoint=False
 	if name.lower() == "service_endpoint": 
 	    isServiceEndpoint=True
@@ -168,20 +182,22 @@ class SaxServiceHandle(ContentHandler):
 	if name.lower() == "in_production": isInProduction=True
 	isMonitored=False
 	if name.lower() == "node_monitored": isMonitored=True
+	isSiteName=False
+	if name.lower() == "sitename": isSiteName=True
+
 
     #Function analysing the content of the tag
     def characters(self,content):
-	global isServiceEndpoint, isServiceType, isInProduction, isMonitored, serviceEndpointFound, serviceType, serviceMonitored, serviceProduction, serviceStatus
-
+	global isServiceEndpoint, isServiceType, isInProduction, isMonitored, isSiteName, serviceEndpointFound, serviceType, serviceMonitored, serviceProduction, serviceStatus, siteName, siteNameTemp
 	if serviceEndpointFound:
 	    if isServiceType: serviceType=content.lower()
 	    if isInProduction: serviceProduction=content.lower()
 	    if isMonitored: serviceMonitored=content.lower()
+	    if isSiteName: siteNameTemp=content
 
     #Function for the closing of the tag
     def endElement(self, name):
-	global isServiceEndpoint, isServiceType, isInProduction, isMonitored, serviceEndpointFound, serviceType, serviceMonitored, serviceProduction, serviceStatus
-
+	global isServiceEndpoint, isServiceType, isInProduction, isMonitored, isSiteName, serviceEndpointFound, serviceType, serviceMonitored, serviceProduction, serviceStatus, siteName, siteNameTemp
 	if name.lower() == "service_endpoint":
 	    if (((service == "CE") and (serviceType in CE_SERVICES)) or ((service == "SE") and (serviceType in SE_SERVICES)) or ((service == "WMS") and (serviceType in WMS_SERVICES))):
 		if serviceProduction == "n": 
@@ -190,7 +206,32 @@ class SaxServiceHandle(ContentHandler):
 		if serviceMonitored == "n": 
 		    if "not monitored" not in serviceStatus: 
 			serviceStatus.append("not monitored")
+		siteName=siteNameTemp
 	    serviceEndpointFound=False
+
+
+
+# -------------------------------------------------------------------------
+# SAX handler for GOCDB site: detects the presence of a
+# site suspended certification status in the xml stream 
+# corresponding to the site associated to the given host 
+# -------------------------------------------------------------------------
+class SaxSiteHandle(ContentHandler):
+
+    #Function analysing the start tag
+    def startElement(self,name,attrs):
+        global serviceStatus, isCertificationStatus
+        isCertificationStatus=False
+        if name.lower()=="certification_status": isCertificationStatus=True
+
+    #Function analysing the content of the tag
+    def characters(self,content):
+        global serviceStatus, isCertificationStatus
+        if isCertificationStatus:
+            if content.lower() == "suspended":
+                if "site suspended" not in serviceStatus:
+                    serviceStatus.append("site suspended")
+
 
 
 # -------------------------------------------------------------------------
@@ -211,7 +252,7 @@ def checkGocdbStatus(host):
     else:
         parseString(output, SaxDowntimeHandle())
     
-    # Check if the node is in status "not in production" or "not monitored"
+    # Check if the node is in status "not in production" or "not monitored" and get the parent site name
     cmdString = CURL_CMD + "\"" + GOCDB_SERVICE_URL + host + "\""
     if DEBUG: print "Command: " + cmdString
     status, output = commands.getstatusoutput(cmdString)
@@ -220,6 +261,20 @@ def checkGocdbStatus(host):
         print "Error when querying the GOCDB for service status: " + output
     else:
         parseString(output, SaxServiceHandle())
+
+    # Check if parent site is suspended or not
+    if DEBUG: print "parent sitename="+siteName   
+    if len(siteName) == 0:
+	if DEBUG: print "Error when querying parent site name of host " + host
+    else:
+	cmdString = CURL_CMD + "\"" + GOCDB_SITE_URL + siteName + "\""
+	if DEBUG: print "Command: " + cmdString
+	status, output = commands.getstatusoutput(cmdString)
+	if DEBUG: print "Response: " + output
+	if status <> 0:
+	    print "Error when querying the GOCDB for certification status: " + output
+	else:
+	    parseString(output, SaxSiteHandle())
 
 # -------------------------------------------------------------------------
 # Checks the status of a CE in the BDII for a given vo and put the result 
@@ -289,6 +344,11 @@ if SE:
     for line in output.splitlines():
         if ("Reserved" not in line) and ("Nearline" not in line) and ("----------" not in line):
             listSE.append(line.split()[-1])
+    listSE.append("atlandse.fis.puc.cl")
+    listSE.append("axon-g05.ieeta.pt")
+    listSE.append("moboro.uniandes.edu.co")
+	
+
 
 if CE:
     # Get the list of CEs from the BDII
@@ -330,6 +390,7 @@ if PRETTY:
 if SE:
     for host in listSE:
         serviceStatus = []
+	siteName=""	
         service = "SE"
         checkGocdbStatus(host)
         checkSEStatus(host)
@@ -338,6 +399,7 @@ if SE:
 if CE:
     for host in listCE:
         serviceStatus = []
+	siteName=""
         service = "CE"
         checkGocdbStatus(host)
         checkCEStatus(host)
@@ -346,6 +408,7 @@ if CE:
 if WMS:
     for host in listWMS:
         serviceStatus = []
+	siteName=""
         service = "WMS"
         checkGocdbStatus(host)
         printStatus(host)
