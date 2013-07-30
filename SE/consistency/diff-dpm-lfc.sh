@@ -1,9 +1,8 @@
 #!/bin/bash
-# This script looks for differences between and SE dump and an LFC dump. It lists
-# - zombie files (aka. dark data) on the SE, i.e. files present on a DPM storage element but not listed in the catalog,
-# - ghost entries (aka. lost data) on the LFC, i.e. entries in the catalog with nomore  physical replica on the SE
+# This script looks for differences between and SE dump and an LFC dump in order to detect zombie files (dark data) on SE,
+# and ghost files (lost entries on the LFC).
 # It takes as input a dump of the DPM SE obtained with command:
-#	dpns-ls -lR <se_hostname>:/dpm/<domain_name>/home/<vo_name>
+#       dpns-ls -lR <se_hostname>:/dpm/<domain_name>/home/<vo_name>
 # and a dump of the LFC obtained with the LFCBrowseSE tool:
 #       LFCBrowseSE <se_hostname> --vo <vo_name> --sfn
 # It produces 3 output files:
@@ -11,13 +10,47 @@
 # - <se_hostname>_se_zombies: SURLs of files only registered in the SE (zombies, aka. dark data)
 # - <se_hostname>_common: SURLs of files found on both the SE and the LFC
 #
-# Zombie files are applied are safety minimum age: only files older than 6 months
-# (by default, can be changed with option --age) are listed in <se_hostname>_se_zombies.
-# Call example:
-#    ./diff-dpm-lfc-time.sh --se gridse.ilc.cnr.it \
-#                           --age 6 \
-#                           --se-dump gridse.ilc.cnr.it.dpns-ls-lR \
-#                           --lfc-dump gridse.ilc.cnr.it.lfcbrowsese-sfn
+# Only zombie files older than 6 months (by default, can be changed with option --age) are listed.
+
+help()
+{
+  echo
+  echo "This script looks for differences between an SE dump and an LFC dump. It lists:"
+  echo "- zombie files (aka. dark data) on the SE, i.e. files present on a DPM storage element but not listed in the catalog,"
+  echo "- ghost entries (aka. lost data) on the LFC, i.e. entries in the catalog with no more physical replica on the SE."
+  echo "It produces 3 output files:"
+  echo "- <se_hostname>_lfc_ghosts: SURLs of files only registered in the LFC (ghosts, aka. lost files)"
+  echo "- <se_hostname>_se_zombies: SURLs of files only registered in the SE (zombies, aka. dark data)"
+  echo "- <se_hostname>_common: SURLs of files found on both the SE and the LFC"
+  echo "Only zombie files older than 6 months (by default, can be changed with option --age) are listed."
+  echo
+  echo "Usage:"
+  echo "$0 [-h|--help]"
+  echo "$0 [-s|--silent] [--age <age>] --se <SE hostname> --se-dump <file name> --lfc-dump <file name>"
+  echo
+  echo "  --se <SE hostname>: the storage element host name"
+  echo
+  echo "  --age <age>: only files older than <age> months are listed in <se_hostname>_se_zombies."
+  echo "        Defaults to 6."
+  echo
+  echo "  --se-dump <filename>: dump of the DPM SE obtained with command:"
+  echo "        dpns-ls -lR <se_hostname>:/dpm/<domain_name>/home/<vo_name>"
+  echo
+  echo "  --lfc-dump <filename>: dump of the LFC obtained with the LFCBrowseSE tool:"
+  echo "        LFCBrowseSE <se_hostname> --vo <vo_name> --sfn"
+  echo
+  echo "  -h, --help: display this help"
+  echo
+  echo "  -s, --silence: be as silent as possible"
+  echo
+  echo "Call example:"
+  echo "   ./diff-dpm-lfc-time.sh --se gridse.ilc.cnr.it \ "
+  echo "                          --age 6 \ "
+  echo "                          --se-dump gridse.ilc.cnr.it.dpns-ls-lR \ "
+  echo "                          --lfc-dump gridse.ilc.cnr.it.lfcbrowsese-sfn"
+  echo
+  exit 1
+}
 
 # Set to true to skip the convertion into SURLs (time consuming). 
 # To use when the file is already present in the local directory.
@@ -31,11 +64,6 @@ INPUT_SE_DUMP=
 SE_HOSTNAME=
 SILENT=
 
-help()
-{
-  echo 'Help. To be done...'
-  exit 1
-}
 
 # Check parameters
 while [ ! -z "$1" ]
@@ -52,6 +80,10 @@ do
   shift
 done
 
+if test -z "$SE_HOSTNAME" ; then help; fi
+if test -z "$INPUT_LFC_DUMP" ; then help; fi
+if test -z "$INPUT_SE_DUMP" ; then help; fi
+
 OUTPUT_LFC_GHOSTS=${SE_HOSTNAME}_lfc_ghosts
 OUTPUT_SE_ZOMBIES=${SE_HOSTNAME}_se_zombies
 OUTPUT_COMMON=${SE_HOSTNAME}_common
@@ -63,7 +95,7 @@ LIMIT_DATE_TS=`date --date="$AGE months ago" "+%s"`
 
 if test -z "$SILENT"; then
   NOW=`date "+%Y-%m-%d %H:%M:%S"`
-  echo $0 - $NOW
+  echo "Start $0: $NOW"
   #echo "--------------------------------------------"
   #echo "LCG_GFAL_INFOSYS: $LCG_GFAL_INFOSYS"
   #echo "LFC_HOST: $LFC_HOST"
@@ -176,6 +208,11 @@ if test -z "$SILENT"; then
   echo "Found `wc -l $OUTPUT_COMMON | awk -- '{print $1}'` files common to SE and LFC."
 fi
 
+if test -z "$SILENT"; then
+  NOW=`date "+%Y-%m-%d %H:%M:%S"`
+  echo "--------------------------------------------"
+  echo "Exit $0: $NOW"
+  echo "--------------------------------------------"
+fi
+
 exit 0
-
-
