@@ -1,6 +1,6 @@
 #!/usr/bin/python
-# This tool queries status information from the GOCDB (downtime, not monitored, not in production)
-# and from the BDII (draining, closed),
+# This tool queries status information from the GOCDB (downtime, not monitored, not in production,
+# site suspended), and from the BDII (draining, closed),
 # concerning all SEs, CEs and WMSs supporting a VO (defaults to biomed).
 # Results are displayed on the standard output either with "pretty" human readable format
 # or '|' separator like: service flavour (SE, CE, WMS)|hostname|status list

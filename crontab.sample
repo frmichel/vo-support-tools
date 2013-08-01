@@ -25,7 +25,7 @@
 7 7 21 * * . /etc/profile; export LFC_HOST=lfc-biomed.in2p3.fr; export VO_SUPPORT_TOOLS=/home/fmichel/biomed-support-tools; $VO_SUPPORT_TOOLS/SE/scan-se/scan-se.sh --voms-users /tmp/monitor-se/voms-users.txt --work-dir /tmp/monitor-se --result-dir $HOME/public_html/scan-full-se --threshold 0 --user-min-used 0 >> /tmp/monitor-se/scan-full-se.log
 
 # Daily SEs report: get the filling rate of all SEs at 3am every day and store it into a csv file
-10 3 * * * . /etc/profile; export VO_SUPPORT_TOOLS=/home/fmichel/biomed-support-tools; $VO_SUPPORT_TOOLS/SE/show-se-space.py/run-monitor-se.sh >> /tmp/monitor-se/show-se-space.py.log
+10 3 * * * . /etc/profile; export VO_SUPPORT_TOOLS=/home/fmichel/biomed-support-tools; $VO_SUPPORT_TOOLS/SE/monitor-se/run-collect-se-space.sh >> /tmp/monitor-se/run-collect-se-space.log
 
 #----------------------------------------------------------------------------
 # Monitoring CEs

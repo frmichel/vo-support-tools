@@ -10,7 +10,7 @@
 # - <se_hostname>_se_zombies: SURLs of files only registered in the SE (zombies, aka. dark data)
 # - <se_hostname>_common: SURLs of files found on both the SE and the LFC
 #
-# Only zombie files older than 6 months (by default, can be changed with option --age) are listed.
+# Only zombie files older than 6 months (by default, can be changed with option --older-than) are listed.
 
 help()
 {
@@ -22,16 +22,16 @@ help()
   echo "- <se_hostname>_lfc_ghosts: SURLs of files only registered in the LFC (ghosts, aka. lost files)"
   echo "- <se_hostname>_se_zombies: SURLs of files only registered in the SE (zombies, aka. dark data)"
   echo "- <se_hostname>_common: SURLs of files found on both the SE and the LFC"
-  echo "Only zombie files older than 6 months (by default, can be changed with option --age) are listed."
+  echo "Only zombie files older than 6 months (by default, can be changed with option --older-than) are listed."
   echo
   echo "Usage:"
   echo "$0 [-h|--help]"
-  echo "$0 [-s|--silent] [--age <age>] --se <SE hostname> --se-dump <file name> --lfc-dump <file name>"
+  echo "$0 [-s|--silent] [--older-than <age>] --se <SE hostname> --se-dump <file name> --lfc-dump <file name>"
   echo
   echo "  --se <SE hostname>: the storage element host name"
   echo
-  echo "  --age <age>: only files older than <age> months are listed in <se_hostname>_se_zombies."
-  echo "        Defaults to 6."
+  echo "  --older-than <age>: only files older than <age> months are listed in <se_hostname>_se_zombies."
+  echo "        Defaults to 6 months."
   echo
   echo "  --se-dump <filename>: dump of the DPM SE obtained with command:"
   echo "        dpns-ls -lR <se_hostname>:/dpm/<domain_name>/home/<vo_name>"
@@ -45,7 +45,7 @@ help()
   echo
   echo "Call example:"
   echo "   ./diff-dpm-lfc-time.sh --se gridse.ilc.cnr.it \ "
-  echo "                          --age 6 \ "
+  echo "                          --older-than 6 \ "
   echo "                          --se-dump gridse.ilc.cnr.it.dpns-ls-lR \ "
   echo "                          --lfc-dump gridse.ilc.cnr.it.lfcbrowsese-sfn"
   echo
@@ -56,21 +56,21 @@ help()
 # To use when the file is already present in the local directory.
 CONVERT_SE_DUMP=true
 
-# Default minimum age of zombies to take into account
-AGE=6		
+# ----------------------------------------------------------------------------------------------------
+# Check parameters and set environment variables
+# ----------------------------------------------------------------------------------------------------
 
+AGE=6		# Default minimum age of zombies to take into account
 INPUT_LFC_DUMP=
 INPUT_SE_DUMP=
 SE_HOSTNAME=
 SILENT=
 
-
-# Check parameters
 while [ ! -z "$1" ]
 do
   case "$1" in
     --se ) SE_HOSTNAME=$2; shift;;
-    --age ) AGE=$2; shift;;
+    --older-than ) AGE=$2; shift;;
     --lfc-dump ) INPUT_LFC_DUMP=$2; shift;;
     --se-dump ) INPUT_SE_DUMP=$2; shift;;
     -s | --silent ) SILENT=true;;
@@ -84,22 +84,19 @@ if test -z "$SE_HOSTNAME" ; then help; fi
 if test -z "$INPUT_LFC_DUMP" ; then help; fi
 if test -z "$INPUT_SE_DUMP" ; then help; fi
 
-OUTPUT_LFC_GHOSTS=${SE_HOSTNAME}_lfc_ghosts
-OUTPUT_SE_ZOMBIES=${SE_HOSTNAME}_se_zombies
-OUTPUT_COMMON=${SE_HOSTNAME}_common
+OUTPUT_LFC_GHOSTS=${SE_HOSTNAME}.output_lfc_ghosts
+OUTPUT_SE_ZOMBIES=${SE_HOSTNAME}.output_se_zombies
+OUTPUT_COMMON=${SE_HOSTNAME}.output_common
 INPUT_SE_DUMP_SURLS=${INPUT_SE_DUMP}_surls
 
-# Files older than $AGE months can be safely deleted. Others must be kept.
+# Files older than $AGE months are considered as zombies. Others are ignored.
 LIMIT_DATE=`date --date="$AGE months ago" "+%Y-%m-%d"`
 LIMIT_DATE_TS=`date --date="$AGE months ago" "+%s"`
 
 if test -z "$SILENT"; then
   NOW=`date "+%Y-%m-%d %H:%M:%S"`
+  echo "--------------------------------------------"
   echo "Start $0: $NOW"
-  #echo "--------------------------------------------"
-  #echo "LCG_GFAL_INFOSYS: $LCG_GFAL_INFOSYS"
-  #echo "LFC_HOST: $LFC_HOST"
-  #echo "LFC_HOME: $LFC_HOME"
   echo "--------------------------------------------"
   echo "Output file for SE zombies: $OUTPUT_SE_ZOMBIES"
   echo "Output file for LFC ghosts: $OUTPUT_LFC_GHOSTS"
@@ -108,14 +105,13 @@ if test -z "$SILENT"; then
   echo "--------------------------------------------"
 fi
 
-
 # ----------------------------------------------------------------------------------------------------
 #--- Convert the SE dump file into a file with only SURLs and dates formated as YYYY-MM-DD
 # ----------------------------------------------------------------------------------------------------
 
 if test "$CONVERT_SE_DUMP" = "true"; then
 
-  rm -r $INPUT_SE_DUMP_SURLS
+  rm -f $INPUT_SE_DUMP_SURLS
   SE_PATH=
   if test -z "$SILENT"; then
     echo "Building the list of SURLs from file ${INPUT_SE_DUMP}..."
