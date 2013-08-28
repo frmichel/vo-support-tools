@@ -6,7 +6,8 @@ This directory provides a set of tools used to monitor or test Storage Elements.
 - scan-se: uses the lfc-browse-se to check on all SEs supporting the VO, retrives the list of users and their email addresses from the VOMS. It is primarily intended to monitor full SEs.
 - lcg-cr.sh: test tool, it registers a file on a SE given by its hostname, then deletes it.
 - lcg-cr-all-se.sh: does the same as the previous but for all SEs. No really usefull as Nagios does that, but may be used when Nagios is down.
-- ldapsearch-se.sh: retrieve all LDAP data from the BDII regarding one SE given by its hostname.
+- get-se-info.sh: retrieve all LDAP data from the BDII regarding one SE given by its hostname.
+- get-root-surl.sh: build the root SRM urls for all SE supporting a VO.
 - se-web-repot-gen: deprecated. This reports the graphical status of SEs from Nagios on a single html page for all SEs supporting the VO.
 - check-ce-close-se.py: reports the CEs of which a SE in a close SE or default SE.
 - check-srm-iplementations.py: reports all SEs supporting the VO with their SRM implementation and version.

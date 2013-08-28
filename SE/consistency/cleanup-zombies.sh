@@ -3,6 +3,8 @@
 # srm://<SE_hostname>/.../<file_name>
 # It is used in particular to remove zombie files (dark data) from DPM SEs,
 # identified by script diff-dpm-lfc.sh.
+#
+# Author: F. Michel, CNRS I3S
 
 help()
 {

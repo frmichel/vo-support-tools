@@ -32,7 +32,7 @@ do
     --vo ) VO=$2; shift;;
     -b | --bdii ) TOPBDII=$2; shift;;
     -h | --help ) help;;
-	*) SEHOSTNAME=$1;;
+    *) SEHOSTNAME=$1;;
   esac
   shift
 done
@@ -41,14 +41,19 @@ if test -z "$SEHOSTNAME"; then
 	help
 fi
 
+LDAPOPTS="-x -LLL -s sub -H ldap://$TOPBDII -b mds-vo-name=local,o=grid"
+
 echo "------------------- GlueSE ---------------------"
-ldapsearch -x -L -s sub -H ldap://$TOPBDII -b mds-vo-name=local,o=grid "(&(ObjectClass=GlueSE)(GlueSEUniqueID=$SEHOSTNAME))"
+ldapsearch $LDAPOPTS "(&(ObjectClass=GlueSE)(GlueSEUniqueID=$SEHOSTNAME))"
 
 echo 
 echo "------------------- GlueSA ---------------------"
-ldapsearch -x -L -s sub -H ldap://$TOPBDII -b mds-vo-name=local,o=grid "(&(ObjectClass=GlueSA)(GlueChunkKey=GlueSEUniqueID=$SEHOSTNAME)(|(GlueSAAccessControlBaseRule=VO:$VO*)(GlueSAAccessControlBaseRule=$VO*)))"
+ldapsearch $LDAPOPTS "(&(ObjectClass=GlueSA)(GlueChunkKey=GlueSEUniqueID=$SEHOSTNAME)(GlueSAAccessControlBaseRule=*${VO}*))"
 
 echo
 echo "------------------- VOInfo ---------------------"
-ldapsearch -x -L -s sub -H ldap://$TOPBDII -b mds-vo-name=local,o=grid "(&(GlueVOInfoLocalID=$VO*)(GlueChunkKey=GlueSEUniqueID=$SEHOSTNAME))"
+ldapsearch $LDAPOPTS "(&(GlueChunkKey=GlueSEUniqueID=$SEHOSTNAME)(GlueVOInfoAccessControlBaseRule=*${VO}*))"
 
+echo
+echo "------------------- GlueService ---------------------"
+ldapsearch $LDAPOPTS "(&(ObjectClass=GlueService)(GlueServiceUniqueID=*${SEHOSTNAME}*)(GlueServiceAccessControlBaseRule=*${VO}*))"

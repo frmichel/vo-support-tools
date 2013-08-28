@@ -2,47 +2,49 @@
 
 # ldapsearch command options:
 # -s base|one|sub|children: Specify the scope of the search to be one of base, one, sub, or children to specify a base object, one-level, subtree, or children search. The default is sub. 
-# -L: Search results are displayed in LDAP Data Interchange Format detailed in ldif(5).  A single  -L  restricts  the  output  to LDIFv1.   A  second  -L  disables  comments.  A third -L disables printing of the LDIF version.  The default is to use an extended version of LDIF.
-# -H ldapuri: Specify URI(s) referring to the ldap server(s); only the protocol/host/port fields are allowed; a list of URI,  separated by whitespace or commas is expected.
+# -L: Search results are displayed in LDAP Data Interchange Format detailed in ldif(5). A single -L restricts the output to LDIFv1. A second -L disables comments. A third -L disables printing of the LDIF version. The default is to use an extended version of LDIF.
+# -H ldapuri: Specify URI(s) referring to the ldap server(s); only the protocol/host/port fields are allowed; a list of URI, separated by whitespace or commas is expected.
 # -b searchbase: Use searchbase as the starting point for the search instead of the default.
 
-alias ldapsearch='ldapsearch -x -L -s sub -H ldap://cclcgtopbdii01.in2p3.fr:2170 -b mds-vo-name=local,o=grid'
+alias ldapsearch='ldapsearch -x -LLL -s sub -H ldap://cclcgtopbdii01.in2p3.fr:2170 -b mds-vo-name=local,o=grid'
+
+SE=ccsrm02.in2p3.fr
+CE=sbgce2.in2p3.fr
+SITE=IN2P3-CC
+VO=biomed
 
 
 # List all sites
-ldapsearch '(&(ObjectClass=GlueSite)(GlueSiteName=IN2P3-CC))' GlueSiteUniqueID GlueSiteName
+ldapsearch '(&(ObjectClass=GlueSite))' GlueSiteUniqueID GlueSiteName
 
 # Get the list of site names
 ldapsearch '(&(ObjectClass=GlueSite))' GlueSiteUniqueID | egrep "^GlueSiteUniqueID" | awk --field-separator ": " '{print $2}' | uniq
 
 # Get the site names from the GlueSE foreignkey
-ldapsearch '(&(ObjectClass=GlueSE))' GlueForeignKey | grep GlueForeignKey |  awk --field-separator "=" '{print $2}' | sort | uniq
+ldapsearch '(&(ObjectClass=GlueSE))' GlueForeignKey | grep GlueForeignKey | awk --field-separator "=" '{print $2}' | sort | uniq
 
 
 #----------------------------------------------------------
 # Queries about storage elements (GlueSE, GlueSA, VOInfo)
 #----------------------------------------------------------
- 
+
 #--- Find all SEs for on one site
-ldapsearch '(&(ObjectClass=GlueSE)(GlueForeignKey=GlueSiteUniqueID=IN2P3-CC))' GlueSEUniqueID
-	==> ccsrm.in2p3.fr, ccsrm02.in2p3.fr
-
-#--- Get details of one SE
-ldapsearch '(&(ObjectClass=GlueSE)(GlueSEUniqueID=ccsrm02.in2p3.fr))' 
-
-#--- Find Storage Areas (GlueSA) that support biomed VO
-ldapsearch '(&(ObjectClass=GlueSA)(GlueChunkKey=GlueSEUniqueID=ccsrm02.in2p3.fr)(GlueSAAccessControlBaseRule=VO:biomed*))'
-
-
-#--- Find all VOInfo elements that support biomed VO
-ldapsearch "(&(objectclass=GlueVOInfo)(GlueVOInfoAccessControlBaseRule=VO:biomed))" | grep GlueVOInfoPath
-
-#--- Find all VOInfo elements for the biomed VO for a SE
-ldapsearch  "(&(objectclass=GlueVOInfo)(GlueChunkKey=GlueSEUniqueID=ccsrm02.in2p3.fr))"
-
+ldapsearch "(&(ObjectClass=GlueSE)(GlueForeignKey=GlueSiteUniqueID=$SITE)) GlueSEUniqueID"
 
 #--- Find all SEs of type Storm or dCache
 ldapsearch '(&(ObjectClass=GlueSE)(|(GlueSEImplementationName=StoRM)(GlueSEImplementationName=dCache)))' GlueSEUniqueID | egrep "^GlueSEUniqueID"
+
+
+#--- Get details of one SE
+ldapsearch "(&(ObjectClass=GlueSE)(GlueSEUniqueID=${SE}))"
+
+#--- Find Storage Areas (GlueSA) that support the VO
+ldapsearch "(&(ObjectClass=GlueSA)(GlueChunkKey=GlueSEUniqueID=${SE})(GlueSAAccessControlBaseRule=*${VO}*))"
+#--- Find VOInfo elements of an SE, supporting biomed VO
+ldapsearch "(&(objectclass=GlueVOInfo)(GlueChunkKey=GlueSEUniqueID=${SE})(GlueVOInfoAccessControlBaseRule=*${VO}*))"
+
+#--- Find the service endpoint elements of an SE, supporting the VO
+ldapsearch "(&(ObjectClass=GlueService)(GlueServiceUniqueID=*${SE}*)(GlueServiceAccessControlBaseRule=*${VO}*)(GlueServiceType=SRM)(GlueServiceVersion=2*))" GlueServiceType GlueServiceVersion GlueServiceUniqueID 
 
 
 #----------------------------------------------------------
@@ -50,18 +52,18 @@ ldapsearch '(&(ObjectClass=GlueSE)(|(GlueSEImplementationName=StoRM)(GlueSEImple
 #----------------------------------------------------------
 
 #--- Get details of one CE
-ldapsearch '(&(ObjectClass=GlueCE)(GlueCEUniqueID=sbgce2.in2p3.fr*))'
-ldapsearch '(&(ObjectClass=GlueCE)(GlueCEUniqueID=sbgce2.in2p3.fr:8443/cream-pbs-biomed))'
+ldapsearch '(&(ObjectClass=GlueCE)(GlueCEUniqueID=${CE}*))'
+ldapsearch '(&(ObjectClass=GlueCE)(GlueCEUniqueID=${CE}:8443/cream-pbs-biomed))'
 
 #--- Get the SE-CE binding info
 ldapsearch '(&(ObjectClass=GlueCESEBind)(GlueCESEBindSEUniqueID=sbgse1.in2p3.fr))' GlueCESEBindCEUniqueID GlueCESEBindSEUniqueID
-ldapsearch '(&(ObjectClass=GlueCE)(GlueCEUniqueID=sbgce2.in2p3.fr*))' GlueCEInfoDefaultSE
+ldapsearch '(&(ObjectClass=GlueCE)(GlueCEUniqueID=${CE}*))' GlueCEInfoDefaultSE
 
 #--- Get the CEs for which a SE is a close or default SE
-ldapsearch "(|(&(ObjectClass=GlueCESEBind)(GlueCESEBindSEUniqueID=$SE))(&(ObjectClass=GlueCE)(GlueCEInfoDefaultSE=$SE)))" GlueCEUniqueID GlueCESEBindCEUniqueID | egrep "^GlueCEUniqueID|^GlueCESEBindCEUniqueID"
+ldapsearch "(|(&(ObjectClass=GlueCESEBind)(GlueCESEBindSEUniqueID=${SE}))(&(ObjectClass=GlueCE)(GlueCEInfoDefaultSE=${SE})))" GlueCEUniqueID GlueCESEBindCEUniqueID | egrep "^GlueCEUniqueID|^GlueCESEBindCEUniqueID"
 
 #--- Get the VO specific stats of the queues that support biomed on a given CE
-ldapsearch '(&(ObjectClass=GlueVOView)(GlueCEAccessControlBaseRule=VO:biomed)(GlueChunkKey=GlueCEUniqueID=sbgce2.in2p3.fr*))'
+ldapsearch '(&(ObjectClass=GlueVOView)(GlueCEAccessControlBaseRule=*${VO}*)(GlueChunkKey=GlueCEUniqueID=${CE}*))'
 
 
 
@@ -70,7 +72,7 @@ ldapsearch '(&(ObjectClass=GlueVOView)(GlueCEAccessControlBaseRule=VO:biomed)(Gl
 #----------------------------------------------------------
 
 #--- Find all GlueSA that support biomed VO
-ldapsearch '(&(ObjectClass=GlueSA)(GlueSAAccessControlBaseRule=VO:biomed*))' GlueChunkKey GlueSAPath GlueSATotalOnlineSize GlueSAUsedOnlineSize GlueSAFreeOnlineSize
+ldapsearch '(&(ObjectClass=GlueSA)(GlueSAAccessControlBaseRule=*${VO}*))' GlueChunkKey GlueSAPath GlueSATotalOnlineSize GlueSAUsedOnlineSize GlueSAFreeOnlineSize
 => the GlueChunkKey gives the GlueSEUniqueID
 
 #--- Find the GlueSE by id
@@ -79,23 +81,23 @@ ldapsearch '(&(ObjectClass=GlueSE)(GlueSEUniqueID=ccsrm02.in2p3.fr))' GlueSEUniq
 
 
 #--- Find all GlueCE that support biomed VO
-ldapsearch '(&(ObjectClass=GlueCE)(GlueCEAccessControlBaseRule=VO:biomed*))' GlueCEUniqueID GlueCEInfoHostName GlueCEImplementationName GlueCEImplementationVersion GlueCEStateStatus GlueForeignKey
+ldapsearch '(&(ObjectClass=GlueCE)(GlueCEAccessControlBaseRule=*${VO}*))' GlueCEUniqueID GlueCEInfoHostName GlueCEImplementationName GlueCEImplementationVersion GlueCEStateStatus GlueForeignKey
 => GlueForeignKey gives the GlueClusterUniqueID
 
-ldapsearch '(&(ObjectClass=GlueCluster)(GlueClusterUniqueID=sbgce2.in2p3.fr))' GGlueClusterUniqueID GlueForeignKey
+ldapsearch '(&(ObjectClass=GlueCluster)(GlueClusterUniqueID=${CE}))' GGlueClusterUniqueID GlueForeignKey
 => One of the GlueForeignKeys gives the GlueSiteUniqueID
 
 
 #--- Find all WMSs that support biomed VO
-ldapsearch '(&(GlueServiceAccessControlBaseRule=VO:biomed)(GlueServiceType=org.glite.wms.WMProxy))' GlueServiceUniqueID GlueServiceVersion GlueServiceName GlueServiceStatus GlueServiceEndpoint GlueForeignKey
+ldapsearch '(&(GlueServiceAccessControlBaseRule=*${VO}*)(GlueServiceType=org.glite.wms.WMProxy))' GlueServiceUniqueID GlueServiceVersion GlueServiceName GlueServiceStatus GlueServiceEndpoint GlueForeignKey
 => GlueForeignKey gives the GlueSiteUniqueID
 
 #--- Find all LFCs that support biomed VO
-ldapsearch '(&(GlueServiceAccessControlBaseRule=VO:biomed)(GlueServiceType=lcg-file-catalog))' GlueServiceUniqueID GlueServiceVersion GlueServiceName GlueServiceStatus GlueServiceEndpoint GlueForeignKey
+ldapsearch '(&(GlueServiceAccessControlBaseRule=*${VO}*)(GlueServiceType=lcg-file-catalog))' GlueServiceUniqueID GlueServiceVersion GlueServiceName GlueServiceStatus GlueServiceEndpoint GlueForeignKey
 => GlueForeignKey gives the GlueSiteUniqueID
 
 #--- Find the VOMS that supports biomed VO
-ldapsearch '(&(GlueServiceAccessControlBaseRule=VO:biomed)(GlueServiceType=org.glite.voms))' GlueServiceUniqueID GlueServiceVersion GlueServiceName GlueServiceStatus GlueServiceEndpoint GlueForeignKey
+ldapsearch '(&(GlueServiceAccessControlBaseRule=*${VO}*)(GlueServiceType=org.glite.voms))' GlueServiceUniqueID GlueServiceVersion GlueServiceName GlueServiceStatus GlueServiceEndpoint GlueForeignKey
 => GlueForeignKey gives the GlueSiteUniqueID
 
 

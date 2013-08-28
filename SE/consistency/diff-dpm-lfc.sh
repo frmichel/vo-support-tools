@@ -11,6 +11,8 @@
 # - <se_hostname>_common: SURLs of files found on both the SE and the LFC
 #
 # Only zombie files older than 6 months (by default, can be changed with option --older-than) are listed.
+#
+# Author: F. Michel, CNRS I3S
 
 help()
 {
