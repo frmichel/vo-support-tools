@@ -4,6 +4,7 @@
 # concerning all SEs, CEs and WMSs supporting a VO (defaults to biomed).
 # Results are displayed on the standard output either with "pretty" human readable format
 # or '|' separator like: service flavour (SE, CE, WMS)|hostname|status list
+# Compatibility with GOCDB v5 has been validated.
 #
 # Author: F. Michel, CNRS I3S, biomed VO support
 #
@@ -99,9 +100,10 @@ ldapSE = ldapSearch + "\'(&(ObjectClass=GlueSE)(GlueSEUniqueID=%(SE)s))\' " + at
 # as it does not support key pass phrase nor timeouts (in Python 2.4)
 CURL_CMD="curl --silent --insecure --connect-timeout 30 --max-time 60 --pass \"`cat " + KEY_PASS + "`\" --cert " + CERT_FILE + " --key " + KEY_FILE + " --url "
 
-GOCDB_DOWNTIME_URL = "https://goc.egi.eu/gocdbpi/private/?method=get_downtime&ongoing_only=yes&topentity="
-GOCDB_SERVICE_URL="https://goc.egi.eu/gocdbpi/private/?method=get_service_endpoint&hostname="
-GOCDB_SITE_URL="https://goc.egi.eu/gocdbpi/private/?method=get_site&sitename="
+GOCDB_URL = "https://goc.egi.eu/gocdbpi/private/"
+GOCDB_DOWNTIME_URL = GOCDB_URL + "?method=get_downtime&ongoing_only=yes&topentity="
+GOCDB_SERVICE_URL = GOCDB_URL + "?method=get_service_endpoint&hostname="
+GOCDB_SITE_URL = GOCDB_URL + "?method=get_site&sitename="
 
 
 # Global variables used during xml parsing

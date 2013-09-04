@@ -9,7 +9,7 @@
 help()
 {
   echo
-  echo "$0 script lists, for all SEs supporting a VO, the SURL to the storage space dedicated to that VO.
+  echo "$0 script lists, for all SEs supporting a VO, the SURL to the storage space dedicated to that VO."
   echo
   echo "Usage:"
   echo "$0 [-h|--help]"
@@ -62,10 +62,8 @@ for hostname in $SEs; do
     for path in $paths; do
         for port in $ports; do
             surl=srm://${hostname}:${port}${path}
-            echo "-----------------------------------------------------------------------------------"
             echo "$surl"
             # srmls $surl
         done
     done
-done  
-
+done

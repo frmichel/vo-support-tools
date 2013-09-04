@@ -1,14 +1,38 @@
 This directory provides a set of tools used to monitor or test Storage Elements.
 
-- lfc-browse-se: scan the LCG File Catalog looking for file replicas on a SE given by its hostname
-- monitor-se: reads the BDII to get the total and used space on all SEs supporting the VO. The result is in csv format, and is dedicated to be exploited further on by analisys scripts that will consolidate the data.
-- show-se-space: reports the total, used and free spacein all SEs supporting the VO. The output can be in a human friendly format. Options allow to sort the SEs by different criterion. This script is mostly used to produice results that can be displayed as is, as opposed to monitor-se that reports raw data.
-- scan-se: uses the lfc-browse-se to check on all SEs supporting the VO, retrives the list of users and their email addresses from the VOMS. It is primarily intended to monitor full SEs.
-- lcg-cr.sh: test tool, it registers a file on a SE given by its hostname, then deletes it.
-- lcg-cr-all-se.sh: does the same as the previous but for all SEs. No really usefull as Nagios does that, but may be used when Nagios is down.
-- get-se-info.sh: retrieve all LDAP data from the BDII regarding one SE given by its hostname.
-- get-root-surl.sh: build the root SRM urls for all SE supporting a VO.
-- se-web-repot-gen: deprecated. This reports the graphical status of SEs from Nagios on a single html page for all SEs supporting the VO.
-- check-ce-close-se.py: reports the CEs of which a SE in a close SE or default SE.
-- check-srm-iplementations.py: reports all SEs supporting the VO with their SRM implementation and version.
+- lfc-browse-se/
+	Scan the LCG File Catalog looking for file replicas on a SE given by its hostname
+- monitor-se/
+	Reads the BDII to get the total and used space on all SEs supporting a VO.
+	The result is in csv format, and is dedicated to be exploited further on by
+	analisys scripts that will consolidate the data.
+- show-se-space/
+	Reports the total, used and free spacein all SEs supporting the VO. 
+	The output can be in a human friendly format. Options allow to sort the SEs 
+	by different criterion. This script is mostly used to produce results that can
+	be displayed as is, as opposed to monitor-se that reports raw data.
+- scan-se/
+	Uses the lfc-browse-se to check on all SEs supporting the VO, retrives the list of users
+	and their email addresses from the VOMS. It is primarily intended to monitor full SEs.
+- consistency/
+	Tools used to detect and clean up inconsistencies between the LFC and the SEs.
+	- get-root-surl.sh:
+		Build the root SRM urls for all SE supporting a VO.
+	- lcg-lsR.sh: recursive lcg-del.
+	- cleanup-zombies.sh - on goiing work
+	- diff-dpm-lfc.sh - on goiing work
+	- dpm_dump_generic.py - on goiing work
+- se-web-repot-gen/
+	Deprecated. This reports the graphical status of SEs from Nagios on a single html page for all SEs supporting the VO.
 
+- lcg-cr.sh:
+	Test tool, it registers a file on a SE given by its hostname, then deletes it.
+- lcg-cr-all-se.sh:
+	Does the same as the previous but for all SEs supporting a VO.
+	Not really usefull as Nagios does that, but may be used when Nagios is down.
+- check-ce-close-se.py:
+	Reports the CEs of which a SE in a close SE or default SE.
+- check-srm-iplementations.py:
+	Reports all SEs supporting the VO with their SRM implementation and version.
+- get-se-info-bdii.sh:
+	report all the data available in the top BDII about a SE
