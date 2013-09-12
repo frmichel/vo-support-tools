@@ -8,7 +8,7 @@
 
 import os
 import csv
-
+import sys
 import globvars
 
 # -------------------------------------------------------------------------
@@ -41,13 +41,17 @@ def process(dataFiles):
 	DEBUG = globvars.DEBUG
 	OUTPUT_DIR = globvars.OUTPUT_DIR
 
-	print "Computing the number of CEs grouped by slice of ratio R/(R+W) as a function of time..."
-
-	outputFile = OUTPUT_DIR + os.sep + "running_ratio_slices.csv"
-	outputf = open(outputFile, 'wb')
-	writer = csv.writer(outputf, delimiter=';')
-
-	writer.writerow(["# Date time", "Nb queues", "0", "0 to 0,5", "0,5 to 1", "1", "n/a"])
+	writer='';
+	if globvars.STDOUT:
+	    writer = csv.writer(sys.stdout, delimiter=globvars.CSV_DELIMITER)
+	    writer.writerow([globvars.SEPARATOR,os.path.splitext(os.path.basename(__file__))[0]])
+	    writer.writerow(["Date time", "Nb queues", "0", "0 to 0.5", "0.5 to 1", "1", "n/a"])
+	else:
+	    print "Computing the number of CEs grouped by slice of ratio R/(R+W) as a function of time..."
+	    outputFile = OUTPUT_DIR + os.sep + "running_ratio_slices.csv"
+	    outputf = open(outputFile, 'wb')
+	    writer = csv.writer(outputf, delimiter=globvars.CSV_DELIMITER)
+	    writer.writerow(["# Date time", "Nb queues", "0", "0 to 0.5", "0.5 to 1", "1", "n/a"])
 
 	# Loop on all data files that were acquired
 	for (fileName, datetime, date, hour, rows, sum_VO_Waiting, sum_VO_Running) in dataFiles:
@@ -77,4 +81,4 @@ def process(dataFiles):
 	                     str(round(nb_na/nbQ, 4)).replace('.', DECIMAL_MARK) 
 	                     ])
 
-	outputf.close()
+	if not globvars.STDOUT: outputf.close()

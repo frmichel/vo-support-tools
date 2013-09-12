@@ -7,7 +7,7 @@
 
 import os
 import csv
-
+import sys
 import globvars
 
 # -------------------------------------------------------------------------
@@ -70,12 +70,17 @@ def process(dataFiles):
 	# -------------------------------------------------------------------------
 	# Compute the distribution of CE queues by ratio R/(R+W)
 	# -------------------------------------------------------------------------
-	print "Computing the distribution of CE queues by ratio R/(R+W)..."
-
-	outputFile = globvars.OUTPUT_DIR + os.sep + "distribute_ce_by_running_ratio.csv"
-	outputf = open(outputFile, 'wb')
-	writer = csv.writer(outputf, delimiter=';')
-	writer.writerow(["0.0 to 0.1", "0.1 to 0.2", "0.2 to 0.3", "0.3 to 0.4", "0.4 to 0.5", "0.5 to 0.6", "0.6 to 0.7", "0.7 to 0.8", "0.8 to 0.9", "0.9 to 1.0", "n.a"])
+	writer='';
+        if globvars.STDOUT:
+	    writer = csv.writer(sys.stdout, delimiter=globvars.CSV_DELIMITER)
+	    writer.writerow([globvars.SEPARATOR,os.path.splitext(os.path.basename(__file__))[0]])
+	    writer.writerow(["'0.0 to 0.1'", "'0.1 to 0.2'", "'0.2 to 0.3'", "'0.3 to 0.4'", "'0.4 to 0.5'", "'0.5 to 0.6'", "'0.6 to 0.7'", "'0.7 to 0.8'", "'0.8 to 0.9'", "'0.9 to 1.0'", "'n.a'"])	
+	else:
+	    print "Computing the distribution of CE queues by ratio R/(R+W)..."
+	    outputFile = globvars.OUTPUT_DIR + os.sep + "distribute_ce_by_running_ratio.csv"
+	    outputf = open(outputFile, 'wb')
+	    writer = csv.writer(outputf, delimiter=globvars.CSV_DELIMITER)
+	    writer.writerow(["0.0 to 0.1", "0.1 to 0.2", "0.2 to 0.3", "0.3 to 0.4", "0.4 to 0.5", "0.5 to 0.6", "0.6 to 0.7", "0.7 to 0.8", "0.8 to 0.9", "0.9 to 1.0", "n.a"])
 
 	# Loop on all data files that were acquired in dataFiles, and build a new table 'queues' that consolidates data per CE queue
 	distrib = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
@@ -104,7 +109,7 @@ def process(dataFiles):
 	    str(round(distrib[7]/len(queues), 4)).replace('.', globvars.DECIMAL_MARK),
 	    str(round(distrib[8]/len(queues), 4)).replace('.', globvars.DECIMAL_MARK),
 	    str(round(distrib[9]/len(queues), 4)).replace('.', globvars.DECIMAL_MARK),
-	    str(round(distrib[10]/len(queues), 4)).replace('.', globvars.DECIMAL_MARK),
-	                ]) 
-	outputf.close()
+	    str(round(distrib[10]/len(queues), 4)).replace('.', globvars.DECIMAL_MARK)
+	    ]) 
+	if not globvars.STDOUT: outputf.close()
 
