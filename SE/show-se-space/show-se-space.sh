@@ -11,7 +11,7 @@
 # 1.0: initial version
 # 1.1: use "lcg-infosites space" instead of "lcg-infosites se" to get new attributes
 #      GlueSAOnline*Size instead of deprecated attributes GlueState*Size
-# 1.2: based on env variable $$SHOW_SE_SPACE to be able to run from anywhere
+# 1.2: based on env variable $SHOW_SE_SPACE to be able to run from anywhere
 # 1.3: get downtimes from the GOCDB/BDII to display it along with SE space report
 
 help()
@@ -67,10 +67,10 @@ SHOW_SE_SPACE=$VO_SUPPORT_TOOLS/SE/show-se-space
 
 VO=biomed
 SORT=name
-TMP_LCGINFOSITES=/tmp/show-se-space/list_se_lcginfosites_$$.txt
+TMP_LCGINFOSITES=/tmp/$VO/show-se-space/list_se_lcginfosites_$$.txt
 MAX=10000
 
-mkdir -p /tmp/show-se-space
+mkdir -p /tmp/$VO/show-se-space
 
 # Check parameters
 while [ ! -z "$1" ]

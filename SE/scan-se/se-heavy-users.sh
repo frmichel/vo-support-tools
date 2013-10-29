@@ -77,7 +77,7 @@ if ! [ -d $WDIR ]; then
 fi
 
 mkdir -p $WDIR/tmp
-LBS_OUT=$WDIR/tmp/$SEHOSTNAME.lst
+LBS_OUT=$WDIR/tmp/$SEHOSTNAME_$$.lst
 
 #--- The hostname_status file will help display the status of the analysis on the web report
 RESULT_STATUS=$RESDIR/${SEHOSTNAME}_status
@@ -98,7 +98,7 @@ date "$DATE_FORMAT" >> $LBS_OUT
 RESULT=$WDIR/${SEHOSTNAME}_users
 NOTFOUND=$WDIR/${SEHOSTNAME}_unknown
 
-TMP_PARSE_AWK=$WDIR/parse-lfcbrowsese.awk
+TMP_PARSE_AWK=$WDIR/parse-lfcbrowsese_$$.awk
 sed "s/@SPACE_THRESHOLD@/$USER_MIN_SPACE/" $MONITOR_SE_SPACE/parse-lfcbrowsese.awk.tpl > $TMP_PARSE_AWK
 
 awk -f $TMP_PARSE_AWK $LBS_OUT | while read LINE ; do

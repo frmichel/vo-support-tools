@@ -61,9 +61,9 @@ help()
   echo
   echo "Check SEs supporting VO myVO with used space over 90%"
   echo "   ./scan-se.sh --vo myVo --threshold 90"
-  echo "                         --voms-users /tmp/monitor-se/voms-users.txt"
-  echo "                         --work-dir /tmp/monitor-se"
-  echo '                         --result-dir $HOME/public_html/monitor-se'
+  echo "                         --voms-users /tmp/myVo/monitor-se/voms-users.txt"
+  echo "                         --work-dir /tmp/myVo/monitor-se"
+  echo '                         --result-dir $HOME/public_html/myVo/monitor-se'
   echo
   exit 1
 }
@@ -96,12 +96,11 @@ done
 mkdir -p $WDIR
 
 # Apply the awk template to have the proper filter of %age of used space
-TMP_PARSE_AWK=$WDIR/parse-show-se-space.awk
+TMP_PARSE_AWK=$WDIR/parse-show-se-space_$$.awk
 sed "s/@SPACE_THRESHOLD@/$SPACE_THRESHOLD/" $MONITOR_SE_SPACE/parse-show-se-space.awk.tpl > $TMP_PARSE_AWK
 
 # Make the list of SEs that use space over the given threshold (95% by default)
-TMP_LIST_SE=$WDIR/list-se.txt
-#$SHOW_SE_SPACE/show-se-space.sh --vo $VO --sort %used --reverse --max 30 --no-header --no-sum | awk -f $TMP_PARSE_AWK | sort | uniq > $TMP_LIST_SE
+TMP_LIST_SE=$WDIR/list-se_$$.txt
 $SHOW_SE_SPACE/show-se-space.sh --vo $VO --sort %used --reverse --no-header --no-sum | awk -f $TMP_PARSE_AWK | sort | uniq > $TMP_LIST_SE
 
 # Prepare web report with a title, threshold of used space and date/time
