@@ -55,7 +55,7 @@ help()
   echo
   echo "  -h, --help: display this help"
   echo
-  echo "Examples :"
+  echo "Examples   :"
   echo "Check SEs supporting biomed with used space over 95%, users with more than 100 MB, store temp and result files in current directory.<date>:"
   echo "   $0"
   echo
