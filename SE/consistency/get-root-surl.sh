@@ -50,7 +50,7 @@ for hostname in $SEs; do
     fi 
 
     # Find the port on which SRMv2 is available (generally 8444 for Storm SEs, 8446 for DPM SEs.
-    # It can happen (se.scope.unina.it) that 2 service endpoints be declared on the same SE with 2 different hostname.
+    # It can happen (se.scope.unina.it) that 2 service endpoints be declared on the same SE with 2 different hostnames.
     # To avoid this: we grep the hostname of the SE.
     # Still, in case we would have the same hostname but several ports, we only keep the first port (head -n1)
     ports=`ldapsearch $LDAPOPT  "(&(ObjectClass=GlueService)(GlueServiceUniqueID=*${hostname}*)(|(GlueServiceAccessControlBaseRule=*${VO}*)(GlueServiceAccessControlRule=${VO}))(GlueServiceType=SRM)(GlueServiceVersion=2*))" GlueServiceUniqueID | grep "/$hostname" | awk 'match($0, /^GlueServiceUniqueID.+:([0-9]+)/, m) {print m[1]}' | head -n1`
