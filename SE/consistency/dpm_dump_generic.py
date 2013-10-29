@@ -46,8 +46,7 @@ try:
 	ns_host = splitlist[1][0]
 	if len(splitlist[1]) == 2:
 		ns_db = splitlist[1][1]
-	nsconfig_line.close()
-except:
+except IOError:
 	sys.stderr.write("Cannot open DPM config file: %s\n" % cfgfile)
 	sys.exit(-1)
 
@@ -59,7 +58,7 @@ try:
 	cursor.execute(sql)
 except Exception, e:
 	sys.stderr.write("Database connection error: %s\n" % e)
-	sys.exit(1)
+	sys.exit(-1)
 
 curtime = datetime.datetime.isoformat(datetime.datetime.now())
 header = '''<?xml version="1.0" encoding="iso-8859-1"?>
@@ -76,7 +75,7 @@ for row in cursor.fetchall():
     if parentid == '' or fileid == '':
         continue   
 
-    if parentid == '0':
+    if parentid == '0' or parentid == 0L:
         fileids[fileid] = ''
     else:
         try:

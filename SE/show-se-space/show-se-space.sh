@@ -67,7 +67,8 @@ SHOW_SE_SPACE=$VO_SUPPORT_TOOLS/SE/show-se-space
 
 VO=biomed
 SORT=name
-TMP_LCGINFOSITES=/tmp/$VO/show-se-space/list_se_lcginfosites_$$.txt
+TMP_LCGINFOSITES=/tmp/$VO/show-se-space/list-se-lcginfosites_$$.txt
+TMP_SESTATUS=/tmp/$VO/show-se-space/se-status_$$.txt
 MAX=10000
 
 mkdir -p /tmp/$VO/show-se-space
@@ -108,10 +109,14 @@ lcg-infosites --vo $VO space | awk -f $AWK_FILE > $TMP_LCGINFOSITES
 
 
 #--- Get status of SE from the GOCDB (downtimes, not in producton, not monitored), BDII (draining, closed)
+
+# Generate the list of SE with downtime of specific status in the GOCDB
+$VO_SUPPORT_TOOLS/service-status.py --noce --nowms > $TMP_SESTATUS
+
 echo -n "" > ${TMP_LCGINFOSITES}_tmp
 cat $TMP_LCGINFOSITES | while read LINE; do
    SE=`echo $LINE | cut -d'|' -f1`
-   SE_STATUS=`grep "$SE" /tmp/show-se-space/se-status.txt | cut -d'|' -f3`
+   SE_STATUS=`grep "$SE" $TMP_SESTATUS | cut -d'|' -f3`
    echo $LINE'|'$SE_STATUS >> ${TMP_LCGINFOSITES}_tmp
 done
 cp ${TMP_LCGINFOSITES}_tmp $TMP_LCGINFOSITES
@@ -140,5 +145,7 @@ if test -z "$NOSUM"; then
     echo "#--------------------------------------------------------------------------"
   fi
 fi
+
 rm -f $TMP_LCGINFOSITES
+rm -f $TMP_SESTATUS
 

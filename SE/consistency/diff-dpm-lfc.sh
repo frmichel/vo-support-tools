@@ -46,10 +46,10 @@ help()
   echo "  -s, --silence: be as silent as possible"
   echo
   echo "Call example:"
-  echo "   ./diff-dpm-lfc-time.sh --se gridse.ilc.cnr.it \ "
-  echo "                          --older-than 6 \ "
-  echo "                          --se-dump gridse.ilc.cnr.it.dpns-ls-lR \ "
-  echo "                          --lfc-dump gridse.ilc.cnr.it.lfcbrowsese-sfn"
+  echo "   ./diff-dpm-lfc.sh --se gridse.ilc.cnr.it \ "
+  echo "                     --older-than 6 \ "
+  echo "                     --se-dump gridse.ilc.cnr.it.dpns-ls-lR \ "
+  echo "                     --lfc-dump gridse.ilc.cnr.it.lfcbrowsese-sfn"
   echo
   exit 1
 }
@@ -113,7 +113,7 @@ fi
 
 if test "$CONVERT_SE_DUMP" = "true"; then
 
-  rm -f $INPUT_SE_DUMP_SURLS
+  echo -n "" > $INPUT_SE_DUMP_SURLS
   SE_PATH=
   if test -z "$SILENT"; then
     echo "Building the list of SURLs from file ${INPUT_SE_DUMP}..."
@@ -123,6 +123,10 @@ if test "$CONVERT_SE_DUMP" = "true"; then
   # by authorizations starting with d, such as "drwxrwxr-x"
   cat $INPUT_SE_DUMP | awk -- '/^$/{next} $1~/^d/{next} {print $0}' | while read LINE; do
 
+    # dpns-ls produces one line per directory formatted as hostname:/pat, 
+    # for instance: se01.grid.auth.gr:/dpm/grid.auth.gr/home/biomed:
+    # The following lines are the content of the directory starting with the file rights, for instance:
+    # -rwxrwxr-x   2 288      104      500 Dec 03  2012 filename
     if echo "$LINE" | egrep --silent "$SE_HOSTNAME"; then
       # Changing to a new directory
       SE_PATH=
@@ -157,10 +161,10 @@ fi
 # ----------------------------------------------------------------------------------------------------
 
 if test -z "$SILENT"; then
-  echo -n "Looking for SE zombie files..."
+  echo -n "Looking for SE zombie files... "
 fi
 
-rm -f $OUTPUT_SE_ZOMBIES
+echo -n "" > $OUTPUT_SE_ZOMBIES
 cat $INPUT_SE_DUMP_SURLS | while read LINE; do
   FILEDATE=`echo $LINE | awk '{print $1}'`
   FILEDATE_TS=`date --date $FILEDATE "+%s"`
@@ -184,13 +188,13 @@ fi
 # ----------------------------------------------------------------------------------------------------
 
 if test -z "$SILENT"; then
-  echo -n "Looking for LFC ghost entries..."
+  echo -n "Looking for LFC ghost entries... "
 fi
 
 # Loop on lines, skip empty lines and lines starting with "Progress" or "Processing". 
 # Keep only second word on the line ($2) => the SURL
-rm -f $OUTPUT_LFC_GHOSTS
-rm -f ${OUTPUT_COMMON}
+echo -n "" > $OUTPUT_LFC_GHOSTS
+echo -n "" >  ${OUTPUT_COMMON}
 cat $INPUT_LFC_DUMP | awk -- '/^$/{next} /^Pro/{next} {print $2}' | while read SURL; do
 
   # Check if that SURL is also in the SE dump
@@ -202,7 +206,7 @@ cat $INPUT_LFC_DUMP | awk -- '/^$/{next} /^Pro/{next} {print $2}' | while read S
 done
 
 if test -z "$SILENT"; then
-  echo "Found `wc -l $OUTPUT_LFC_GHOSTS | awk -- '{print $1}'` ghosts entries in LFC."
+  echo "Found `wc -l $OUTPUT_LFC_GHOSTS | awk -- '{print $1}'` ghost entries in LFC."
   echo "Found `wc -l $OUTPUT_COMMON | awk -- '{print $1}'` files common to SE and LFC."
 fi
 

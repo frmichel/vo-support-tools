@@ -3,14 +3,13 @@
 # srm://<SE_hostname>/.../<file_name>
 # It is used in particular to remove zombie files (dark data) from DPM SEs,
 # identified by script diff-dpm-lfc.sh.
-#
-# Author: F. Michel, CNRS I3S
 
 help()
 {
   echo
   echo "This script deletes files from Storage Elements using their SURL formated as"
   echo "    srm://<SE_hostname>/.../<file_name>."
+  echo "SURLs are given in the input file that contains one SURL per line."
   echo
   echo "Usage:"
   echo "$0 [-h|--help]"
@@ -20,7 +19,7 @@ help()
   echo
   echo "  --se <SE hostname>: the storage element host name"
   echo
-  echo "  --surls <filename>: file containing the SURLs of file to delete"
+  echo "  --surls <filename>: file containing the SURLs of files to delete, one SURL per line"
   echo
   echo "  -s, --silence: be as silent as possible"
   echo

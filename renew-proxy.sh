@@ -8,5 +8,5 @@ export VO_SUPPORT_TOOLS=/home/fmichel/biomed-support-tools/
 export HOME=/home/fmichel
 
 # Make sure file .globus/proxy_pass.txt is private! (rights 600)
-voms-proxy-init --voms biomed -pwstdin < $HOME/.globus/proxy_pass.txt
+voms-proxy-init -q --voms biomed -pwstdin < $HOME/.globus/proxy_pass.txt
 
