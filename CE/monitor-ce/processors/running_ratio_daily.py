@@ -8,7 +8,7 @@
 
 import os
 import csv
-
+import sys
 import globvars
 
 # -------------------------------------------------------------------------
@@ -40,6 +40,8 @@ def process(dataFiles):
 	DECIMAL_MARK = globvars.DECIMAL_MARK
 	DEBUG = globvars.DEBUG
 	OUTPUT_DIR = globvars.OUTPUT_DIR
+	CSV_DELIMITER = globvars.CSV_DELIMITER
+	STDOUT = globvars.STDOUT
 
 	# Consolidate the data by summing per day measures of W and R
 	dataPerDate = {}
@@ -52,11 +54,21 @@ def process(dataFiles):
 	    dataPerDate[date]['Waiting'] += W
 	    dataPerDate[date]['Running'] += R
 
-	print "Computing the mean ratio R/(R+W) as a function of time (daily)..."
-	outputFile = globvars.OUTPUT_DIR + os.sep + "running_ratio_daily.csv"
-	outputf = open(outputFile, 'wb')
-	writer = csv.writer(outputf, delimiter=';')
-	writer.writerow(["# Date", "Waiting", "Running", "R/(R+W)"])
+	outStream = sys.stdout
+	if STDOUT:
+	    outStream = sys.stdout
+	else:
+            outputFile = OUTPUT_DIR + os.sep + "running_ratio_daily.csv"
+            outStream = open(outputFile, 'wb')
+ 
+	writer = csv.writer(outStream, delimiter=CSV_DELIMITER)
+	# Write the separator followed the name of the script called
+	if STDOUT:
+	   writer.writerow([globvars.SEPARATOR,os.path.splitext(os.path.basename(__file__))[0]])
+	else:
+	   print "Computing the mean ratio R/(R+W) as a function of time (daily)..."
+
+	writer.writerow(["Date", "Waiting", "Running", "R/(R+W)"])
 
 	# Loop on all data files that were acquired
 	for (date, data) in dataPerDate.iteritems():
@@ -64,10 +76,11 @@ def process(dataFiles):
 	    W = data['Waiting']
 	    R = data['Running']
 	    if R+W > 0:
-	        writer.writerow([
-	            date,
-	            str(round(W/nbMeasures, 1)).replace('.', globvars.DECIMAL_MARK),
-	            str(round(R/nbMeasures, 1)).replace('.', globvars.DECIMAL_MARK),
-	            str(round(R/(R+W), 4)).replace('.', globvars.DECIMAL_MARK) ])
+		writer.writerow([
+		date,
+		str(round(W/nbMeasures, 1)).replace('.', DECIMAL_MARK),
+		str(round(R/nbMeasures, 1)).replace('.', DECIMAL_MARK),
+		str(round(R/(R+W), 4)).replace('.', DECIMAL_MARK) ])
+	 
+	if not STDOUT: outStream.close()
 
-	outputf.close()

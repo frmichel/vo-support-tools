@@ -11,10 +11,12 @@
 # With no option at all, this script processes all data files from the local dir, and writes the output files to
 # the <local dir>/results.
 #
+# Author: Franck MICHEL, CNRS, I3S lab. fmichel[at]i3s[dot]unice[dot]fr
 # ChangeLog:
 # 1.1: 2012-08-25 - take into account the status from the GOCDB to ignore CEs
 # 2.0: 2012-11-08 - refactor code in several modules
 # 2.1: 2013-03-27 - ignore files of size 0
+# 2.2: 2013-08-02 - add booleans to select sub processes to call
 
 import sys
 import os
@@ -37,7 +39,7 @@ import processors.running_ratio_per_ce
 optParser = OptionParser(version="%prog 2.1", description="""This tools exploits the csv data files produced by script collect-ce-job-status.py,
 to make statistics about the ratio of running jobs / (running + waiting jobs).
 CE which status in not normal production are ignored.
-Currently the following files are produced: running_ratio.csv, running_ratio_day_night.csv, ce_grouped_by_running_ratio.csv, running_ratio_bad.csv,
+Currently the following files are produced: running_ratio.csv, running_ratio_daily.csv, running_ratio_day_night.csv, ce_grouped_by_running_ratio.csv, running_ratio_bad.csv,
 and distribute_ce_by_running_ratio.csv. With no option at all, this tool processes all data files from the local dir, and writes the output files to
 the local dir.
 """)
@@ -46,19 +48,49 @@ optParser.add_option("--input-dir", action="store", dest="input_dir", default='.
                      help="Directory where to look for files to process. Defaults to '.'")
 
 optParser.add_option("--from", action="store", dest="fromDate", default='00000000',
-                     help="Starting date, formatted as YYYMMDD. Defaults the origin of time!")
+                     help="Starting date, formatted as YYYYMMDD. Defaults the origin of time!")
 
 optParser.add_option("--to", action="store", dest="toDate", default='99999999',
-                     help="Ending date (inclusive), formatted as YYYMMDD. Defaults to the end of time!")
+                     help="Ending date (inclusive), formatted as YYYYMMDD. Defaults to the end of time!")
 
-optParser.add_option("--output-dir", action="store", dest="output_dir", default='results',
+optParser.add_option("--output-dir", action="store", dest="output_dir", default='',
                      help="Directory where to write output files. Defaults to './results'.")
 
 optParser.add_option("--decimal-mark", action="store", dest="decimal_mark", default=',',
                      help="The decimal marker. Defaults to comma (','), but some tools may need the dot instead")
 
+optParser.add_option("--csv-separator", action="store", dest="csv_separator", default=';',
+                     help="The CSV field separator. Defaults to semi-column (';'), but some tools may need the comma instead")
+
 optParser.add_option("--monce", action="store_true", dest="monce",
                      help="Insert additional columns for test results of the MonCE tool")
+
+optParser.add_option("--no-running-ratio", action="store_false", dest="run_running_ratio", default=True,
+		     help="don't run running_ratio process")
+
+optParser.add_option("--no-running-ratio-daily", action="store_false", dest="run_running_ratio_daily", default=True,
+		     help="don't run running_ratio_daily process")
+
+optParser.add_option("--no-running-ratio-day-night", action="store_false", dest="run_running_ratio_day_night", default=True,
+		     help="don't run running_ratio_day_night")
+
+optParser.add_option("--no-distribute-ce-by-running-ratio", action="store_false", dest="run_distribute_ce_by_running_ratio", default=True,
+		     help="don't run distribute_ce_by_running_ratio process")
+
+optParser.add_option("--no-running-ratio-slices", action="store_false", dest="run_running_ratio_slices", default=True,
+		     help="don't run running_ratio_slices process")
+
+optParser.add_option("--no-running-ratio-bad", action="store_false", dest="run_running_ratio_bad", default=True,
+		     help="don't run running_ratio_bad process")
+
+optParser.add_option("--no-running-ratio-per-ce", action="store_false", dest="run_running_ratio_per_ce", default=True,
+		     help="don't run running_ratio_per_ce process")
+
+optParser.add_option("--stdout", action="store_true", dest="stdout", default=False,
+		     help="set script output to stdout. This option is mutually exclusive with output_dir.")
+
+optParser.add_option("--percent", action="store_true", dest="percent", default=False,
+		     help="computes running ratio slices rates as percentage.")
 
 optParser.add_option("--debug", action="store_true", dest="debug",
                      help="Add debug traces")
@@ -69,18 +101,33 @@ optParser.add_option("--debug", action="store_true", dest="debug",
 
 (options, args) = optParser.parse_args()
 
+if ((options.output_dir != '') and options.stdout) : optParser.error("Options --output-dir and --stdout are mutually exclusive")
+if ((not options.stdout) and (options.output_dir == '')) : options.output_dir='results'
+
 globvars.DATA_DIR = options.input_dir
 globvars.FROM_DATE = options.fromDate
 globvars.TO_DATE = options.toDate
 globvars.DEBUG = options.debug
 globvars.DECIMAL_MARK = options.decimal_mark
+globvars.CSV_DELIMITER = options.csv_separator
 globvars.OUTPUT_DIR = options.output_dir
+globvars.STDOUT = options.stdout
 globvars.MONCE = options.monce
+globvars.PERCENT = options.percent
+
+globvars.RUN_RUNNING_RATIO = options.run_running_ratio
+globvars.RUN_RUNNING_RATIO_DAILY = options.run_running_ratio_daily
+globvars.RUN_RUNNING_RATIO_DAY_NIGHT = options.run_running_ratio_day_night
+globvars.RUN_DISTRIBUTE_CE_BY_RUNNING_RATIO = options.run_distribute_ce_by_running_ratio
+globvars.RUN_RUNNING_RATIO_SLICES = options.run_running_ratio_slices
+globvars.RUN_RUNNING_RATIO_BAD = options.run_running_ratio_bad
+globvars.RUN_RUNNING_RATIO_PER_CE = options.run_running_ratio_per_ce
+
 
 if not os.path.isdir(globvars.DATA_DIR):
     print "Input directory " + globvars.DATA_DIR + " is not valid."
     sys.exit(1)
-if not os.path.isdir(globvars.OUTPUT_DIR):
+if ((not globvars.STDOUT) and (not os.path.isdir(globvars.OUTPUT_DIR))):
     print "Output directory " + globvars.OUTPUT_DIR + " is not valid."
     sys.exit(1)
 
@@ -244,29 +291,29 @@ if globvars.DEBUG: print "Loaded", len(dataFiles), "files."
 
 # -------------------------------------------------------------------------
 # Compute the running ratio R/(R+W) as a function of time
-processors.running_ratio.process(dataFiles)
-processors.running_ratio_daily.process(dataFiles)
+if globvars.RUN_RUNNING_RATIO: processors.running_ratio.process(dataFiles)
+if globvars.RUN_RUNNING_RATIO_DAILY: processors.running_ratio_daily.process(dataFiles)
 
 # -------------------------------------------------------------------------
 # Compute the mean running ratio R/(R+W) during day time (12h, 16h, 20h)
 # or night time (0h, 4h, 8h), as a function of time
-# processors.running_ratio_day_night.process(dataFiles)
+if globvars.RUN_RUNNING_RATIO_DAY_NIGHT: processors.running_ratio_day_night.process(dataFiles)
 
 # -------------------------------------------------------------------------
 # Compute the distribution of CE queues by ratio R/(R+W)
-processors.distribute_ce_by_running_ratio.process(dataFiles)
+if globvars.RUN_DISTRIBUTE_CE_BY_RUNNING_RATIO: processors.distribute_ce_by_running_ratio.process(dataFiles)
 
 # -------------------------------------------------------------------------
 # Compute the number of CEs grouped by ratio R/(R+W) as a function of time:
 # between 0 and 0,5, and between 0,5 and 1
-processors.running_ratio_slices.process(dataFiles)
+if globvars.RUN_RUNNING_RATIO_SLICES: processors.running_ratio_slices.process(dataFiles)
 
 # -------------------------------------------------------------------------
 # Try to figure out good and bad CEs: compute the list of CE queues based on the 
 # number of times each one has been seen with 0 running jobs, or no activity...
-processors.running_ratio_bad.process(dataFiles)
+if globvars.RUN_RUNNING_RATIO_BAD: processors.running_ratio_bad.process(dataFiles)
 
 # -------------------------------------------------------------------------
 # Compute the running ratio R/(R+W) per CE as a function of time
-processors.running_ratio_per_ce.process(dataFiles)
+if globvars.RUN_RUNNING_RATIO_PER_CE: processors.running_ratio_per_ce.process(dataFiles)
 
