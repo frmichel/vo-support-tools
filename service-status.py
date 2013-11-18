@@ -13,7 +13,7 @@
 #    Valid grid proxy certificate
 #
 # Typically this tool should be run in the cron like:
-# 10,40 * * * * . /etc/profile; /home/fmichel/biomed-support-tools/service-status.py --pretty > /tmp/service-status-$$.txt; mv /tmp/service-status-$$.txt $HOME/public_html/service-status.txt
+# 10,40 * * * * . /etc/profile; $HOME/biomed-support-tools/service-status.py --pretty > /tmp/service-status-$$.txt; mv /tmp/service-status-$$.txt $HOME/public_html/service-status.txt
 #
 # ChangeLog:
 # 1.0: initial version

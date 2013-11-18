@@ -107,7 +107,7 @@ def fillGlueObject(glueObject, attrib, value):
 
 if DEBUG: print "Retreiving CE with a specific status in GOCDB:"
 GOCDBCE = {}
-status, output = commands.getstatusoutput("$VO_SUPPORT_TOOLS/service-status.py --nose --nowms")
+status, output = commands.getstatusoutput("$VO_SUPPORT_TOOLS/service-status.py --nose --nowms --vo " + VO)
 for line in output.splitlines():
     if line.find('|') != -1:
         service, host, status = line.rsplit('|')

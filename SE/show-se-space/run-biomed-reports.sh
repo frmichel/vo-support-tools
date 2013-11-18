@@ -1,6 +1,6 @@
 #!/bin/bash
 # This script allows to run the show-se-space.sh script from a cron job, like:
-# */10 * * * * . /etc/profile; export VO_SUPPORT_TOOLS=/home/fmichel/biomed-support-tools; $VO_SUPPORT_TOOLS/SE/show-se-space/run-biomed-reports.sh >> /tmp/show-se-space.log
+# */10 * * * * . /etc/profile; export VO_SUPPORT_TOOLS=$HOME/biomed-support-tools; $VO_SUPPORT_TOOLS/SE/show-se-space/run-biomed-reports.sh >> /tmp/show-se-space.log
 #
 # Variable $VO_SUPPORT_TOOLS must be set before running the script.
 

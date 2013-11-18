@@ -111,7 +111,7 @@ lcg-infosites --vo $VO space | awk -f $AWK_FILE > $TMP_LCGINFOSITES
 #--- Get status of SE from the GOCDB (downtimes, not in producton, not monitored), BDII (draining, closed)
 
 # Generate the list of SE with downtime of specific status in the GOCDB
-$VO_SUPPORT_TOOLS/service-status.py --noce --nowms > $TMP_SESTATUS
+$VO_SUPPORT_TOOLS/service-status.py --vo $VO --noce --nowms > $TMP_SESTATUS
 
 echo -n "" > ${TMP_LCGINFOSITES}_tmp
 cat $TMP_LCGINFOSITES | while read LINE; do
