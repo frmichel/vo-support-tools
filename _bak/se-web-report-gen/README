@@ -3,5 +3,5 @@ This tools requires a file that lists the SE supporting the VO. It is generated 
 Run that script in a cron job like this:
 
 # Generate the current list of biomed SEs used by the se-web-report-generator tool, once every night
-0 3 * * * . /etc/profile; $HOME/biomed-support-tools/SE/se-web-report-gen/make-list-se.sh > /tmp/make-list-se.log
+0 3 * * * . /etc/profile; $HOME/vo-support-tools/SE/se-web-report-gen/make-list-se.sh > /tmp/make-list-se.log
 

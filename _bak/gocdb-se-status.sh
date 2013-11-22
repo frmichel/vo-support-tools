@@ -14,7 +14,7 @@ GOCDB_DOWNTIME_URL="https://goc.egi.eu/gocdbpi/private/?method=get_downtime&ongo
 GOCDB_SERVICE_URL="https://goc.egi.eu/gocdbpi/private/?method=get_service_endpoint&hostname="
 GOCDB_RESP=/tmp/check-se-downtime/gocdb-get-downtime.resp
 
-CURL_CMD="curl --silent --insecure --pass `cat /home/fmichel/.globus/proxy_pass.txt` --cert /home/fmichel/.globus/usercert.pem --key /home/fmichel/.globus/userkey.pem --url"
+CURL_CMD="curl --silent --insecure --pass `cat $HOME/.globus/proxy_pass.txt` --cert $HOME/.globus/usercert.pem --key $HOME/.globus/userkey.pem --url"
 
 # Get the current list of SEs supporting the VO from the BDII
 lcg-infosites --vo $VO space | egrep -v "Reserved|Nearline|[\-]{10}" | egrep -o "[^[:space:]]*$" > $LIST_SE

@@ -1,34 +1,34 @@
-# Renew the proxy certificate every 8 hours
-0 0,8,16 * * * $HOME/biomed-support-tools/renew-proxy.sh 2>&1 >> /tmp/monitor-se/renew-proxy.log
+ Renew the proxy certificate every 8 hours
+0 0,8,16 * * * $HOME/vo-support-tools/renew-proxy.sh 2>&1 >> /tmp/monitor-se/renew-proxy.log
 
 #----------------------------------------------------------------------------
 
 # Refresh the SE space availability reports every 30 min
-*/30 * * * * $HOME/biomed-support-tools/SE/show-se-space/run-biomed-reports.sh >> /tmp/biomed/show-se-space/show-se-space.log
+*/30 * * * * $HOME/vo-support-tools/SE/show-se-space/run-biomed-reports.sh >> /tmp/biomed/show-se-space/show-se-space.log
 
 # Refresh the list of service nodes that are not running from the GOCDB (downtime, not in prod, not monitored)
-10,40 * * * * . /etc/profile; export VO_SUPPORT_TOOLS=$HOME/biomed-support-tools; $VO_SUPPORT_TOOLS/service-status.py --vo biomed --pretty > /tmp/biomed/service-status-$$.txt; mv /tmp/biomed/service-status-$$.txt $HOME/public_html/biomed/service-status.txt
+10,40 * * * * . /etc/profile; export VO_SUPPORT_TOOLS=$HOME/vo-support-tools; $VO_SUPPORT_TOOLS/service-status.py --vo biomed --pretty > /tmp/biomed/service-status-$$.txt; mv /tmp/biomed/service-status-$$.txt $HOME/public_html/biomed/service-status.txt
 
 #----------------------------------------------------------------------------
 # Monitoring and scan of the SEs
 
 # Refresh the list of users from the VOMS every day
-0 1 * * * . /etc/profile; export VO_SUPPORT_TOOLS=$HOME/biomed-support-tools; $VO_SUPPORT_TOOLS/SE/scan-se/list-users-voms.sh --vo biomed --out /tmp/biomed/monitor-se/voms-users.txt > /tmp/biomed/monitor-se/voms-users.log
+0 1 * * * . /etc/profile; export VO_SUPPORT_TOOLS=$HOME/vo-support-tools; $VO_SUPPORT_TOOLS/SE/scan-se/list-users-voms.sh --vo biomed --out /tmp/biomed/monitor-se/voms-users.txt > /tmp/biomed/monitor-se/voms-users.log
 
 # Scan SEs over 80% full and get the list of users with files on them, every sunday
-0 2 * * 0 . /etc/profile; export LFC_HOST=lfc-biomed.in2p3.fr; export VO_SUPPORT_TOOLS=$HOME/biomed-support-tools; $VO_SUPPORT_TOOLS/SE/scan-se/scan-se.sh --vo biomed --voms-users /tmp/biomed/monitor-se/voms-users.txt --work-dir /tmp/biomed/monitor-se --result-dir $HOME/public_html/biomed/scan-full-se --threshold 80 --user-min-used 0 >> /tmp/biomed/monitor-se/scan-full-se.log
+0 2 * * 0 . /etc/profile; export LFC_HOST=lfc-biomed.in2p3.fr; export VO_SUPPORT_TOOLS=$HOME/vo-support-tools; $VO_SUPPORT_TOOLS/SE/scan-se/scan-se.sh --vo biomed --voms-users /tmp/biomed/monitor-se/voms-users.txt --work-dir /tmp/biomed/monitor-se --result-dir $HOME/public_html/biomed/scan-full-se --threshold 80 --user-min-used 0 >> /tmp/biomed/monitor-se/scan-full-se.log
 
 # Scan all SEs once a month the 21st, at 7:07
 # => at least 0% of used space (i.e. all), and users with at least 0GB (i.e. all) of used space
-7 7 21 * * . /etc/profile; export LFC_HOST=lfc-biomed.in2p3.fr; export VO_SUPPORT_TOOLS=$HOME/biomed-support-tools; $VO_SUPPORT_TOOLS/SE/scan-se/scan-se.sh --vo biomed --voms-users /tmp/biomed/monitor-se/voms-users.txt --work-dir /tmp/biomed/monitor-se --result-dir $HOME/public_html/biomed/scan-full-se --threshold 0 --user-min-used 0 >> /tmp/biomed/monitor-se/scan-full-se.log
+7 7 21 * * . /etc/profile; export LFC_HOST=lfc-biomed.in2p3.fr; export VO_SUPPORT_TOOLS=$HOME/vo-support-tools; $VO_SUPPORT_TOOLS/SE/scan-se/scan-se.sh --vo biomed --voms-users /tmp/biomed/monitor-se/voms-users.txt --work-dir /tmp/biomed/monitor-se --result-dir $HOME/public_html/biomed/scan-full-se --threshold 0 --user-min-used 0 >> /tmp/biomed/monitor-se/scan-full-se.log
 
 # Monitor SEs: get the filling rate of all SEs at 3am every day
-10 3 * * * . /etc/profile; export VO_SUPPORT_TOOLS=$HOME/biomed-support-tools; $VO_SUPPORT_TOOLS/SE/monitor-se/run-collect-se-space.sh --vo biomed
+10 3 * * * . /etc/profile; export VO_SUPPORT_TOOLS=$HOME/vo-support-tools; $VO_SUPPORT_TOOLS/SE/monitor-se/run-collect-se-space.sh --vo biomed
 
 #----------------------------------------------------------------------------
 # Monitoring CEs
-10 0,4,8,12,16,20 * * * . /etc/profile; export VO_SUPPORT_TOOLS=$HOME/biomed-support-tools; $VO_SUPPORT_TOOLS/CE/monitor-ce/run-collect-ce-job-status.sh --vo biomed
+10 0,4,8,12,16,20 * * * . /etc/profile; export VO_SUPPORT_TOOLS=$HOME/vo-support-tools; $VO_SUPPORT_TOOLS/CE/monitor-ce/run-collect-ce-job-status.sh --vo biomed
 
 # Find out all CEs with badly published number of jobs (with default numbers 4444...)
-*/30 * * * * . /etc/profile; export VO_SUPPORT_TOOLS=$HOME/biomed-support-tools; $VO_SUPPORT_TOOLS/CE/find-ce-4444.sh > /tmp/biomed/ce-4444-$$.txt; mv /tmp/biomed/ce-4444-$$.txt $HOME/public_html/biomed/ce-4444.txt
+*/30 * * * * . /etc/profile; export VO_SUPPORT_TOOLS=$HOME/vo-support-tools; $VO_SUPPORT_TOOLS/CE/find-ce-4444.sh > /tmp/biomed/ce-4444-$$.txt; mv /tmp/biomed/ce-4444-$$.txt $HOME/public_html/biomed/ce-4444.txt
 

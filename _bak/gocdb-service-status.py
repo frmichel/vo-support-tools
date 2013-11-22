@@ -12,7 +12,7 @@
 #    Valid grid proxy certificate
 #
 # Typically this tool should be run in the cron like:
-# 34,10,40 * * * * . /etc/profile; /home/fmichel/biomed-support-tools/gocdb-service-status.py --pretty > /tmp/gocdb-service-status-$$.txt; mv /tmp/gocdb-service-status-$$.txt $HOME/public_html/gocdb-service-status.txt
+# 34,10,40 * * * * . /etc/profile; $HOME/vo-support-tools/gocdb-service-status.py --pretty > /tmp/biomed/gocdb-service-status-$$.txt; mv /tmp/biomed/gocdb-service-status-$$.txt $HOME/public_html/biomed/gocdb-service-status.txt
  
 import sys
 import os
