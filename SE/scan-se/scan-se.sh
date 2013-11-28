@@ -23,6 +23,8 @@ RESDIR=`pwd`/$NOW
 
 VO=biomed
 VOMS_USERS=`pwd`/voms-users.txt
+SUSPENDED_EXPIRED_VOMS_USERS=`pwd`/suspended-expired-voms-users.txt
+XML_OUTPUT=false
 
 help()
 {
@@ -42,6 +44,9 @@ help()
   echo "  --voms-users <file name>: list of users extracted from the VOMS server."
   echo "           Defaults to './voms-users.txt'."
   echo
+  echo "  --suspended-expired-voms-users <file name>: list of suspended or expired users extracted from the VOMS server."
+  echo "           Defaults to './suspended-expired-voms-users.txt'."
+  echo 
   echo "  --work-dir <work directory>: where to store temporary files. The date is appended to the directory,"
   echo "           formatted as <work directory>/YYYYMMDD-HHMMSS. Defaults to './<date>'."
   echo
@@ -53,9 +58,11 @@ help()
   echo
   echo "  --user-min-used <space in GB>: minimum used space (in GB) for a user to be reported. Defaults to 0.1 = 100 MB."
   echo
+  echo "  --xml-output : compute output files to xml format."
+  echo
   echo "  -h, --help: display this help"
   echo
-  echo "Examples   :"
+  echo "Examples: "
   echo "Check SEs supporting biomed with used space over 95%, users with more than 100 MB, store temp and result files in current directory.<date>:"
   echo "   $0"
   echo
@@ -82,10 +89,12 @@ do
   case "$1" in
     --vo ) VO=$2; shift;;
     --voms-users ) VOMS_USERS=$2; shift;;
+    --suspended-expired-voms-users ) SUSPENDED_EXPIRED_VOMS_USERS=$2; shift;;
     --work-dir ) WDIR=$2/$NOW; shift;;
     --result-dir ) RESDIR=$2/$NOW; shift;;
     --threshold ) SPACE_THRESHOLD=$2; shift;;
     --user-min-used ) USER_MIN_SPACE=$2; shift;;
+    --xml-output ) XML_OUTPUT=true;;
     -h | --help ) help;;
     * ) help;;
   esac
@@ -103,26 +112,38 @@ sed "s/@SPACE_THRESHOLD@/$SPACE_THRESHOLD/" $MONITOR_SE_SPACE/parse-show-se-spac
 TMP_LIST_SE=$WDIR/list-se_$$.txt
 $SHOW_SE_SPACE/show-se-space.sh --vo $VO --sort %used --reverse --no-header --no-sum | awk -f $TMP_PARSE_AWK | sort | uniq > $TMP_LIST_SE
 
+NB_SE=`wc -l $TMP_LIST_SE | cut -d ' ' -f 1`
+
 # Prepare web report with a title, threshold of used space and date/time
 mkdir -p $RESDIR
+if $XML_OUTPUT; then
+cat <<EOF >> $RESDIR/INFO.xml
+<ScanDate>$NOW</ScanDate><MinUsedSpacePercentage>${SPACE_THRESHOLD}</MinUsedSpacePercentage><UserMinUsedSpace>${USER_MIN_SPACE}</UserMinUsedSpace><NbSEs>${NB_SE}</NbSEs>
+EOF
+
+else
 cat <<EOF >> $RESDIR/INFO.htm
 Report started $NOW_PRETTY<br>
 SE minimum used space: ${SPACE_THRESHOLD}%<br>
 Users minimum used space: ${USER_MIN_SPACE}GB
 EOF
-
+fi
 # Run the analisys on each SE in parallel
 echo "Starting analysis of SEs over ${SPACE_THRESHOLD}% of used space, reporting uses consumming over ${USER_MIN_SPACE}GB - $NOW_PRETTY"
 for SEHOSTNAME in `cat $TMP_LIST_SE`
 do
   echo "$SEHOSTNAME"
-  $MONITOR_SE_SPACE/se-heavy-users.sh --vo $VO --voms-users $VOMS_USERS --user-min-used $USER_MIN_SPACE --work-dir $WDIR --result-dir $RESDIR $SEHOSTNAME &
+  if $XML_OUTPUT; then
+    $MONITOR_SE_SPACE/se-heavy-users.sh --xml-output --vo $VO --voms-users $VOMS_USERS --suspended-expired-voms-users $SUSPENDED_EXPIRED_VOMS_USERS --user-min-used $USER_MIN_SPACE --work-dir $WDIR --result-dir $RESDIR $SEHOSTNAME &
+  else  
+    $MONITOR_SE_SPACE/se-heavy-users.sh --vo $VO --voms-users $VOMS_USERS --user-min-used $USER_MIN_SPACE --work-dir $WDIR --result-dir $RESDIR $SEHOSTNAME &
+  fi
   sleep 10
 done
 echo "Analysis started."
 
 # Clean up
-#rm -f $TMP_LIST_SE
+rm -f $TMP_LIST_SE
 rm -f $TMP_PARSE_AWK
 
 

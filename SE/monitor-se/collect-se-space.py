@@ -119,7 +119,7 @@ for host in seHostNames:
 
     # Consistency checks: ignore 0 or negative values
     if totalSE <= 0 or usedSE < 0: 
-        print "Skipping " + host + " due to inconsistent data: totalSE=" + str(totalSE) + ", usedSE=" + str(usedSE)
+        if DEBUG: print "Skipping " + host + " due to inconsistent data: totalSE=" + str(totalSE) + ", usedSE=" + str(usedSE)
         continue
 
     # Limit the version number to only 2 figures, like 1.8 instead of 1.8.2-1

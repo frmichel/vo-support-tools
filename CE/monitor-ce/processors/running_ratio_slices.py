@@ -55,30 +55,40 @@ def process(dataFiles):
 
 	# Loop on all data files that were acquired
 	for (fileName, datetime, date, hour, rows, sum_VO_Waiting, sum_VO_Running) in dataFiles:
-
 	    nb_0 = nb_0_05 = nb_05_1 = nb_1 = nb_na = 0.0
 	    # Loop on all rows of the file
 	    for (hostname, structRow) in rows.iteritems():
-	        W = float(structRow['VO_Waiting'])
-	        R = float(structRow['VO_Running'])
+		W = float(structRow['VO_Waiting'])
+		R = float(structRow['VO_Running'])
 
-	        if R+W == 0:
-	            nb_na += 1
-	        else:
-	            ratio = R/(R+W)
-	            if ratio == 0: nb_0 += 1
-	            if ratio >= 0 and ratio < 0.5: nb_0_05 += 1
-	            else: 
-	                if ratio >= 0.5 and ratio <= 1: nb_05_1 += 1
-	            if ratio == 1: nb_1 += 1
+		if R+W == 0:
+		    nb_na += 1
+		else:
+		    ratio = R/(R+W)
+		    if ratio == 0: nb_0 += 1
+		    if ratio >= 0 and ratio < 0.5: nb_0_05 += 1
+		    else: 
+			if ratio >= 0.5 and ratio <= 1: nb_05_1 += 1
+		    if ratio == 1: nb_1 += 1
 
-	    nbQ = len(rows)
-	    writer.writerow([datetime, nbQ, 
-	                     str(round(nb_0/nbQ, 4)).replace('.', DECIMAL_MARK), 
-	                     str(round(nb_0_05/nbQ, 4)).replace('.', DECIMAL_MARK), 
-	                     str(round(nb_05_1/nbQ, 4)).replace('.', DECIMAL_MARK), 
-	                     str(round(nb_1/nbQ, 4)).replace('.', DECIMAL_MARK), 
-	                     str(round(nb_na/nbQ, 4)).replace('.', DECIMAL_MARK) 
-	                     ])
+	    if globvars.PERCENT:
+		nbQ = len(rows)
+		writer.writerow([datetime, nbQ,
+		    str(round(nb_0*100/nbQ,2)).replace('.', DECIMAL_MARK),
+		    str(round(nb_0_05*100/nbQ,2)).replace('.', DECIMAL_MARK),
+		    str(round(nb_05_1*100/nbQ,2)).replace('.', DECIMAL_MARK),
+		    str(round(nb_1*100/nbQ,2)).replace('.', DECIMAL_MARK),
+		    str(round(nb_na*100/nbQ,2)).replace('.', DECIMAL_MARK)
+		    ])
+
+	    else:
+		nbQ = len(rows)
+		writer.writerow([datetime, nbQ, 
+	            str(round(nb_0/nbQ, 4)).replace('.', DECIMAL_MARK), 
+	            str(round(nb_0_05/nbQ, 4)).replace('.', DECIMAL_MARK), 
+	            str(round(nb_05_1/nbQ, 4)).replace('.', DECIMAL_MARK), 
+	            str(round(nb_1/nbQ, 4)).replace('.', DECIMAL_MARK), 
+	            str(round(nb_na/nbQ, 4)).replace('.', DECIMAL_MARK) 
+	            ])
 
 	if not globvars.STDOUT: outputf.close()

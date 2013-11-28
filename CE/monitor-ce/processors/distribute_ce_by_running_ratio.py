@@ -98,18 +98,33 @@ def process(dataFiles):
 	    if ratio >= 0.9 and ratio < 1.0: distrib[9] += 1
 	    if ratio == -1.0: distrib[10] += 1
 
-	writer.writerow([
-	    str(round(distrib[0]/len(queues), 4)).replace('.', globvars.DECIMAL_MARK),
-	    str(round(distrib[1]/len(queues), 4)).replace('.', globvars.DECIMAL_MARK),
-	    str(round(distrib[2]/len(queues), 4)).replace('.', globvars.DECIMAL_MARK),
-	    str(round(distrib[3]/len(queues), 4)).replace('.', globvars.DECIMAL_MARK),
-	    str(round(distrib[4]/len(queues), 4)).replace('.', globvars.DECIMAL_MARK),
-	    str(round(distrib[5]/len(queues), 4)).replace('.', globvars.DECIMAL_MARK),
-	    str(round(distrib[6]/len(queues), 4)).replace('.', globvars.DECIMAL_MARK),
-	    str(round(distrib[7]/len(queues), 4)).replace('.', globvars.DECIMAL_MARK),
-	    str(round(distrib[8]/len(queues), 4)).replace('.', globvars.DECIMAL_MARK),
-	    str(round(distrib[9]/len(queues), 4)).replace('.', globvars.DECIMAL_MARK),
-	    str(round(distrib[10]/len(queues), 4)).replace('.', globvars.DECIMAL_MARK)
-	    ]) 
+	if globvars.PERCENT:
+	    writer.writerow([
+		str(round(distrib[0]*100/len(queues),2)).replace('.', globvars.DECIMAL_MARK),
+		str(round(distrib[1]*100/len(queues),2)).replace('.', globvars.DECIMAL_MARK),
+		str(round(distrib[2]*100/len(queues),2)).replace('.', globvars.DECIMAL_MARK),
+		str(round(distrib[3]*100/len(queues),2)).replace('.', globvars.DECIMAL_MARK),
+		str(round(distrib[4]*100/len(queues),2)).replace('.', globvars.DECIMAL_MARK),
+		str(round(distrib[5]*100/len(queues),2)).replace('.', globvars.DECIMAL_MARK),
+		str(round(distrib[6]*100/len(queues),2)).replace('.', globvars.DECIMAL_MARK),
+                str(round(distrib[7]*100/len(queues),2)).replace('.', globvars.DECIMAL_MARK),
+                str(round(distrib[8]*100/len(queues),2)).replace('.', globvars.DECIMAL_MARK),
+                str(round(distrib[9]*100/len(queues),2)).replace('.', globvars.DECIMAL_MARK),
+                str(round(distrib[10]*100/len(queues),2)).replace('.', globvars.DECIMAL_MARK)
+		])
+	else:
+	    writer.writerow([
+		str(round(distrib[0]/len(queues), 4)).replace('.', globvars.DECIMAL_MARK),
+		str(round(distrib[1]/len(queues), 4)).replace('.', globvars.DECIMAL_MARK),
+		str(round(distrib[2]/len(queues), 4)).replace('.', globvars.DECIMAL_MARK),
+		str(round(distrib[3]/len(queues), 4)).replace('.', globvars.DECIMAL_MARK),
+		str(round(distrib[4]/len(queues), 4)).replace('.', globvars.DECIMAL_MARK),
+		str(round(distrib[5]/len(queues), 4)).replace('.', globvars.DECIMAL_MARK),
+		str(round(distrib[6]/len(queues), 4)).replace('.', globvars.DECIMAL_MARK),
+		str(round(distrib[7]/len(queues), 4)).replace('.', globvars.DECIMAL_MARK),
+		str(round(distrib[8]/len(queues), 4)).replace('.', globvars.DECIMAL_MARK),
+		str(round(distrib[9]/len(queues), 4)).replace('.', globvars.DECIMAL_MARK),
+		str(round(distrib[10]/len(queues), 4)).replace('.', globvars.DECIMAL_MARK)
+		]) 
 	if not globvars.STDOUT: outputf.close()
 

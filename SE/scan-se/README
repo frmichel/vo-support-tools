@@ -6,27 +6,27 @@ $VO_SUPPORT_TOOLS, $LFC_HOST
 ------------------------------------------------
 To run the jobs in cron:
 
-1. Install cron jobs
-
-1.1. Use script list-users-voms.sh to generate file voms-users.txt. That file must be passed to scan-se.sh with the option --voms-users. Typically, this file should be generated with a cron like:
-# Refresh the list of users from the VOMS every day
-0 1 * * * . /etc/profile; export VO_SUPPORT_TOOLS=$HOME/vo-support-tools; $VO_SUPPORT_TOOLS/SE/scan-se/list-users-voms.sh --vo biomed --voms-host voms-biomed.in2p3.fr --voms-port 8443 --out /tmp/biomed/monitor-se/voms-users.txt > /tmp/biomed/monitor-se/voms-users.log
-
-1.2. Use script $VO_SUPPORT_TOOLS/renew-proxy.sh to renew your proxy certificate regularly:
+1. Use script $VO_SUPPORT_TOOLS/renew-proxy.sh to renew your proxy certificate regularly:
 # Renew the proxy certificate every 8 hours
-0 0,8,16 * * * /path/vo-support-tools/renew-proxy.sh 2>&1 >> /tmp/biomed/monitor-se/renew-proxy.log
+0 0,8,16 * * * export VO=biomed; export VO_SUPPORT_TOOLS=$HOME/vo-support-tools; $VO_SUPPORT_TOOLS/renew-proxy.sh --vo $VO 2>&1 >> /tmp/$VO/scan-se/renew-proxy.log
 
-2. Run the scan-se.sh script, possibly using a cron, this example runs it once a week on Sundays:
-# Monitor the SEs over 80% full and get the list of users with over 100 MB
-0 2 * * 0 . /etc/profile; export LFC_HOST=lfc-biomed.in2p3.fr; export VO_SUPPORT_TOOLS=$HOME/vo-support-tools; $VO_SUPPORT_TOOLS/SE/scan-se/scan-se.sh --vo biomed --voms-users /tmp/biomed/monitor-se/voms-users.txt --work-dir /tmp/biomed/monitor-se --result-dir $HOME/public_html/biomed/scan-se --threshold 80 --user-min-used 0.1 >> /tmp/biomed/monitor-se/scan-se.log
+2. Scan full SEs: Use script list-active-users-voms.sh and list-suspended-expired-users-voms.sh to generate the file active vs. suspended/expired users. 
+Those lists will be passed to scan-se.sh with the option --voms-users and --suspended-expired-voms-users.
 
-This will use the following:
+0 2 * * 0 . /etc/profile; export VO=biomed; export TMP=/tmp/$VO/scan-se; export VO_SUPPORT_TOOLS=$HOME/vo-support-tools; export SCANSE=$VO_SUPPORT_TOOLS/SE/scan-se; export USERID=`id --user`; export X509_USER_PROXY=/tmp/x509_${VO}_u${USERID}; $SCANSE/list-suspended-expired-users-voms.sh --vo $VO --voms-host voms-biomed.in2p3.fr --voms-port 8443 --out $TMP/suspended-expired-voms-users.txt > $TMP/suspended-expired-voms-users.log; $SCANSE/list-active-users-voms.sh --vo $VO --voms-host voms-biomed.in2p3.fr --voms-port 8443 --suspended-expired-voms-users $TMP/suspended-expired-voms-users.txt --out $TMP/voms-users.txt > $TMP/voms-users.log; $SCANSE/scan-se.sh --vo $VO --voms-users $TMP/voms-users.txt --suspended-expired-voms-users $TMP/suspended-expired-voms-users.txt --work-dir $TMP --result-dir $HOME/public_html/$VO/scan-se --threshold 95 --user-min-used 0 --xml-output > $TMP/scan-se-80.log
+
+3. Scan all SEs: once a month at 5am, scan all SEs whatever the filling rate
+
+0 5 21 * * . /etc/profile; export VO=biomed; export TMP=/tmp/$VO/scan-se; export VO_SUPPORT_TOOLS=$HOME/vo-support-tools; export SCANSE=$VO_SUPPORT_TOOLS/SE/scan-se; export USERID=`id --user`; export X509_USER_PROXY=/tmp/x509_${VO}_u${USERID}; $SCANSE/list-suspended-expired-users-voms.sh --vo $VO --voms-host voms-biomed.in2p3.fr --voms-port 8443 --out $TMP/suspended-expired-voms-users.txt > $TMP/suspended-expired-voms-users.log; $SCANSE/list-active-users-voms.sh --vo $VO --voms-host voms-biomed.in2p3.fr --voms-port 8443 --suspended-expired-voms-users $TMP/suspended-expired-voms-users.txt --out $TMP/voms-users.txt > $TMP/voms-users.log; $SCANSE/scan-se.sh --vo $VO --voms-users $TMP/voms-users.txt --suspended-expired-voms-users $TMP/suspended-expired-voms-users.txt --work-dir $TMP --result-dir $HOME/public_html/$VO/scan-se --threshold 0 --user-min-used 0 --xml-output > $TMP/scan-se-all.log
+
+The scan SE can produce xml output using the option --xml-output. Without it, it produces html files straight away.
+
+Scan-SE will use the following scripts:
 - parse-show-se-space.awk.tpl: template of awk file to filter the output of tool show-se-space.sh 
 - parse-lfcbrowsese.awk.tpl: template of awk file to filter the output of LFCBrowseSE with users over a given used space
 - se-heavy-user.sh: run the LFCBrowseSE tools, get the list of users over 100 MB
   - parse-lfcbrowsese.awk: process the result of LFCBrosweSE --summary
   - email-users.sh: convert the output of se-heavy-users.sh into +/- an email body
-
-3. Optionally, once all SE have been analyzed, use script unknown-users.sh to build a consolidated list of users who have files on SEs but are no longer known in the VOMS server. E.g.:
-   $VO_SUPPORT_TOOLS/SE/scan-se/unknown-users.sh --vo biomed --input-dir /tmp/biomed/monitor-se/20120104-165852
+  - unknown-users.sh builds a consolidated list of users who have files on SEs but are no longer known in the VOMS server. E.g.:
+    $VO_SUPPORT_TOOLS/SE/scan-se/unknown-users.sh --vo biomed --input-dir /tmp/biomed/scan-se/20120104-165852
 
