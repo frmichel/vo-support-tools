@@ -1,4 +1,6 @@
 <?php
+	header ("Content-Type:text/xml");
+
 	// Check parameters
         if (array_key_exists("vo", $_GET)) {
                 if ($_GET['vo'] == ""){

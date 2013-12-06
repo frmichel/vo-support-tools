@@ -1,4 +1,5 @@
 <?php
+        header ("Content-Type:text/xml");
 
         // Check parameters
         if (array_key_exists("datetime", $_GET)) {
