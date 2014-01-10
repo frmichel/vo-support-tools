@@ -70,11 +70,13 @@ def process(dataFiles):
 	# -------------------------------------------------------------------------
 	# Compute the distribution of CE queues by ratio R/(R+W)
 	# -------------------------------------------------------------------------
-	writer='';
+	writer=''
         if globvars.STDOUT:
-	    writer = csv.writer(sys.stdout, delimiter=globvars.CSV_DELIMITER)
-	    writer.writerow([globvars.SEPARATOR,os.path.splitext(os.path.basename(__file__))[0]])
+	    writer = csv.writer(sys.stdout, delimiter=globvars.CSV_DELIMITER,lineterminator=';')
+	    print('<'+os.path.splitext(os.path.basename(__file__))[0]+'>'),
+	    print('<Xaxis>'),
 	    writer.writerow(["'0.0 to 0.1'", "'0.1 to 0.2'", "'0.2 to 0.3'", "'0.3 to 0.4'", "'0.4 to 0.5'", "'0.5 to 0.6'", "'0.6 to 0.7'", "'0.7 to 0.8'", "'0.8 to 0.9'", "'0.9 to 1.0'", "'n.a'"])	
+	    print('</Xaxis>'),
 	else:
 	    print "Computing the distribution of CE queues by ratio R/(R+W)..."
 	    outputFile = globvars.OUTPUT_DIR + os.sep + "distribute_ce_by_running_ratio.csv"
@@ -99,6 +101,7 @@ def process(dataFiles):
 	    if ratio == -1.0: distrib[10] += 1
 
 	if globvars.PERCENT:
+	    print('<Yaxis>'),
 	    writer.writerow([
 		str(round(distrib[0]*100/len(queues),2)).replace('.', globvars.DECIMAL_MARK),
 		str(round(distrib[1]*100/len(queues),2)).replace('.', globvars.DECIMAL_MARK),
@@ -112,6 +115,7 @@ def process(dataFiles):
                 str(round(distrib[9]*100/len(queues),2)).replace('.', globvars.DECIMAL_MARK),
                 str(round(distrib[10]*100/len(queues),2)).replace('.', globvars.DECIMAL_MARK)
 		])
+	    print('</Yaxis>'),
 	else:
 	    writer.writerow([
 		str(round(distrib[0]/len(queues), 4)).replace('.', globvars.DECIMAL_MARK),
@@ -126,5 +130,6 @@ def process(dataFiles):
 		str(round(distrib[9]/len(queues), 4)).replace('.', globvars.DECIMAL_MARK),
 		str(round(distrib[10]/len(queues), 4)).replace('.', globvars.DECIMAL_MARK)
 		]) 
-	if not globvars.STDOUT: outputf.close()
+	if globvars.STDOUT:  print('</'+os.path.splitext(os.path.basename(__file__))[0]+'>'),
 
+	if not globvars.STDOUT: outputf.close()

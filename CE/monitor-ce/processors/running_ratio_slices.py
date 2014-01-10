@@ -41,10 +41,10 @@ def process(dataFiles):
 	DEBUG = globvars.DEBUG
 	OUTPUT_DIR = globvars.OUTPUT_DIR
 
-	writer='';
+	writer=''
 	if globvars.STDOUT:
-	    writer = csv.writer(sys.stdout, delimiter=globvars.CSV_DELIMITER)
-	    writer.writerow([globvars.SEPARATOR,os.path.splitext(os.path.basename(__file__))[0]])
+	    writer = csv.writer(sys.stdout, delimiter=globvars.CSV_DELIMITER,lineterminator=';')
+	    print('<'+os.path.splitext(os.path.basename(__file__))[0]+'>'),
 	    writer.writerow(["Date time", "Nb queues", "0", "0 to 0.5", "0.5 to 1", "1", "n/a"])
 	else:
 	    print "Computing the number of CEs grouped by slice of ratio R/(R+W) as a function of time..."
@@ -52,14 +52,13 @@ def process(dataFiles):
 	    outputf = open(outputFile, 'wb')
 	    writer = csv.writer(outputf, delimiter=globvars.CSV_DELIMITER)
 	    writer.writerow(["# Date time", "Nb queues", "0", "0 to 0.5", "0.5 to 1", "1", "n/a"])
-
 	# Loop on all data files that were acquired
 	for (fileName, datetime, date, hour, rows, sum_VO_Waiting, sum_VO_Running) in dataFiles:
 	    nb_0 = nb_0_05 = nb_05_1 = nb_1 = nb_na = 0.0
-	    # Loop on all rows of the file
+	    #Loop on all rows of the file
 	    for (hostname, structRow) in rows.iteritems():
 		W = float(structRow['VO_Waiting'])
-		R = float(structRow['VO_Running'])
+	    	R = float(structRow['VO_Running'])
 
 		if R+W == 0:
 		    nb_na += 1
@@ -68,12 +67,33 @@ def process(dataFiles):
 		    if ratio == 0: nb_0 += 1
 		    if ratio >= 0 and ratio < 0.5: nb_0_05 += 1
 		    else: 
-			if ratio >= 0.5 and ratio <= 1: nb_05_1 += 1
+		        if ratio >= 0.5 and ratio <= 1: nb_05_1 += 1
 		    if ratio == 1: nb_1 += 1
 
-	    if globvars.PERCENT:
-		nbQ = len(rows)
-		writer.writerow([datetime, nbQ,
+	    if globvars.STDOUT:	    
+		if globvars.PERCENT:
+		    nbQ = len(rows)
+		    writer.writerow([datetime, nbQ,
+		    str(round(nb_0*100/nbQ,2)).replace('.', DECIMAL_MARK),
+		    str(round(nb_0_05*100/nbQ,2)).replace('.', DECIMAL_MARK),
+		    str(round(nb_05_1*100/nbQ,2)).replace('.', DECIMAL_MARK),
+		    str(round(nb_1*100/nbQ,2)).replace('.', DECIMAL_MARK),
+                    str(round(nb_na*100/nbQ,2)).replace('.', DECIMAL_MARK)
+                    ])
+	
+		else:
+		    nbQ = len(rows)
+		    writer.writerow([datetime, nbQ, 
+		    str(round(nb_0/nbQ, 4)).replace('.', DECIMAL_MARK), 
+		    str(round(nb_0_05/nbQ, 4)).replace('.', DECIMAL_MARK), 
+		    str(round(nb_05_1/nbQ, 4)).replace('.', DECIMAL_MARK), 
+		    str(round(nb_1/nbQ, 4)).replace('.', DECIMAL_MARK), 
+		    str(round(nb_na/nbQ, 4)).replace('.', DECIMAL_MARK) 
+		    ])
+	    else:
+		if globvars.PERCENT:
+		    nbQ = len(rows)
+		    writer.writerow([datetime, nbQ,
 		    str(round(nb_0*100/nbQ,2)).replace('.', DECIMAL_MARK),
 		    str(round(nb_0_05*100/nbQ,2)).replace('.', DECIMAL_MARK),
 		    str(round(nb_05_1*100/nbQ,2)).replace('.', DECIMAL_MARK),
@@ -81,14 +101,15 @@ def process(dataFiles):
 		    str(round(nb_na*100/nbQ,2)).replace('.', DECIMAL_MARK)
 		    ])
 
-	    else:
-		nbQ = len(rows)
-		writer.writerow([datetime, nbQ, 
-	            str(round(nb_0/nbQ, 4)).replace('.', DECIMAL_MARK), 
-	            str(round(nb_0_05/nbQ, 4)).replace('.', DECIMAL_MARK), 
-	            str(round(nb_05_1/nbQ, 4)).replace('.', DECIMAL_MARK), 
-	            str(round(nb_1/nbQ, 4)).replace('.', DECIMAL_MARK), 
-	            str(round(nb_na/nbQ, 4)).replace('.', DECIMAL_MARK) 
-	            ])
-
+		else:
+		    nbQ = len(rows)
+		    writer.writerow([datetime, nbQ,
+		    str(round(nb_0/nbQ, 4)).replace('.', DECIMAL_MARK),
+		    str(round(nb_0_05/nbQ, 4)).replace('.', DECIMAL_MARK),
+		    str(round(nb_05_1/nbQ, 4)).replace('.', DECIMAL_MARK),
+		    str(round(nb_1/nbQ, 4)).replace('.', DECIMAL_MARK),
+		    str(round(nb_na/nbQ, 4)).replace('.', DECIMAL_MARK)
+		    ])
+ 
+	if globvars.STDOUT: print('</'+os.path.splitext(os.path.basename(__file__))[0]+'>'),
 	if not globvars.STDOUT: outputf.close()

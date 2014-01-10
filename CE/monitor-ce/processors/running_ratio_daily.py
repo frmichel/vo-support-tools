@@ -54,19 +54,19 @@ def process(dataFiles):
 	    dataPerDate[date]['Waiting'] += W
 	    dataPerDate[date]['Running'] += R
 
-	outStream = sys.stdout
+    	outStream = sys.stdout
 	if STDOUT:
 	    outStream = sys.stdout
 	else:
-            outputFile = OUTPUT_DIR + os.sep + "running_ratio_daily.csv"
-            outStream = open(outputFile, 'wb')
+	    outputFile = OUTPUT_DIR + os.sep + "running_ratio_daily.csv"
+	    outStream = open(outputFile, 'wb')
  
-	writer = csv.writer(outStream, delimiter=CSV_DELIMITER)
+	writer = csv.writer(outStream, delimiter=CSV_DELIMITER,lineterminator=';')
 	# Write the separator followed the name of the script called
 	if STDOUT:
-	   writer.writerow([globvars.SEPARATOR,os.path.splitext(os.path.basename(__file__))[0]])
+	    print('<'+os.path.splitext(os.path.basename(__file__))[0]+'>'),
 	else:
-	   print "Computing the mean ratio R/(R+W) as a function of time (daily)..."
+	    print "Computing the mean ratio R/(R+W) as a function of time (daily)..."
 
 	writer.writerow(["Date", "Waiting", "Running", "R/(R+W)"])
 
@@ -81,6 +81,5 @@ def process(dataFiles):
 		str(round(W/nbMeasures, 1)).replace('.', DECIMAL_MARK),
 		str(round(R/nbMeasures, 1)).replace('.', DECIMAL_MARK),
 		str(round(R/(R+W), 4)).replace('.', DECIMAL_MARK) ])
-	 
+	if STDOUT: print('</'+os.path.splitext(os.path.basename(__file__))[0]+'>'),
 	if not STDOUT: outStream.close()
-

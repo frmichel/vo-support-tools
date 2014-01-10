@@ -288,10 +288,11 @@ for fileName in files:
 
 if globvars.DEBUG: print "Loaded", len(dataFiles), "files."
 
-
+if globvars.STDOUT: print "<running_ratio>", 
 # -------------------------------------------------------------------------
 # Compute the running ratio R/(R+W) as a function of time
 if globvars.RUN_RUNNING_RATIO: processors.running_ratio.process(dataFiles)
+
 if globvars.RUN_RUNNING_RATIO_DAILY: processors.running_ratio_daily.process(dataFiles)
 
 # -------------------------------------------------------------------------
@@ -316,4 +317,6 @@ if globvars.RUN_RUNNING_RATIO_BAD: processors.running_ratio_bad.process(dataFile
 # -------------------------------------------------------------------------
 # Compute the running ratio R/(R+W) per CE as a function of time
 if globvars.RUN_RUNNING_RATIO_PER_CE: processors.running_ratio_per_ce.process(dataFiles)
+
+if globvars.STDOUT: print "</running_ratio>",
 
