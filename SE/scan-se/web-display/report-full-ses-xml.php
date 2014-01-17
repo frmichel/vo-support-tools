@@ -1,5 +1,5 @@
 <?php
-        header ("Content-Type:text/xml");
+        header ("Content-Type:text/xml; charset=utf-8");
 
         // Check parameters
         if (array_key_exists("datetime", $_GET)) {
@@ -28,12 +28,17 @@
 
         $vo = $_GET['vo'];
 
-        print "<scans>";
+        print "<scans>\n";
 	print "<datetime>";
 	ereg("([0-9]{4})([0-9]{2})([0-9]{2})-([0-9]{2})([0-9]{2})([0-9]{2})", $datetime, $arDate);
 	print $arDate[1]."-".$arDate[2]."-".$arDate[3]." ".$arDate[4].":".$arDate[5].":".$arDate[6];
-	print "</datetime>";
-	
+	print "</datetime>\n";
+	print "<info>";
+	if (file_exists("../../$vo/scan-se/$datetime/INFO.xml")) {
+	print file_get_contents("../../$vo/scan-se/$datetime/INFO.xml");
+	}
+	print "</info>\n";	
+
 	$localdir = opendir("../../$vo/scan-se/$datetime");
         $arUsersFiles = array();
         $arStatusFiles = array();
@@ -46,38 +51,38 @@
         }
 
         sort($arStatusFiles);
-	print "<scan-status>";
+	print "<scan-status>\n";
         foreach ($arStatusFiles as $id => $file) {
                 print "<scan-status-se>"; 
 		print file_get_contents("../../$vo/scan-se/$datetime/$file");	
-        	print "</scan-status-se>";
+        	print "</scan-status-se>\n";
 	} 
                
-        print "</scan-status>";
+        print "</scan-status>\n";
 
         // Generate the blocs for each SE
         sort($arUsersFiles);
         foreach ($arUsersFiles as $id => $file)
         {
-                print "<scan-se>";
+                print "<scan-se>\n";
 		ereg("^(.*)_users.xml$", $file, $arName);
                 $seHostName = $arName[1];
-                print "<HostName>".$seHostName."</HostName>";
-		print "<Users>";
+                print "<HostName>".$seHostName."</HostName>\n";
+		print "<Users>\n";
 		print file_get_contents("../../$vo/scan-se/$datetime/$file");
-		print "</Users>";
+		print "</Users>\n";
 		if (file_exists("../../$vo/scan-se/$datetime/$seHostName"."_suspended-expired.xml")) {		
-		print "<SuspendedExpired>";
+		print "<SuspendedExpired>\n";
 		print file_get_contents("../../$vo/scan-se/$datetime/$seHostName"."_suspended-expired.xml");
-		print "</SuspendedExpired>";
+		print "</SuspendedExpired>\n";
 		}
  		if (file_exists("../../$vo/scan-se/$datetime/$seHostName"."_unknown.xml")) {
-		print "<Unknown>";
+		print "<Unknown>\n";
 		print file_get_contents("../../$vo/scan-se/$datetime/$seHostName"."_unknown.xml");
-		print "</Unknown>";
+		print "</Unknown>\n";
 		}
 		print file_get_contents("../../$vo/scan-se/$datetime/$seHostName"."_email.xml");
-		print "</scan-se>";        	
+		print "\n</scan-se>\n";        	
 	}
         closedir($localdir);
 	print "</scans>";

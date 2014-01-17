@@ -87,7 +87,7 @@ mkdir -p $WDIR
 fi
 
 mkdir -p $WDIR/tmp
-LBS_OUT=$WDIR/tmp/$SEHOSTNAME_$$.lst
+LBS_OUT=$WDIR/tmp/${SEHOSTNAME}_$$.lst
 
 #--- The hostname_status file will help display the status of the analysis on the web report
 RESULT_STATUS=""
@@ -135,46 +135,46 @@ TMP_PARSE_AWK=$WDIR/parse-lfcbrowsese_$$.awk
 sed "s/@SPACE_THRESHOLD@/$USER_MIN_SPACE/" $MONITOR_SE_SPACE/parse-lfcbrowsese.awk.tpl > $TMP_PARSE_AWK
 
 if $XML_OUTPUT; then
-  echo -n "<emails>" >> $RESULT_EMAIL
+  echo  "<emails>" >> $RESULT_EMAIL
 fi
 awk -f $TMP_PARSE_AWK $LBS_OUT | while read LINE ; do
   dn=`echo $LINE | cut -d"|" -f1`
   used=`echo $LINE | cut -d"|" -f2`
- 
-  voms_user=`grep "$dn" $VOMS_USERS`
-  if test $? -eq 0; then
-    # Get the user's email address
-    if $XML_OUTPUT; then
+  if [[ $dn =~ ^/[a-zA-Z]+= ]]; then
+    voms_user=`grep "$dn" $VOMS_USERS`
+    if test $? -eq 0; then
+      # Get the user's email address
+      if $XML_OUTPUT; then
 	echo -n "<email>" >> $RESULT_EMAIL
 	# Regexp contains a - or a , depending on the voms-admin version
 	echo -n $voms_user |  awk '{ printf "%s", gensub("^.+,([^ ]+@[^ ]+)$", "\\1", 1); }'  >> $RESULT_EMAIL 
-	echo -n "</email>" >> $RESULT_EMAIL
+	echo  "</email>" >> $RESULT_EMAIL
 	echo -n "<User><DN>$dn</DN>"  >> $RESULT
     	echo -n "<UsedSpace>" >> $RESULT
 	echo -n $used | cut -d ' ' -f 1 | tr -d '\n' >> $RESULT
-	echo -n "</UsedSpace></User>"  >> $RESULT
-    else
+	echo "</UsedSpace></User>"  >> $RESULT
+      else
  	echo -n "$dn|"  >> $RESULT
         # Complex parsing due to several ambiguous separators: <user's dn>, <CA dn> - <email address>
 	# Regexp contains a - or a , depending on the voms-admin version
         echo -n $voms_user | awk '{ printf "%s", gensub("^.+ - ([^ ]+@[^ ]+)$", "\\1", 1); }' >> $RESULT
         echo "|$used"  >> $RESULT
-    fi
-  else
-    suspendedExpiredVomsUser=`grep "$dn" $SUSPENDED_EXPIRED_VOMS_USERS`
-    if test $? -eq 0; then
+      fi
+    else
+      suspendedExpiredVomsUser=`grep "$dn" $SUSPENDED_EXPIRED_VOMS_USERS`
+      if test $? -eq 0; then
 	if $XML_OUTPUT; then
 	  echo -n "<email>" >> $RESULT_EMAIL
           # Regexp contains a - or a , depending on the voms-admin version
           echo -n $suspendedExpiredVomsUser | awk '{ printf "%s", gensub("^.+,([^ ]+@[^ ]+)$", "\\1", 1); }'  >> $RESULT_EMAIL
-          echo -n "</email>" >> $RESULT_EMAIL
+          echo  "</email>" >> $RESULT_EMAIL
 	  echo -n "<User><DN>$dn</DN><UsedSpace>" >> $SUSPENDED_EXPIRED
           echo -n $used | cut -d ' ' -f 1 | tr -d '\n' >> $SUSPENDED_EXPIRED
-          echo -n "</UsedSpace></User>" >> $SUSPENDED_EXPIRED
+          echo  "</UsedSpace></User>" >> $SUSPENDED_EXPIRED
 	else
 	  echo "$dn|$used" >> $NOTFOUND
 	fi
-    else
+      else
     	if $XML_OUTPUT; then
 	  echo -n "<User><DN>$dn</DN><UsedSpace>" >> $NOTFOUND
 	  echo -n $used | cut -d ' ' -f 1 | tr -d '\n' >> $NOTFOUND
@@ -182,7 +182,8 @@ awk -f $TMP_PARSE_AWK $LBS_OUT | while read LINE ; do
     	else
 	  echo "$dn|$used" >> $NOTFOUND
         fi
-     fi
+      fi
+    fi
   fi
 done
 
@@ -224,7 +225,7 @@ if $XML_OUTPUT; then
   USED_SPACE=`echo $SPACE | cut -d"|" -f3`
   FREE_SPACE=`echo $SPACE | cut -d"|" -f2`
   TOTAL_SPACE=`echo $SPACE | cut -d"|" -f4`
-  echo "<HostName>${SEHOSTNAME}</HostName><UsedSpace>${USED_SPACE}</UsedSpace><FreeSpace>${FREE_SPACE}</FreeSpace><TotalSpace>${TOTAL_SPACE}</TotalSpace><UsedSpacePercentage>${USED_PERCENT}</UsedSpacePercentage><Status>completed</Status>" > $RESULT_STATUS
+  echo -n "<HostName>${SEHOSTNAME}</HostName><UsedSpace>${USED_SPACE}</UsedSpace><FreeSpace>${FREE_SPACE}</FreeSpace><TotalSpace>${TOTAL_SPACE}</TotalSpace><UsedSpacePercentage>${USED_PERCENT}</UsedSpacePercentage><Status>completed</Status>" > $RESULT_STATUS
 else
   echo "${SEHOSTNAME}|${USED_PERCENT}% full," | awk --field-separator "|" '{ printf "<a href=\"#%s\">%-51s</a>, %10s completed.\n",$1,$1,$2; }' > $RESULT_STATUS
 fi
