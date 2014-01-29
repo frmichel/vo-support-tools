@@ -22,7 +22,7 @@
 #      look for not in production or not monitored status in gocdb by service type (CREAM-CE or CE for CE, SRM for SE, WMS for WMS)
 #      look for draining or closed status in BDII using a by vo ldap search for CE
 # 1.3: look for suspended site certification status in the GOCDB for CE, SE and WMS
-
+# 1.4: fix a bug that removes the site name and makes that we never check the site certification status
 
 
 import sys
@@ -146,17 +146,17 @@ class SaxDowntimeHandle(ContentHandler):
 
     #Function analysing the start tag
     def startElement(self,name,attrs):
-	global serviceStatus, isServiceType
-	isServiceType=False
-	if name.lower()=="service_type": isServiceType=True
+        global serviceStatus, isServiceType
+        isServiceType=False
+        if name.lower()=="service_type": isServiceType=True
 
     #Function analysing the content of the tag
     def characters(self,content):
-	global serviceStatus, isServiceType, service
-	if isServiceType:
-	    if (((service == "CE") and (content.lower() in CE_SERVICES)) or ((service == "SE") and (content.lower() in SE_SERVICES)) or ((service == "WMS") and (content.lower() in WMS_SERVICES))):
-		if "downtime" not in serviceStatus:
-		    serviceStatus.append("downtime")
+        global serviceStatus, isServiceType, service
+        if isServiceType:
+            if (((service == "CE") and (content.lower() in CE_SERVICES)) or ((service == "SE") and (content.lower() in SE_SERVICES)) or ((service == "WMS") and (content.lower() in WMS_SERVICES))):
+                if "downtime" not in serviceStatus:
+                    serviceStatus.append("downtime")
 
 
 # -------------------------------------------------------------------------
@@ -168,49 +168,66 @@ class SaxDowntimeHandle(ContentHandler):
 # -------------------------------------------------------------------------
 class SaxServiceHandle(ContentHandler):
 
-    #Function analysing the start tag
+    # Function analysing the start tag
     def startElement(self, name, attrs):
-	global isServiceEndpoint, isServiceType, isInProduction, isMonitored, isSiteName, serviceEndpointFound, serviceType, serviceMonitored, serviceProduction, serviceStatus, siteName, siteNameTemp
-	isServiceEndpoint=False
-	if name.lower() == "service_endpoint": 
-	    isServiceEndpoint=True
-	    serviceEndpointFound=True
-	    serviceType=""
-	    serviceMonitored=""
-	    serviceProduction=""
-	isServiceType=False
-	if name.lower() == "service_type": isServiceType=True
-	isInProduction=False
-	if name.lower() == "in_production": isInProduction=True
-	isMonitored=False
-	if name.lower() == "node_monitored": isMonitored=True
-	isSiteName=False
-	if name.lower() == "sitename": isSiteName=True
+        global isServiceEndpoint, isServiceType, isInProduction, isMonitored, isSiteName, serviceEndpointFound, serviceType, serviceMonitored, serviceProduction, serviceStatus, siteName
+        if DEBUG: print "* Starting element " + name
+        isServiceEndpoint=False
+        if name.lower() == "service_endpoint": 
+            isServiceEndpoint=True
+            serviceEndpointFound=True
+            serviceType=""
+            serviceMonitored=""
+            serviceProduction=""
+
+        isServiceType=False
+        if name.lower() == "service_type": isServiceType=True
+        isInProduction=False
+        if name.lower() == "in_production": isInProduction=True
+        isMonitored=False
+        if name.lower() == "node_monitored": isMonitored=True
+        isSiteName=False
+        if name.lower() == "sitename": isSiteName=True
 
 
-    #Function analysing the content of the tag
+    # Function analysing the content of the tag
     def characters(self,content):
-	global isServiceEndpoint, isServiceType, isInProduction, isMonitored, isSiteName, serviceEndpointFound, serviceType, serviceMonitored, serviceProduction, serviceStatus, siteName, siteNameTemp
-	if serviceEndpointFound:
-	    if isServiceType: serviceType=content.lower()
-	    if isInProduction: serviceProduction=content.lower()
-	    if isMonitored: serviceMonitored=content.lower()
-	    if isSiteName: siteNameTemp=content
+        global isServiceEndpoint, isServiceType, isInProduction, isMonitored, isSiteName, serviceEndpointFound, serviceType, serviceMonitored, serviceProduction, serviceStatus, siteName
+        if serviceEndpointFound:
+            if isServiceType: 
+                serviceType=content.lower()
+                isServiceType = False
+            if isInProduction: 
+                serviceProduction=content.lower()
+                isInProduction = False
+            if isMonitored: 
+                serviceMonitored=content.lower()
+                isMonitored = False
+            if isSiteName:
+                siteName=content
+                isSiteName = False
 
-    #Function for the closing of the tag
+
+    # Function for the closing of the tag
     def endElement(self, name):
-	global isServiceEndpoint, isServiceType, isInProduction, isMonitored, isSiteName, serviceEndpointFound, serviceType, serviceMonitored, serviceProduction, serviceStatus, siteName, siteNameTemp
-	if name.lower() == "service_endpoint":
-	    if (((service == "CE") and (serviceType in CE_SERVICES)) or ((service == "SE") and (serviceType in SE_SERVICES)) or ((service == "WMS") and (serviceType in WMS_SERVICES))):
-		if serviceProduction == "n": 
-		    if "not in production" not in serviceStatus: 
-			serviceStatus.append("not in production")
-		if serviceMonitored == "n": 
-		    if "not monitored" not in serviceStatus: 
-			serviceStatus.append("not monitored")
-		siteName=siteNameTemp
-	    serviceEndpointFound=False
+        global isServiceEndpoint, isServiceType, isInProduction, isMonitored, isSiteName, serviceEndpointFound, serviceType, serviceMonitored, serviceProduction, serviceStatus, siteName
+        if DEBUG: print "* Ending element " + name
 
+        if name.lower() == "service_endpoint":
+            if (((service == "CE") and (serviceType in CE_SERVICES)) or ((service == "SE") and (serviceType in SE_SERVICES)) or ((service == "WMS") and (serviceType in WMS_SERVICES))):
+                if serviceProduction == "n": 
+                    if "not in production" not in serviceStatus: 
+                        serviceStatus.append("not in production")
+                if serviceMonitored == "n": 
+                    if "not monitored" not in serviceStatus: 
+                        serviceStatus.append("not monitored")
+
+                serviceEndpointFound = False
+                if DEBUG:
+                    print "serviceType: " + serviceType 
+                    print "serviceProduction: " + serviceProduction 
+                    print "serviceMonitored: " + serviceMonitored 
+                    print "siteName: " + siteName
 
 
 # -------------------------------------------------------------------------
@@ -245,6 +262,7 @@ class SaxSiteHandle(ContentHandler):
 def checkGocdbStatus(host):
 
     # Check if the node is in status downtime
+    if DEBUG: print "Checking GOCDB downtimes for " + host + "..."
     cmdString = CURL_CMD + "\"" + GOCDB_DOWNTIME_URL + host + "\""
     if DEBUG: print "Command: " + cmdString
     status, output = commands.getstatusoutput(cmdString)
@@ -255,6 +273,7 @@ def checkGocdbStatus(host):
         parseString(output, SaxDowntimeHandle())
     
     # Check if the node is in status "not in production" or "not monitored" and get the parent site name
+    if DEBUG: print "Checking GOCDB status for " + host + "..."
     cmdString = CURL_CMD + "\"" + GOCDB_SERVICE_URL + host + "\""
     if DEBUG: print "Command: " + cmdString
     status, output = commands.getstatusoutput(cmdString)
@@ -265,18 +284,19 @@ def checkGocdbStatus(host):
         parseString(output, SaxServiceHandle())
 
     # Check if parent site is suspended or not
-    if DEBUG: print "parent sitename="+siteName   
+    if DEBUG: print "Checking GOCDB site certification status for " + host + "..."
+    if DEBUG: print "Parent sitename: "+siteName   
     if len(siteName) == 0:
-	if DEBUG: print "Error when querying parent site name of host " + host
+        if DEBUG: print "Error when querying parent site name of host " + host
     else:
-	cmdString = CURL_CMD + "\"" + GOCDB_SITE_URL + siteName + "\""
-	if DEBUG: print "Command: " + cmdString
-	status, output = commands.getstatusoutput(cmdString)
-	if DEBUG: print "Response: " + output
-	if status <> 0:
-	    print "Error when querying the GOCDB for certification status: " + output
-	else:
-	    parseString(output, SaxSiteHandle())
+        cmdString = CURL_CMD + "\"" + GOCDB_SITE_URL + siteName + "\""
+        if DEBUG: print "Command: " + cmdString
+        status, output = commands.getstatusoutput(cmdString)
+        if DEBUG: print "Response: " + output
+        if status <> 0:
+            print "Error when querying the GOCDB for certification status: " + output
+        else:
+            parseString(output, SaxSiteHandle())
 
 # -------------------------------------------------------------------------
 # Checks the status of a CE in the BDII for a given vo and put the result 
@@ -289,14 +309,14 @@ def checkCEStatus(host):
     if DEBUG: print "Checking GlueCE " + host + "..."
     status, output = commands.getstatusoutput(ldapCE % {'TOPBDII': TOPBDII, 'CE': host})
     if len(output) != 0:
-	found=False
-	lines=output.splitlines()
-	for i in range(len(lines)):
-	    if not found:
-		attrib,value = lines[i].split(":")
-		if value.strip() != "Production":
-		    serviceStatus.append(value.strip().lower())
-		    found=True
+        found=False
+        lines=output.splitlines()
+        for i in range(len(lines)):
+            if not found:
+                attrib,value = lines[i].split(":")
+                if value.strip() != "Production":
+                    serviceStatus.append(value.strip().lower())
+                    found=True
 
 # -------------------------------------------------------------------------
 # Checks the status of an SE in the BDII and stores the result in var serviceStatus
@@ -388,7 +408,7 @@ if PRETTY:
 if SE:
     for host in listSE:
         serviceStatus = []
-	siteName=""	
+        siteName=""
         service = "SE"
         checkGocdbStatus(host)
         checkSEStatus(host)
@@ -397,7 +417,7 @@ if SE:
 if CE:
     for host in listCE:
         serviceStatus = []
-	siteName=""
+        siteName=""
         service = "CE"
         checkGocdbStatus(host)
         checkCEStatus(host)
@@ -406,7 +426,7 @@ if CE:
 if WMS:
     for host in listWMS:
         serviceStatus = []
-	siteName=""
+        siteName=""
         service = "WMS"
         checkGocdbStatus(host)
         printStatus(host)
