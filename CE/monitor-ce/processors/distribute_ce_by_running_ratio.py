@@ -35,101 +35,104 @@ import globvars
 # -------------------------------------------------------------------------
 
 def process(dataFiles):
-	# Global variables
-	DECIMAL_MARK = globvars.DECIMAL_MARK
-	DEBUG = globvars.DEBUG
-	OUTPUT_DIR = globvars.OUTPUT_DIR
+        # Global variables
+        DECIMAL_MARK = globvars.DECIMAL_MARK
+        DEBUG = globvars.DEBUG
+        OUTPUT_DIR = globvars.OUTPUT_DIR
 
-	# -------------------------------------------------------------------------
-	# Loop on all data files that were acquired in dataFiles, 
-	# and build a new table 'queues' that consolidates data per CE queue
-	# -------------------------------------------------------------------------
-	queues = {}
-	for (fileName, datetime, date, hour, rows, sum_VO_Waiting, sum_VO_Running) in dataFiles:
+        # -------------------------------------------------------------------------
+        # Loop on all data files that were acquired in dataFiles, 
+        # and build a new table 'queues' that consolidates data per CE queue
+        # -------------------------------------------------------------------------
+        queues = {}
+        for (fileName, datetime, date, hour, rows, sum_VO_Waiting, sum_VO_Running) in dataFiles:
 
-	    # Loop on all rows of the file
-	    for (hostname, structRow) in rows.iteritems():
+            # Loop on all rows of the file
+            for (hostname, structRow) in rows.iteritems():
 
-	        if hostname not in queues: 			# add only one entry for each CE queue
-	            queues[hostname] = {
-	                    'Running': 0,
-	                    'Waiting': 0,
-	                    'avgRatio': -1.0, 			# mean ratio R/(R+W)
-	                     }	
+                if hostname not in queues:                         # add only one entry for each CE queue
+                    queues[hostname] = {
+                            'Running': 0,
+                            'Waiting': 0,
+                            'avgRatio': -1.0,                         # mean ratio R/(R+W)
+                             }        
 
-	        queues[hostname]['Waiting'] += float(structRow['VO_Waiting'])
-	        queues[hostname]['Running'] += float(structRow['VO_Running'])
+                queues[hostname]['Waiting'] += float(structRow['VO_Waiting'])
+                queues[hostname]['Running'] += float(structRow['VO_Running'])
 
-	# Compute the mean R/(R+W)
-	for hostname in queues:
-	    R = float(queues[hostname]['Running'])
-	    W = float(queues[hostname]['Waiting'])
-	    if R+W != 0: 
-	        queues[hostname]['avgRatio'] = R/(W+R)
+        # Compute the mean R/(R+W)
+        for hostname in queues:
+            R = float(queues[hostname]['Running'])
+            W = float(queues[hostname]['Waiting'])
+            if R+W != 0: 
+                queues[hostname]['avgRatio'] = R/(W+R)
 
-	# -------------------------------------------------------------------------
-	# Compute the distribution of CE queues by ratio R/(R+W)
-	# -------------------------------------------------------------------------
-	writer=''
+        # -------------------------------------------------------------------------
+        # Compute the distribution of CE queues by ratio R/(R+W)
+        # -------------------------------------------------------------------------
+        writer=''
         if globvars.STDOUT:
-	    writer = csv.writer(sys.stdout, delimiter=globvars.CSV_DELIMITER,lineterminator=';')
-	    print('<'+os.path.splitext(os.path.basename(__file__))[0]+'>'),
-	    print('<Xaxis>'),
-	    writer.writerow(["'0.0 to 0.1'", "'0.1 to 0.2'", "'0.2 to 0.3'", "'0.3 to 0.4'", "'0.4 to 0.5'", "'0.5 to 0.6'", "'0.6 to 0.7'", "'0.7 to 0.8'", "'0.8 to 0.9'", "'0.9 to 1.0'", "'n.a'"])	
-	    print('</Xaxis>'),
-	else:
-	    print "Computing the distribution of CE queues by ratio R/(R+W)..."
-	    outputFile = globvars.OUTPUT_DIR + os.sep + "distribute_ce_by_running_ratio.csv"
-	    outputf = open(outputFile, 'wb')
-	    writer = csv.writer(outputf, delimiter=globvars.CSV_DELIMITER)
-	    writer.writerow(["0.0 to 0.1", "0.1 to 0.2", "0.2 to 0.3", "0.3 to 0.4", "0.4 to 0.5", "0.5 to 0.6", "0.6 to 0.7", "0.7 to 0.8", "0.8 to 0.9", "0.9 to 1.0", "n.a"])
+            writer = csv.writer(sys.stdout, delimiter=globvars.CSV_DELIMITER,lineterminator=';')
+            print('<'+os.path.splitext(os.path.basename(__file__))[0]+'>')
+            print('<Xaxis>'),
+            writer.writerow(["'0.0 to 0.1'", "'0.1 to 0.2'", "'0.2 to 0.3'", "'0.3 to 0.4'", "'0.4 to 0.5'", "'0.5 to 0.6'", "'0.6 to 0.7'", "'0.7 to 0.8'", "'0.8 to 0.9'", "'0.9 to 1.0'", "'n.a'"])        
+            print('</Xaxis>')
+        else:
+            print "Computing the distribution of CE queues by ratio R/(R+W)..."
+            outputFile = globvars.OUTPUT_DIR + os.sep + "distribute_ce_by_running_ratio.csv"
+            outputf = open(outputFile, 'wb')
+            writer = csv.writer(outputf, delimiter=globvars.CSV_DELIMITER)
+            writer.writerow(["0.0 to 0.1", "0.1 to 0.2", "0.2 to 0.3", "0.3 to 0.4", "0.4 to 0.5", "0.5 to 0.6", "0.6 to 0.7", "0.7 to 0.8", "0.8 to 0.9", "0.9 to 1.0", "n.a"])
 
-	# Loop on all data files that were acquired in dataFiles, and build a new table 'queues' that consolidates data per CE queue
-	distrib = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-	for hostname in queues:
-	    ratio = queues[hostname]['avgRatio']
-	    if ratio >= 0.0 and ratio < 0.1: distrib[0] += 1
-	    if ratio >= 0.1 and ratio < 0.2: distrib[1] += 1
-	    if ratio >= 0.2 and ratio < 0.3: distrib[2] += 1
-	    if ratio >= 0.3 and ratio < 0.4: distrib[3] += 1
-	    if ratio >= 0.4 and ratio < 0.5: distrib[4] += 1
-	    if ratio >= 0.5 and ratio < 0.6: distrib[5] += 1
-	    if ratio >= 0.6 and ratio < 0.7: distrib[6] += 1
-	    if ratio >= 0.7 and ratio < 0.8: distrib[7] += 1
-	    if ratio >= 0.8 and ratio < 0.9: distrib[8] += 1
-	    if ratio >= 0.9 and ratio < 1.0: distrib[9] += 1
-	    if ratio == -1.0: distrib[10] += 1
+        # Loop on all data files that were acquired in dataFiles, and build a new table 'queues' that consolidates data per CE queue
+        distrib = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+        for hostname in queues:
+            ratio = queues[hostname]['avgRatio']
+            if ratio >= 0.0 and ratio < 0.1: distrib[0] += 1
+            if ratio >= 0.1 and ratio < 0.2: distrib[1] += 1
+            if ratio >= 0.2 and ratio < 0.3: distrib[2] += 1
+            if ratio >= 0.3 and ratio < 0.4: distrib[3] += 1
+            if ratio >= 0.4 and ratio < 0.5: distrib[4] += 1
+            if ratio >= 0.5 and ratio < 0.6: distrib[5] += 1
+            if ratio >= 0.6 and ratio < 0.7: distrib[6] += 1
+            if ratio >= 0.7 and ratio < 0.8: distrib[7] += 1
+            if ratio >= 0.8 and ratio < 0.9: distrib[8] += 1
+            if ratio >= 0.9 and ratio < 1.0: distrib[9] += 1
+            if ratio == -1.0: distrib[10] += 1
 
-	if globvars.PERCENT:
-	    print('<Yaxis>'),
-	    writer.writerow([
-		str(round(distrib[0]*100/len(queues),2)).replace('.', globvars.DECIMAL_MARK),
-		str(round(distrib[1]*100/len(queues),2)).replace('.', globvars.DECIMAL_MARK),
-		str(round(distrib[2]*100/len(queues),2)).replace('.', globvars.DECIMAL_MARK),
-		str(round(distrib[3]*100/len(queues),2)).replace('.', globvars.DECIMAL_MARK),
-		str(round(distrib[4]*100/len(queues),2)).replace('.', globvars.DECIMAL_MARK),
-		str(round(distrib[5]*100/len(queues),2)).replace('.', globvars.DECIMAL_MARK),
-		str(round(distrib[6]*100/len(queues),2)).replace('.', globvars.DECIMAL_MARK),
-                str(round(distrib[7]*100/len(queues),2)).replace('.', globvars.DECIMAL_MARK),
-                str(round(distrib[8]*100/len(queues),2)).replace('.', globvars.DECIMAL_MARK),
-                str(round(distrib[9]*100/len(queues),2)).replace('.', globvars.DECIMAL_MARK),
-                str(round(distrib[10]*100/len(queues),2)).replace('.', globvars.DECIMAL_MARK)
-		])
-	    print('</Yaxis>'),
-	else:
-	    writer.writerow([
-		str(round(distrib[0]/len(queues), 4)).replace('.', globvars.DECIMAL_MARK),
-		str(round(distrib[1]/len(queues), 4)).replace('.', globvars.DECIMAL_MARK),
-		str(round(distrib[2]/len(queues), 4)).replace('.', globvars.DECIMAL_MARK),
-		str(round(distrib[3]/len(queues), 4)).replace('.', globvars.DECIMAL_MARK),
-		str(round(distrib[4]/len(queues), 4)).replace('.', globvars.DECIMAL_MARK),
-		str(round(distrib[5]/len(queues), 4)).replace('.', globvars.DECIMAL_MARK),
-		str(round(distrib[6]/len(queues), 4)).replace('.', globvars.DECIMAL_MARK),
-		str(round(distrib[7]/len(queues), 4)).replace('.', globvars.DECIMAL_MARK),
-		str(round(distrib[8]/len(queues), 4)).replace('.', globvars.DECIMAL_MARK),
-		str(round(distrib[9]/len(queues), 4)).replace('.', globvars.DECIMAL_MARK),
-		str(round(distrib[10]/len(queues), 4)).replace('.', globvars.DECIMAL_MARK)
-		]) 
-	if globvars.STDOUT:  print('</'+os.path.splitext(os.path.basename(__file__))[0]+'>'),
+        if len(queues) != 0:
+            if globvars.PERCENT:
+                print('<Yaxis>'),
+                writer.writerow([
+                    str(round(distrib[0]*100/len(queues),2)).replace('.', globvars.DECIMAL_MARK),
+                    str(round(distrib[1]*100/len(queues),2)).replace('.', globvars.DECIMAL_MARK),
+                    str(round(distrib[2]*100/len(queues),2)).replace('.', globvars.DECIMAL_MARK),
+                    str(round(distrib[3]*100/len(queues),2)).replace('.', globvars.DECIMAL_MARK),
+                    str(round(distrib[4]*100/len(queues),2)).replace('.', globvars.DECIMAL_MARK),
+                    str(round(distrib[5]*100/len(queues),2)).replace('.', globvars.DECIMAL_MARK),
+                    str(round(distrib[6]*100/len(queues),2)).replace('.', globvars.DECIMAL_MARK),
+                    str(round(distrib[7]*100/len(queues),2)).replace('.', globvars.DECIMAL_MARK),
+                    str(round(distrib[8]*100/len(queues),2)).replace('.', globvars.DECIMAL_MARK),
+                    str(round(distrib[9]*100/len(queues),2)).replace('.', globvars.DECIMAL_MARK),
+                    str(round(distrib[10]*100/len(queues),2)).replace('.', globvars.DECIMAL_MARK)
+                    ])
+                print('</Yaxis>\n'),
+            else:
+                writer.writerow([
+                    str(round(distrib[0]/len(queues), 4)).replace('.', globvars.DECIMAL_MARK),
+                    str(round(distrib[1]/len(queues), 4)).replace('.', globvars.DECIMAL_MARK),
+                    str(round(distrib[2]/len(queues), 4)).replace('.', globvars.DECIMAL_MARK),
+                    str(round(distrib[3]/len(queues), 4)).replace('.', globvars.DECIMAL_MARK),
+                    str(round(distrib[4]/len(queues), 4)).replace('.', globvars.DECIMAL_MARK),
+                    str(round(distrib[5]/len(queues), 4)).replace('.', globvars.DECIMAL_MARK),
+                    str(round(distrib[6]/len(queues), 4)).replace('.', globvars.DECIMAL_MARK),
+                    str(round(distrib[7]/len(queues), 4)).replace('.', globvars.DECIMAL_MARK),
+                    str(round(distrib[8]/len(queues), 4)).replace('.', globvars.DECIMAL_MARK),
+                    str(round(distrib[9]/len(queues), 4)).replace('.', globvars.DECIMAL_MARK),
+                    str(round(distrib[10]/len(queues), 4)).replace('.', globvars.DECIMAL_MARK)
+                    ]) 
+        if globvars.STDOUT:  print('</'+os.path.splitext(os.path.basename(__file__))[0]+'>')
 
-	if not globvars.STDOUT: outputf.close()
+        if not globvars.STDOUT: outputf.close()
+        
+        

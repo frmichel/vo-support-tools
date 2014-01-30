@@ -111,5 +111,7 @@ def process(dataFiles):
 		    str(round(nb_na/nbQ, 4)).replace('.', DECIMAL_MARK)
 		    ])
  
-	if globvars.STDOUT: print('</'+os.path.splitext(os.path.basename(__file__))[0]+'>'),
+	if globvars.STDOUT: print('</'+os.path.splitext(os.path.basename(__file__))[0]+'>')
 	if not globvars.STDOUT: outputf.close()
+	
+	

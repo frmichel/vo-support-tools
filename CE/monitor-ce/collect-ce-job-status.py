@@ -120,7 +120,7 @@ for line in output.splitlines():
 
 GlueCE = {}
 listCE = []
-status, output = commands.getstatusoutput("lcg-infosites --vo biomed ce -v 4")
+status, output = commands.getstatusoutput("lcg-infosites --vo " + VO + " ce -v 4")
 
 nbCE = 0
 for line in output.splitlines():

@@ -54,7 +54,7 @@ def process(dataFiles):
 	    dataPerDate[date]['Waiting'] += W
 	    dataPerDate[date]['Running'] += R
 
-    	outStream = sys.stdout
+        outStream = sys.stdout
 	if STDOUT:
 	    outStream = sys.stdout
 	else:
@@ -81,5 +81,7 @@ def process(dataFiles):
 		str(round(W/nbMeasures, 1)).replace('.', DECIMAL_MARK),
 		str(round(R/nbMeasures, 1)).replace('.', DECIMAL_MARK),
 		str(round(R/(R+W), 4)).replace('.', DECIMAL_MARK) ])
-	if STDOUT: print('</'+os.path.splitext(os.path.basename(__file__))[0]+'>'),
+	if STDOUT: print('</'+os.path.splitext(os.path.basename(__file__))[0]+'>')
 	if not STDOUT: outStream.close()
+	
+	

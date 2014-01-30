@@ -268,7 +268,7 @@ for fileName in files:
         if dataQualityCheck(structRow):
             rows[host] = structRow
         else: 
-            if globvars.DEBUG: print "QC removing CE", host + ": status=" + structRow['CE_Status']
+            if globvars.DEBUG: print "QC removing CE", host + ": status=[" + structRow['CE_Status'] + "]"
         # End of loop of rows
 
     # Calculate sums of number of jobs for the VO
@@ -288,7 +288,7 @@ for fileName in files:
 
 if globvars.DEBUG: print "Loaded", len(dataFiles), "files."
 
-if globvars.STDOUT: print "<running_ratio>", 
+if globvars.STDOUT: print "<running_ratio>"
 # -------------------------------------------------------------------------
 # Compute the running ratio R/(R+W) as a function of time
 if globvars.RUN_RUNNING_RATIO: processors.running_ratio.process(dataFiles)
@@ -318,5 +318,5 @@ if globvars.RUN_RUNNING_RATIO_BAD: processors.running_ratio_bad.process(dataFile
 # Compute the running ratio R/(R+W) per CE as a function of time
 if globvars.RUN_RUNNING_RATIO_PER_CE: processors.running_ratio_per_ce.process(dataFiles)
 
-if globvars.STDOUT: print "</running_ratio>",
+if globvars.STDOUT: print "</running_ratio>"
 
