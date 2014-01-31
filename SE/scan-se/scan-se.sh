@@ -129,7 +129,7 @@ Users minimum used space: ${USER_MIN_SPACE}GB
 EOF
 fi
 # Run the analisys on each SE in parallel
-echo "Starting analysis of SEs over ${SPACE_THRESHOLD}% of used space, reporting uses consumming over ${USER_MIN_SPACE}GB - $NOW_PRETTY"
+echo "Starting analysis of SEs over ${SPACE_THRESHOLD}% of used space, reporting users consumming at least ${USER_MIN_SPACE}GB - $NOW_PRETTY"
 for SEHOSTNAME in `cat $TMP_LIST_SE`
 do
   echo "$SEHOSTNAME"
