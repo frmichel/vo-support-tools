@@ -1,7 +1,7 @@
 #!/bin/bash
 # This script looks for differences between and SE dump and an LFC dump in order to detect zombie files (dark data) on SE,
 # and ghost files (lost entries on the LFC).
-# It takes as input a dump of the DPM SE obtained with command:
+# It takes as input a dump of the SE. For DPM SEs, this is possibly obtained with command:
 #       dpns-ls -lR <se_hostname>:/dpm/<domain_name>/home/<vo_name>
 # and a dump of the LFC obtained with the LFCBrowseSE tool:
 #       LFCBrowseSE <se_hostname> --vo <vo_name> --sfn
@@ -18,7 +18,7 @@ help()
 {
   echo
   echo "This script looks for differences between an SE dump and an LFC dump. It lists:"
-  echo "- zombie files (aka. dark data) on the SE, i.e. files present on a DPM storage element but not listed in the catalog,"
+  echo "- zombie files (aka. dark data) on the SE, i.e. files present on a storage element but not listed in the catalog,"
   echo "- ghost entries (aka. lost data) on the LFC, i.e. entries in the catalog with no more physical replica on the SE."
   echo "It produces 3 output files:"
   echo "- <se_hostname>_lfc_ghosts: SURLs of files only registered in the LFC (ghosts, aka. lost files)"
@@ -35,13 +35,15 @@ help()
   echo "  --older-than <age>: only files older than <age> months are listed in <se_hostname>_se_zombies."
   echo "        Defaults to 6 months."
   echo
-  echo "  --se-dump <filename>: dump of the DPM SE obtained with command:"
+  echo "  --se-dump <filename>: dump of the SE. For DPM SEs, this is possibly obtained with command:"
   echo "        dpns-ls -lR <se_hostname>:/dpm/<domain_name>/home/<vo_name>"
   echo
   echo "  --lfc-dump <filename>: dump of the LFC obtained with the LFCBrowseSE tool:"
   echo "        LFCBrowseSE <se_hostname> --vo <vo_name> --sfn"
   echo
-  echo "  --output-dir <directory>: directory where to write output files."
+  echo "  --work-dir <work directory>: where to store temporary files. Defaults to '.'."
+  echo
+  echo "  --result-dir <result directory>: where to store result files. Defaults to '.'."
   echo 
   echo "  -h, --help: display this help"
   echo
@@ -65,10 +67,8 @@ CONVERT_SE_DUMP=true
 # ----------------------------------------------------------------------------------------------------
 
 AGE=6		# Default minimum age of zombies to take into account
-INPUT_LFC_DUMP=
-INPUT_SE_DUMP=
-OUTPUT_DIR=
-SE_HOSTNAME=
+RESDIR=`pwd`
+WDIR=`pwd`
 SILENT=
 
 while [ ! -z "$1" ]
@@ -78,7 +78,8 @@ do
     --older-than ) AGE=$2; shift;;
     --lfc-dump ) INPUT_LFC_DUMP=$2; shift;;
     --se-dump ) INPUT_SE_DUMP=$2; shift;;
-    --output-dir ) OUTPUT_DIR=$2; shift;;
+    --result-dir ) RESDIR=$2; shift;;
+    --work-dir ) WDIR=$2; shift;;
     -s | --silent ) SILENT=true;;
     -h | --help ) help;;
     * ) help;;
@@ -86,15 +87,14 @@ do
   shift
 done
 
-if test -z "$SE_HOSTNAME" ; then help; fi
-if test -z "$INPUT_LFC_DUMP" ; then help; fi
-if test -z "$INPUT_SE_DUMP" ; then help; fi
-if test -z "$OUTPUT_DIR"; then help; fi
+if test -z "$SE_HOSTNAME" ; then echo "Option --se is mandatory."; help; fi
+if test -z "$INPUT_LFC_DUMP" ; then echo "Option --lfc-dump is mandatory."; help; fi
+if test -z "$INPUT_SE_DUMP" ; then echo "Option --se-dump is mandatory."; help; fi
 
-OUTPUT_LFC_GHOSTS=${SE_HOSTNAME}.output_lfc_lost_files
-OUTPUT_SE_ZOMBIES=${SE_HOSTNAME}.output_se_dark_data
-OUTPUT_COMMON=${SE_HOSTNAME}.output_common
-INPUT_SE_DUMP_SURLS=${SE_HOSTNAME}_se_dump_surls
+OUTPUT_LFC_GHOSTS=${RESDIR}/${SE_HOSTNAME}.output_lfc_lost_files
+OUTPUT_SE_ZOMBIES=${RESDIR}/${SE_HOSTNAME}.output_se_dark_data
+OUTPUT_COMMON=${RESDIR}/${SE_HOSTNAME}.output_common
+INPUT_SE_DUMP_SURLS=${WDIR}/${SE_HOSTNAME}_se_dump_surls
 
 # Files older than $AGE months are considered as zombies. Others are ignored.
 LIMIT_DATE=`date --date="$AGE months ago" "+%Y-%m-%d"`
@@ -117,23 +117,31 @@ fi
 # ----------------------------------------------------------------------------------------------------
 
 if test "$CONVERT_SE_DUMP" = "true"; then
-
-    echo -n "" > $OUTPUT_DIR/$INPUT_SE_DUMP_SURLS
+    echo -n "" > $INPUT_SE_DUMP_SURLS
     
     if test -z "$SILENT"; then
 	echo "Building the list of SURLs from file ${INPUT_SE_DUMP}..."
     fi
 
-    # Convert the gfal2 dump output to format YYYY-MM-DD SURL lines
+    # Convert the SE dump output to format YYYY-MM-DD SURL lines
     # The selected date is the last modification date as creation 
     # date may be wrong for gsiftp protocol
-    grep ^- $INPUT_SE_DUMP | cut -d ' ' -f 3,5 | sed 's/:84[0-9][0-9]//g' > $OUTPUT_DIR/$INPUT_SE_DUMP_SURLS
+    grep ^- $INPUT_SE_DUMP | cut -d ' ' -f 3,5 | sed 's/:84[0-9][0-9]//g' > $INPUT_SE_DUMP_SURLS
 
     if test -z "$SILENT"; then
-	echo "Found `wc -l $OUTPUT_DIR/$INPUT_SE_DUMP_SURLS | awk -- '{print $1}'` SURLs in input file $INPUT_SE_DUMP."
+	echo "Found `wc -l $INPUT_SE_DUMP_SURLS | awk -- '{print $1}'` SURLs in input file $INPUT_SE_DUMP."
     fi
-
 fi
+
+
+# ----------------------------------------------------------------------------------------------------
+# --- Display the number of files found in LFC dump 
+# ----------------------------------------------------------------------------------------------------
+
+if test -z "$SILENT"; then
+        echo "Found `cat $INPUT_LFC_DUMP | awk -- '/^$/{next} /^Pro/{next} {print $2}'  | wc -l | awk -- '{print $1}'` SURLs in input file $INPUT_LFC_DUMP."
+fi
+
 # ----------------------------------------------------------------------------------------------------
 #--- Check zombie files: loop on all SURLs in the SE dump, and search each one in the LFC dump
 # ----------------------------------------------------------------------------------------------------
@@ -142,8 +150,8 @@ if test -z "$SILENT"; then
   echo -n "Looking for SE zombie files... "
 fi
 
-echo -n "" > $OUTPUT_DIR/$OUTPUT_SE_ZOMBIES
-cat $OUTPUT_DIR/$INPUT_SE_DUMP_SURLS | while read LINE; do
+echo -n "" > $OUTPUT_SE_ZOMBIES
+cat $INPUT_SE_DUMP_SURLS | while read LINE; do
   FILEDATE=`echo $LINE | awk '{print $1}'`
   FILEDATE_TS=`date --date $FILEDATE "+%s"`
   SURL=`echo $LINE | awk '{print $2}'`
@@ -152,13 +160,13 @@ cat $OUTPUT_DIR/$INPUT_SE_DUMP_SURLS | while read LINE; do
   if ((FILEDATE_TS < LIMIT_DATE_TS)); then
     # Check if that SURL is also in the LFC dump
     if ! grep --silent $SURL $INPUT_LFC_DUMP; then
-      echo $SURL >> $OUTPUT_DIR/$OUTPUT_SE_ZOMBIES
+      echo $SURL >> $OUTPUT_SE_ZOMBIES
     fi
   fi
 done
 
 if test -z "$SILENT"; then
-  echo "Found `wc -l $OUTPUT_DIR/$OUTPUT_SE_ZOMBIES | awk -- '{print $1}'` zombie files on SE."
+  echo "Found `wc -l $OUTPUT_SE_ZOMBIES | awk -- '{print $1}'` zombie files on SE."
 fi
 
 # ----------------------------------------------------------------------------------------------------
@@ -171,30 +179,30 @@ fi
 
 # Loop on lines, skip empty lines and lines starting with "Progress" or "Processing". 
 # Keep only second word on the line ($2) => the SURL
-echo -n "" > $OUTPUT_DIR/$OUTPUT_LFC_GHOSTS
-echo -n "" >  $OUTPUT_DIR/${OUTPUT_COMMON}
+echo -n "" > $OUTPUT_LFC_GHOSTS
+echo -n "" >  ${OUTPUT_COMMON}
 cat $INPUT_LFC_DUMP | awk -- '/^$/{next} /^Pro/{next} {print $2}' | while read SURL; do
 
   # Check if that SURL is also in the SE dump
-  if grep --silent $SURL $OUTPUT_DIR/$INPUT_SE_DUMP_SURLS; then
-    echo $SURL >> $OUTPUT_DIR/${OUTPUT_COMMON}
+  if grep --silent $SURL $INPUT_SE_DUMP_SURLS; then
+    echo $SURL >> ${OUTPUT_COMMON}
   else
-    echo $SURL >> $OUTPUT_DIR/$OUTPUT_LFC_GHOSTS
+    echo $SURL >> $OUTPUT_LFC_GHOSTS
   fi
 done
 
 if test -z "$SILENT"; then
-  echo "Found `wc -l $OUTPUT_DIR/$OUTPUT_LFC_GHOSTS | awk -- '{print $1}'` ghost entries in LFC."
-  echo "Found `wc -l $OUTPUT_DIR/$OUTPUT_COMMON | awk -- '{print $1}'` files common to SE and LFC."
+  echo "Found `wc -l $OUTPUT_LFC_GHOSTS | awk -- '{print $1}'` ghost entries in LFC."
+  echo "Found `wc -l $OUTPUT_COMMON | awk -- '{print $1}'` files common to SE and LFC."
 fi
 
-NB_DARK_DATA=`wc -l $OUTPUT_DIR/$OUTPUT_SE_ZOMBIES | cut -d ' ' -f1`
-NB_LOST_FILES=`wc -l $OUTPUT_DIR/$OUTPUT_LFC_GHOSTS | cut -d ' ' -f1`
-NB_COMMON=`wc -l $OUTPUT_DIR/$OUTPUT_COMMON | cut -d ' ' -f1`
+NB_DARK_DATA=`wc -l $OUTPUT_SE_ZOMBIES | cut -d ' ' -f1`
+NB_LOST_FILES=`wc -l $OUTPUT_LFC_GHOSTS | cut -d ' ' -f1`
+NB_COMMON=`wc -l $OUTPUT_COMMON | cut -d ' ' -f1`
+
+# Calculate the percent of zombie and ghost files found
 NB_FILES_TOTAL_LFC=$(($NB_LOST_FILES+$NB_COMMON))
 NB_FILES_TOTAL_SE=$(($NB_DARK_DATA+$NB_COMMON))
-PERCENT_LOST_FILES=
-PERCENT_DARK_DATA=
 
 if [ $NB_FILES_TOTAL_LFC -gt 0 ]; then
     PERCENT_LOST_FILES=$(($NB_LOST_FILES*100/$NB_FILES_TOTAL_LFC))
@@ -208,7 +216,8 @@ else
     PERCENT_DARK_DATA='N/A'
 fi
 
-echo "<checkResult><hostname>$SE_HOSTNAME</hostname><darkData>$NB_DARK_DATA</darkData><percentDarkData>$PERCENT_DARK_DATA</percentDarkData><lostFiles>$NB_LOST_FILES</lostFiles><percentLostFiles>$PERCENT_LOST_FILES</percentLostFiles></checkResult>" > $OUTPUT_DIR/${SE_HOSTNAME}_check_result.xml
+# output xml data
+echo "<checkResult><hostname>$SE_HOSTNAME</hostname><darkData>$NB_DARK_DATA</darkData><percentDarkData>$PERCENT_DARK_DATA</percentDarkData><lostFiles>$NB_LOST_FILES</lostFiles><percentLostFiles>$PERCENT_LOST_FILES</percentLostFiles></checkResult>" > $RESDIR/${SE_HOSTNAME}_check_result.xml
 
 
 if test -z "$SILENT"; then

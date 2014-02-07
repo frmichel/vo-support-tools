@@ -16,10 +16,10 @@
 help()
 {
   
-  echo " This script check the consistency of all active SEs"
-  echo " It sequentially do the following actions by calling the "
-  echo " corresponding script:"
-  echo " - call list-se-urls.py"
+  echo " This script checks the consistency of all active SEs."
+  echo " It sequentially does the following actions by calling the"
+  echo " corresponding scripts:"
+  echo " - call list-se-urls.py: get the SURLs of all SEs supporting the VO."
   echo " - for each SE of the list:"
   echo "       - call check-se.sh"
   echo 
@@ -35,24 +35,29 @@ help()
   echo "$0 [-h|--help]"
   echo "$0 [-s|--silent] [--older-than <age>] --se <SE hostname> --url <url> --datetime <datetime>"
   echo
-  echo "  --vo <vo>: the vo"
+  echo "  --vo <VO>: the Virtual Organisation to query. Defaults to biomed."
   echo
-  echo "  --lavoisier-host <host>: The Lavoisier host"
+  echo "  --lavoisier-host <host>: Lavoisier hostname, defaults to localhost."
   echo
-  echo "  --lavoisier-port <port>: the Lavoisier port"
+  echo "  --lavoisier-port <port>: Lavoisier port, defaults to 8080."
   echo
-  echo "  --older-than <age> : the minimum age of checked files (in months)"
+  echo "  --older-than <age> : the minimum age of checked files (in months). Defaults to 6 months."
   echo
-  echo "  --output-dir <directory>: the output directory"
+  echo "  --work-dir <work directory>: where to store temporary files. The date is appended to the directory,"
+  echo "           formatted as <work directory>/YYYYMMDD-HHMMSS. Defaults to './<date>'."
+  echo
+  echo "  --result-dir <result directory>: where to store result files, that is <hostname>_email."
+  echo "           The date is appended to the directory, formatted as <result directory>/YYYYMMDD-HHMMSS."
+  echo "           Defaults to './<date>'."
   echo
   echo "  -h, --help: display this help"
-  echo
-  echo "  -s, --silence: be as silent as possible"
   echo
   echo "Call example:"
   echo "   ./check-all-ses.sh --vo biomed \ "
   echo "                 --lavoisier-host localhost \ "
   echo "                 --lavoisier-port 8080 \ "
+  echo "                 --work-dir /tmp/myVo/cleanup-se"
+  echo '                 --result-dir $HOME/public_html/myVo/cleanup-se'
   echo
   exit 1
 }
@@ -62,12 +67,20 @@ help()
 # Check parameters and set environment variables
 # ----------------------------------------------------------------------------------------------------
 
+if test -z "$VO_SUPPORT_TOOLS"; then
+    echo "Please set variable \$VO_SUPPORT_TOOLS before calling $0."
+    exit 1
+fi
+CLEANUPSE=$VO_SUPPORT_TOOLS/SE/consistency
+
+NOW=`date "+%Y%m%d-%H%M%S"`
+WDIR=`pwd`/$NOW
+RESDIR=`pwd`/$NOW
+
+VO=biomed
 AGE=6
-VO='biomed'
 LAVOISIER_HOST='localhost'
 LAVOISIER_PORT='8080'
-OUTPUT_DIR=
-SILENT=
 
 while [ ! -z "$1" ]
 do
@@ -76,46 +89,53 @@ do
     --lavoisier-host ) LAVOISIER_HOST=$2; shift;;
     --lavoisier-port ) LAVOISIER_PORT=$2; shift;;
     --older-than ) AGE=$2; shift;;    
-    --output-dir ) OUTPUT_DIR=$2; shift;;
-    -s | --silent ) SILENT=true;;
+    --work-dir ) WDIR=$2/$NOW; shift;;
+    --result-dir ) RESDIR=$2/$NOW; shift;;
     -h | --help ) help;;
     * ) help;;
   esac
   shift
 done
 
-if test -z "$OUTPUT_DIR" ; then help; fi
+echo "Starting cleanup of all active SEs..."
+mkdir -p $WDIR $RESDIR
 
-echo "Checking all active SEs consistency"
-
-if [ ! -d $OUTPUT_DIR ];
-    then mkdir $OUTPUT_DIR;
-fi
-
-./list-se-urls.py --vo $VO --lavoisier-host $LAVOISIER_HOST --lavoisier-port $LAVOISIER_PORT --output-file ${OUTPUT_DIR}/list_ses_urls.txt --xml-output-file ${OUTPUT_DIR}/list_ses_urls.xml --debug > ${OUTPUT_DIR}/log_list_se_urls.txt
-
+LISTSE=$WDIR/list_ses_urls.txt
+LISTSEXML=$RESDIR/list_ses_urls.xml
+echo "Retreiving the list of SE supporting the VO..."
+$CLEANUPSE/list-se-urls.py --vo $VO --lavoisier-host $LAVOISIER_HOST --lavoisier-port $LAVOISIER_PORT --output-file ${LISTSE} --xml-output-file ${LISTSEXML} --debug > ${WDIR}/list_se_urls.log
 if [ $? -ne 0 ];
-    then echo "list-se-urls.py call failed";exit 1;
+    then echo "list-se-urls.py call failed, check ${WDIR}/list_se_urls.log."; exit 1
+fi
+if [ ! -e $LISTSE ];
+    then echo "List of SEs URLs cannot be found: $LISTSE."; exit 1
 fi
 
-if [ ! -e $OUTPUT_DIR/list_ses_urls.txt ];
-    then echo "list SEs urls file generation failed";exit 1;
-fi
-cat $OUTPUT_DIR/list_ses_urls.txt | while read LINE; do
+nb=0
+# Run the analisys on each SE in parallel
+cat $LISTSE | while read LINE; do
     SE_HOSTNAME=`echo $LINE | cut -d ' ' -f 1`
     SE_URL=`echo $LINE | cut -d ' ' -f 5`
-    echo "Checking SE $SE_HOSTNAME ..."
-    ./check-se.sh --vo $VO --se $SE_HOSTNAME --url $SE_URL --older-than $AGE --output-dir $OUTPUT_DIR &
+    echo "Running cleanup process on SE ${SE_HOSTNAME}..."
+    $CLEANUPSE/check-se.sh --vo $VO --se $SE_HOSTNAME --url $SE_URL --older-than $AGE --work-dir $WDIR --result-dir $RESDIR > $WDIR/check-se.log &
+    # Wait for 10 minites between each run
+    
+    # ###### DEBUG ########
+    #nb=`expr $nb + 1`
+    #if [ "$nb" -gt "10" ]; then
+    #    break
+    #fi
+    # ###### DEBUG ########
+    
+    sleep 600
 done
-DATETIME=`basename $OUTPUT_DIR`
-NB_SES=`cat $OUTPUT_DIR/list_ses_urls.txt | wc -l`
 
-if [ -e $OUTPUT_DIR/INFO.xml ];
-    then rm $OUTPUT_DIR/INFO.xml;
-fi
-
-cat <<EOF >> $OUTPUT_DIR/INFO.xml
-<info><datetime>$DATETIME</datetime><olderThan>$AGE</olderThan><nbSEs>$NB_SES</nbSEs></info>
+# Prepare web report with date and parameters
+rm -f $RESDIR/INFO.xml
+NB_SES=`cat $LISTSE | wc -l`
+cat <<EOF >> $RESDIR/INFO.xml
+<info><datetime>$NOW</datetime><olderThan>$AGE</olderThan><nbSEs>$NB_SES</nbSEs></info>
 EOF
 
-exit 0; 
+exit 0
+
