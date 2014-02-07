@@ -33,7 +33,9 @@ help()
   echo 
   echo "Usage:"
   echo "$0 [-h|--help]"
-  echo "$0 [-s|--silent] [--older-than <age>] --se <SE hostname> --url <url> --datetime <datetime>"
+  echo "$0 --se <SE hostname> --url <url> --datetime <datetime> [--vo VO] [--older-than <age>] "
+  echo "   [--work-dir <work directory>] [--result-dir <result directory>]"
+  echo "   [--lavoisier-host <hostname>] [--lavoisier-port <port>]"
   echo
   echo "  --vo <VO>: the Virtual Organisation to query. Defaults to biomed."
   echo
@@ -53,7 +55,7 @@ help()
   echo "  -h, --help: display this help"
   echo
   echo "Call example:"
-  echo "   ./check-all-ses.sh --vo biomed \ "
+  echo "   ./check-all-ses.sh --vo biomed --older-than 6 \ "
   echo "                 --lavoisier-host localhost \ "
   echo "                 --lavoisier-port 8080 \ "
   echo "                 --work-dir /tmp/myVo/cleanup-se"
@@ -71,7 +73,7 @@ if test -z "$VO_SUPPORT_TOOLS"; then
     echo "Please set variable \$VO_SUPPORT_TOOLS before calling $0."
     exit 1
 fi
-CLEANUPSE=$VO_SUPPORT_TOOLS/SE/consistency
+CLEANUPSE=$VO_SUPPORT_TOOLS/SE/cleanup-se
 
 NOW=`date "+%Y%m%d-%H%M%S"`
 WDIR=`pwd`/$NOW
@@ -103,7 +105,7 @@ mkdir -p $WDIR $RESDIR
 LISTSE=$WDIR/list_ses_urls.txt
 LISTSEXML=$RESDIR/list_ses_urls.xml
 echo "Retreiving the list of SE supporting the VO..."
-$CLEANUPSE/list-se-urls.py --vo $VO --lavoisier-host $LAVOISIER_HOST --lavoisier-port $LAVOISIER_PORT --output-file ${LISTSE} --xml-output-file ${LISTSEXML} --debug > ${WDIR}/list_se_urls.log
+$CLEANUPSE/list-se-urls.py --vo $VO --lavoisier-host $LAVOISIER_HOST --lavoisier-port $LAVOISIER_PORT --output-file ${LISTSE} --xml-output-file ${LISTSEXML} --debug > ${WDIR}/list_ses_urls.log
 if [ $? -ne 0 ];
     then echo "list-se-urls.py call failed, check ${WDIR}/list_se_urls.log."; exit 1
 fi
@@ -111,21 +113,21 @@ if [ ! -e $LISTSE ];
     then echo "List of SEs URLs cannot be found: $LISTSE."; exit 1
 fi
 
-nb=0
+nb=1
 # Run the analisys on each SE in parallel
 cat $LISTSE | while read LINE; do
     SE_HOSTNAME=`echo $LINE | cut -d ' ' -f 1`
     SE_URL=`echo $LINE | cut -d ' ' -f 5`
     echo "Running cleanup process on SE ${SE_HOSTNAME}..."
-    $CLEANUPSE/check-se.sh --vo $VO --se $SE_HOSTNAME --url $SE_URL --older-than $AGE --work-dir $WDIR --result-dir $RESDIR > $WDIR/check-se.log &
+    $CLEANUPSE/check-se.sh --vo $VO --se $SE_HOSTNAME --url $SE_URL --older-than $AGE --work-dir $WDIR --result-dir $RESDIR > $WDIR/check-se-${SE_HOSTNAME}.log &
     # Wait for 10 minites between each run
     
-    # ###### DEBUG ########
-    #nb=`expr $nb + 1`
-    #if [ "$nb" -gt "10" ]; then
-    #    break
-    #fi
-    # ###### DEBUG ########
+    ####### DEBUG ########
+    if [ "$nb" -ge "5" ]; then
+        break
+    fi
+    nb=`expr $nb + 1`
+    ####### DEBUG ########
     
     sleep 600
 done

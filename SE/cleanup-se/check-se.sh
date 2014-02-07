@@ -32,7 +32,8 @@ help()
   echo
   echo "Usage:"
   echo "$0 [-h|--help]"
-  echo "$0 [-s|--silent] [--older-than <age>] --se <SE hostname> --url <url> --datetime <datetime>"
+  echo "$0 --se <SE hostname> --url <url> [--vo VO] [--older-than <age>] "
+  echo "   [--work-dir <work directory>] [--result-dir <result directory>]"  
   echo
   echo "  --se <SE hostname>: the storage element host name. Mandatory."
   echo
@@ -52,7 +53,7 @@ help()
   echo "   ./check-se.sh --se sampase.if.usp.br \ "
   echo "                 --url srm://sampase.if.usp.br:8446/dpm/if.usp.br/home/biomed \ "
   echo "                 --older-than 6 \ "
-  echo "                 --result-dir $HOME/public_html/myVO/cleanup-se/20140127-120000"
+  echo "                 --result-dir \$HOME/public_html/myVO/cleanup-se/20140127-120000"
   echo
   exit 1
 }
@@ -67,11 +68,11 @@ if test -z "$VO_SUPPORT_TOOLS"; then
     exit 1
 fi
 if test -z "$LFC_HOST"; then
-    echo "Please set variable $\LFC_HOST before calling $0, e.g. export LFC_HOST=lfc-biomed.in2p3.fr"
+    echo "Please set variable \$LFC_HOST before calling $0, e.g. export LFC_HOST=lfc-biomed.in2p3.fr"
     exit 1
 fi
 
-CLEANUPSE=$VO_SUPPORT_TOOLS/SE/consistency
+CLEANUPSE=$VO_SUPPORT_TOOLS/SE/cleanup-se
 
 WDIR=`pwd`
 RESDIR=`pwd`
@@ -99,7 +100,7 @@ mkdir -p $WDIR
 
 # Dump the list of files on the SE based on the catalog
 LFCDUMP=$WDIR/dump_lfc_${SE_HOSTNAME}.txt
-echo "Running LFCBrowseSE on SE ${SE}..."
+echo "Running LFCBrowseSE on SE ${SE_HOSTNAME}..."
 $VO_SUPPORT_TOOLS/SE/lfc-browse-se/LFCBrowseSE $SE_HOSTNAME --vo $VO --sfn > $LFCDUMP
 if [ $? -ne 0 ];
     then echo "LFCBrowseSE call failed"; exit 1
@@ -111,19 +112,19 @@ fi
 
 # Dump the list of files on the SE based on the SE itself
 SEDUMP=$WDIR/dump_se_${SE_HOSTNAME}.txt
-echo "Running dump-se-files.py on SE ${SE}..."
-$CLEANUPSE/dump-se-files.py --url $URL --output-file $SEDUMP --debug > ${WDIR}/log_${SE_HOSTNAME}_dump_se_files.txt
+echo "Running dump-se-files.py on SE ${SE_HOSTNAME}..."
+$CLEANUPSE/dump-se-files.py --url $URL --output-file $SEDUMP --debug
 if [ $? -ne 0 ];
-    then echo "dump-se-files.py call failed. Check ${WDIR}/log_${SE_HOSTNAME}_dump_se_files.txt."; exit 1
+    then echo "dump-se-files.py call failed. Check ${WDIR}/${SE_HOSTNAME}.log."; exit 1
 fi
 if [ ! -e $SEDUMP ];
     then echo "SE dump file generation failed, cannot read ${SEDUMP}."; exit 1
 fi
 
 # Run the difference between both dumps LFC and SE
-$CLEANUPSE/diff-se-dump-lfc.sh --se-dump $SEDUMP --lfc-dump $LFCDUMP --older-than $AGE --se $SE_HOSTNAME --work-dir $WDIR --result-dir $RESDIR > ${WDIR}/log_${SE_HOSTNAME}_diff_se_dump.txt
+$CLEANUPSE/diff-se-dump-lfc.sh --se-dump $SEDUMP --lfc-dump $LFCDUMP --older-than $AGE --se $SE_HOSTNAME --work-dir $WDIR --result-dir $RESDIR
 if [ $? -ne 0 ];
-    then echo "Difference betwen LFC and SE dumps failed. Check file ${WDIR}/log_${SE_HOSTNAME}_diff_se_dump.txt."; exit 1;
+    then echo "Difference betwen LFC and SE dumps failed. Check file ${WDIR}/${SE_HOSTNAME}.log"; exit 1;
 fi
 
 exit 0

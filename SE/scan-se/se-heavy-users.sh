@@ -81,10 +81,7 @@ if test -z "$LFC_HOST"; then
     echo "Please set variable LFC_HOST before calling $0, e.g. export LFC_HOST=lfc-biomed.in2p3.fr"
     exit 1
 fi
-if ! [ -d $WDIR ]; then
-
-mkdir -p $WDIR
-fi
+if ! [ -d $WDIR ]; then mkdir -p $WDIR; fi
 
 mkdir -p $WDIR/tmp
 LBS_OUT=$WDIR/tmp/${SEHOSTNAME}_$$.lst
