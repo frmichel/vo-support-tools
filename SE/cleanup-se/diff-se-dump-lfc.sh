@@ -44,7 +44,7 @@ help()
   echo "  --work-dir <work directory>: where to store temporary files. Defaults to '.'."
   echo
   echo "  --result-dir <result directory>: where to store result files. Defaults to '.'."
-  echo 
+  echo
   echo "  -h, --help: display this help"
   echo
   echo "  -s, --silence: be as silent as possible"
@@ -58,7 +58,7 @@ help()
   exit 1
 }
 
-# Set to true to skip the convertion into SURLs (time consuming). 
+# Set to true to skip the convertion into SURLs (time consuming).
 # To use when the file is already present in the local directory.
 CONVERT_SE_DUMP=true
 
@@ -118,13 +118,13 @@ fi
 
 if test "$CONVERT_SE_DUMP" = "true"; then
     echo -n "" > $INPUT_SE_DUMP_SURLS
-    
+
     if test -z "$SILENT"; then
 	echo "Building the list of SURLs from file ${INPUT_SE_DUMP}..."
     fi
 
     # Convert the SE dump output to format YYYY-MM-DD SURL lines
-    # The selected date is the last modification date as creation 
+    # The selected date is the last modification date as creation
     # date may be wrong for gsiftp protocol
     grep ^- $INPUT_SE_DUMP | cut -d ' ' -f 3,5 | sed 's/:84[0-9][0-9]//g' > $INPUT_SE_DUMP_SURLS
 
@@ -135,7 +135,7 @@ fi
 
 
 # ----------------------------------------------------------------------------------------------------
-# --- Display the number of files found in LFC dump 
+# --- Display the number of files found in LFC dump
 # ----------------------------------------------------------------------------------------------------
 
 if test -z "$SILENT"; then
@@ -177,7 +177,7 @@ if test -z "$SILENT"; then
   echo -n "Looking for LFC ghost entries... "
 fi
 
-# Loop on lines, skip empty lines and lines starting with "Progress" or "Processing". 
+# Loop on lines, skip empty lines and lines starting with "Progress" or "Processing".
 # Keep only second word on the line ($2) => the SURL
 echo -n "" > $OUTPUT_LFC_GHOSTS
 echo -n "" >  ${OUTPUT_COMMON}
