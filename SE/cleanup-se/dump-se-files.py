@@ -187,4 +187,5 @@ ls_rec(options.url,f)
 # Final cleanup
 if outputToFile:
     f.close()
-exit(0)
+
+sys.exit(0)
