@@ -44,7 +44,7 @@ optParser.add_option("--debug", action = "store_true", dest = "debug",
 (options, args)  =  optParser.parse_args()
 
 # Check options validity
-if options.url =  = '':
+if options.url == '':
     optParser.error("Option --url is mandatory.")
     exit(1)
 
