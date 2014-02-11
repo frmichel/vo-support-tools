@@ -65,12 +65,12 @@ def mode_to_rights(st_mode) :
     # l for symbolic link
     # - for files
     if stat.S_ISDIR(st_mode):
-        permstr + =  'd'
+        permstr +=  'd'
     else:
         if stat.S_ISLNK(st_mode):
-            permstr + =  'l'
+            permstr +=  'l'
         else:
-            permstr + =  '-'
+            permstr +=  '-'
     # Loops to call the S_IRUSR, S_IWUSR etc... attribute of st_mode item
     # to affect r,w or x permission to user, group and other
     usertypes  =  ['USR', 'GRP', 'OTH']
@@ -79,9 +79,9 @@ def mode_to_rights(st_mode) :
         for permtype in perm_types:
             perm  =  getattr(stat, 'S_I%s%s' % (permtype, usertype))
             if st_mode & perm:
-                permstr + =  permtype.lower()
+                permstr +=  permtype.lower()
             else:
-                permstr + =  '-'
+                permstr +=  '-'
     # Return the permissions string
     return permstr
 
