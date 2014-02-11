@@ -7,7 +7,7 @@
 #   - the creation date
 #   - the last modification date
 #   - the size
-#   - the full file path         
+#   - the full file path
 
 import sys
 import os
@@ -44,7 +44,7 @@ optParser.add_option("--debug", action = "store_true", dest = "debug",
 (options, args)  =  optParser.parse_args()
 
 # Check options validity
-if options.url =  = '':
+if options.url == '':
     optParser.error("Option --url is mandatory.")
     exit(1)
 
@@ -56,7 +56,7 @@ context = gfal2.creat_context()
 
 # Method that format a stat.st_mode item into `ls -l` like permissions
 def mode_to_rights(st_mode) :
-    
+
     # Variable containing the result permission string
     permstr  =  ''
 
@@ -65,13 +65,13 @@ def mode_to_rights(st_mode) :
     # l for symbolic link
     # - for files
     if stat.S_ISDIR(st_mode):
-        permstr + =  'd'
+        permstr +=  'd'
     else:
         if stat.S_ISLNK(st_mode):
-            permstr + =  'l'
+            permstr +=  'l'
         else:
-            permstr + =  '-'
-    # Loops to call the S_IRUSR, S_IWUSR etc... attribute of st_mode item        
+            permstr +=  '-'
+    # Loops to call the S_IRUSR, S_IWUSR etc... attribute of st_mode item
     # to affect r,w or x permission to user, group and other
     usertypes  =  ['USR', 'GRP', 'OTH']
     for usertype in usertypes:
@@ -79,9 +79,9 @@ def mode_to_rights(st_mode) :
         for permtype in perm_types:
             perm  =  getattr(stat, 'S_I%s%s' % (permtype, usertype))
             if st_mode & perm:
-                permstr + =  permtype.lower()
+                permstr +=  permtype.lower()
             else:
-                permstr + =  '-'
+                permstr +=  '-'
     # Return the permissions string
     return permstr
 
@@ -97,11 +97,11 @@ def mode_to_rights(st_mode) :
 # 2. build the map (directory name  => stat object)
 # 3. for each entry of the map whose type is file: print the file
 # 4. for each entry of the map whose type is directory:
-# 4.1. print the directory 
+# 4.1. print the directory
 # 4.2. recursively call the algorithm on url: {current url}/{current entry directory}
-# N.B. The recursion stops when the url directory contains no directory 
+# N.B. The recursion stops when the url directory contains no directory
 #      i.e. contains only files.
-# 
+#
 # The output generated contains lines with the following structure:
 # %file permissions% %creation date% %last modification date% %file size% %file full url%
 #
@@ -109,39 +109,39 @@ def mode_to_rights(st_mode) :
 # ------------------------------------------------------------------------------------
 
 def ls_rec(url,f) :
-    # Assuming given as arg url is a directory 
+    # Assuming given as arg url is a directory
     # List the content of the current url directory
     entries = ''
     try:
-        entries = context.listdir(url)        
+        entries = context.listdir(url)
     except Exception, e:
         print 'error while listing url: ' + url + ' message: ', e
-        return        
-        
+        return
+
     # Build a map (directory name  => stat object)
     entries_map = {}
 
     # Check each entry in the current directory
     for entry in entries:
         # check that filename doesn't begin by '/' (workaround until gfal2.5 version is released)
-        if entry[0] != '/':        
+        if entry[0] != '/':
             # current entry is valid, get its stat item
             st = ''
             try:
                 st = context.lstat(url + '/' + entry)
             except Exception,e:
-                print 'error while loading status of url: ' + url  + '/' + entry + ' message: ',e 
+                print 'error while loading status of url: ' + url  + '/' + entry + ' message: ',e
                 continue
             # store the entry with its stat item
             entries_map[entry] = st
-        
+
     # Look for files entries and print them
     for (entry_key,entry_st) in entries_map.iteritems():
         # Check if entry is a file
         if not stat.S_ISDIR(entry_st.st_mode):
             f.write( mode_to_rights(entry_st.st_mode) + ' ' +
                      str(datetime.datetime.fromtimestamp(int(entry_st.st_ctime)).strftime('%Y-%m-%d')) + ' ' +
-                     str(datetime.datetime.fromtimestamp(int(entry_st.st_mtime)).strftime('%Y-%m-%d')) + ' ' + 
+                     str(datetime.datetime.fromtimestamp(int(entry_st.st_mtime)).strftime('%Y-%m-%d')) + ' ' +
                      str(entry_st.st_size) + ' ' + url + '/' + entry_key + '\n')
 
     # Look for directory entries, for each print it then recursively call the function on this directory
@@ -149,9 +149,9 @@ def ls_rec(url,f) :
         # check entry is a directory
         if stat.S_ISDIR(entry_st.st_mode):
             # print the directory line
-            f.write( mode_to_rights(entry_st.st_mode) + ' ' + 
-                     str(datetime.datetime.fromtimestamp(int(entry_st.st_ctime)).strftime('%Y-%m-%d')) + ' ' + 
-                     str(datetime.datetime.fromtimestamp(int(entry_st.st_mtime)).strftime('%Y-%m-%d')) + ' ' + 
+            f.write( mode_to_rights(entry_st.st_mode) + ' ' +
+                     str(datetime.datetime.fromtimestamp(int(entry_st.st_ctime)).strftime('%Y-%m-%d')) + ' ' +
+                     str(datetime.datetime.fromtimestamp(int(entry_st.st_mtime)).strftime('%Y-%m-%d')) + ' ' +
                      str(entry_st.st_size) + ' ' + url + '/' + entry_key + '\n')
 
             # Recursively call the method on current entry directory
@@ -167,14 +167,14 @@ if outputToFile:
     f = open(options.output_file,'w')
 else:
     f = sys.stdout
-        
+
 # Get stat item of url given as argument
 st = ''
 try:
     st = context.lstat(options.url)
 except Exception,e:
     print 'invalid url: ' + options.url  + ' message: ',e
-    exit(1) 
+    exit(1)
 # Print the url
 if f != '':
     f.write( mode_to_rights(st.st_mode) + ' ' + str(datetime.datetime.fromtimestamp(int(st.st_ctime)).strftime('%Y-%m-%d')) + ' ' + str(datetime.datetime.fromtimestamp(int(st.st_mtime)).strftime('%Y-%m-%d')) + ' ' + str(st.st_size) + ' ' + options.url + '\n')
@@ -183,8 +183,8 @@ else:
 
 # Start the recursive process
 ls_rec(options.url,f)
-           
+
 # Final cleanup
 if outputToFile:
     f.close()
-exit(0) 
+exit(0)
