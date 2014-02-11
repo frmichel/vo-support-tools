@@ -154,7 +154,7 @@ except Exception,e:
     exit(1)
 
 xml_out.write('<ses>\n')
-
+urls=[]
 # Get the services tags
 services=dom.getElementsByTagName("service")
 # Iterate on each service
@@ -173,9 +173,11 @@ for service in services:
 	    srmurl=getText(service.getElementsByTagName("SRMv2")[0].getElementsByTagName("SRMUrl")[0].childNodes)
 	    if srmurl=='':
 		srmurl=getText(service.getElementsByTagName("SRMv1")[0].getElementsByTagName("SRMUrl")[0].childNodes)
-	    # Write line to output file
-	    f.write(hostname+' '+site+' '+safreesize+' '+satotalsize+' '+srmurl+'\n')
-	    xml_out.write('<se><hostname>'+hostname+'</hostname><site>'+site+'</site><freeSpaceBefore>'+safreesize+'</freeSpaceBefore><freeSpaceAfter>N/A</freeSpaceAfter><totalSize>'+satotalsize+'</totalSize><srmUrl>'+srmurl+'</srmUrl><status>ongoing</status></se>\n')
+	    if not srmurl in urls:
+		urls.append(srmurl)
+		# Write line to output file
+		f.write(hostname+' '+site+' '+safreesize+' '+satotalsize+' '+srmurl+'\n')
+		xml_out.write('<se><hostname>'+hostname+'</hostname><site>'+site+'</site><freeSpaceBefore>'+safreesize+'</freeSpaceBefore><freeSpaceAfter>N/A</freeSpaceAfter><totalSize>'+satotalsize+'</totalSize><srmUrl>'+srmurl+'</srmUrl><status>ongoing</status></se>\n')
 
 xml_out.write('</ses>')
 

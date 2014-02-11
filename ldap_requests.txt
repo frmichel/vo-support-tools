@@ -29,7 +29,7 @@ ldapsearch "(&(ObjectClass=GlueSE))" GlueForeignKey | grep GlueForeignKey | awk 
 #----------------------------------------------------------
 
 #--- Find all SEs for on one site
-ldapsearch "(&(ObjectClass=GlueSE)(GlueForeignKey=GlueSiteUniqueID=$SITE)) GlueSEUniqueID"
+ldapsearch "(&(ObjectClass=GlueSE)(GlueForeignKey=GlueSiteUniqueID=$SITE))" GlueSEUniqueID
 
 #--- Find all SEs of type Storm or dCache
 ldapsearch "(&(ObjectClass=GlueSE)(|(GlueSEImplementationName=StoRM)(GlueSEImplementationName=dCache)))" GlueSEUniqueID | egrep "^GlueSEUniqueID"
@@ -40,7 +40,7 @@ ldapsearch "(&(ObjectClass=GlueSE)(GlueSEUniqueID=${SE}))"
 
 #--- Find Storage Areas (GlueSA) that support the VO
 ldapsearch "(&(ObjectClass=GlueSA)(GlueChunkKey=GlueSEUniqueID=${SE})(GlueSAAccessControlBaseRule=*${VO}*))"
-#--- Find VOInfo elements of an SE, supporting biomed VO
+#--- Find VOInfo elements of an SE, supporting biomed VO
 ldapsearch "(&(objectclass=GlueVOInfo)(GlueChunkKey=GlueSEUniqueID=${SE})(GlueVOInfoAccessControlBaseRule=*${VO}*))"
 
 #--- Find the service endpoint elements of an SE, supporting the VO
