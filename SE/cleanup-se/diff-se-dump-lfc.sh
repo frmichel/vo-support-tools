@@ -2,7 +2,7 @@
 # This script looks for differences between and SE dump and an LFC dump in order to detect zombie files (dark data) on SE,
 # and ghost files (lost entries on the LFC).
 # It takes as input a dump of the SE. For DPM SEs, this is possibly obtained with command:
-#       dpns-ls -lR <se_hostname>:/dpm/<domain_name>/home/<vo_name>
+#       dump-se-files.py --url srm://<se_hostname>/dpm/<domain_name>/home/<vo_name>
 # and a dump of the LFC obtained with the LFCBrowseSE tool:
 #       LFCBrowseSE <se_hostname> --vo <vo_name> --sfn
 # It produces 3 output files:
@@ -37,6 +37,7 @@ help()
   echo
   echo "  --se-dump <filename>: dump of the SE. For DPM SEs, this is possibly obtained with command:"
   echo "        dpns-ls -lR <se_hostname>:/dpm/<domain_name>/home/<vo_name>"
+  echo "        dump-se-files.py --url srm://<se_hostname>/dpm/<domain_name>/home/<vo_name>"
   echo
   echo "  --lfc-dump <filename>: dump of the LFC obtained with the LFCBrowseSE tool:"
   echo "        LFCBrowseSE <se_hostname> --vo <vo_name> --sfn"
