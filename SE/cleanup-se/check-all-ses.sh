@@ -103,29 +103,50 @@ do
   shift
 done
 
-echo "Starting cleanup of all active SEs..."
+NOW=`date "+%Y-%m-%d %H:%M:%S"`
+echo "# --------------------------------------------"
+echo "# $NOW - Starting cleanup of all active SEs: $(basename $0)"
+echo "# --------------------------------------------"
 mkdir -p $WDIR $RESDIR
 
+# ----------------------------------------------------------------------------------------------------
+# Build the list of SEs to cleanup
+# ----------------------------------------------------------------------------------------------------
 LISTSE=$WDIR/list_ses_urls.txt
 LISTSEXML=$RESDIR/list_ses_urls.xml
-echo "Retreiving the list of SE supporting the VO..."
-$CLEANUPSE/list-se-urls.py --vo $VO --lavoisier-host $LAVOISIER_HOST --lavoisier-port $LAVOISIER_PORT --output-file ${LISTSE} --xml-output-file ${LISTSEXML} --debug > ${WDIR}/list_ses_urls.log
+NOW=`date "+%Y-%m-%d %H:%M:%S"`
+echo "# $NOW - Retreiving the list of SE supporting the VO..."
+$CLEANUPSE/list-se-urls.py --vo $VO --lavoisier-host $LAVOISIER_HOST --lavoisier-port $LAVOISIER_PORT --output-file ${LISTSE} --xml-output-file ${LISTSEXML} --debug 2>&1 > ${WDIR}/list_ses_urls.log
 if [ $? -ne 0 ];
-    then echo "list-se-urls.py call failed, check ${WDIR}/list_se_urls.log."; exit 1
+    then echo "Script list-se-urls.py failed, check ${WDIR}/list_se_urls.log."; exit 1
 fi
 if [ ! -e $LISTSE ];
     then echo "List of SEs URLs cannot be found: ${LISTSE}."; exit 1
 fi
 
+# ----------------------------------------------------------------------------------------------------
 # Prepare web report with date and parameters
+# ----------------------------------------------------------------------------------------------------
 rm -f $RESDIR/INFO.xml
 NB_SES=`cat $LISTSE | wc -l`
 cat <<EOF >> $RESDIR/INFO.xml
-<info><datetime>$NOW</datetime><olderThan>$AGE</olderThan><nbSEs>$NB_SES</nbSEs></info>
+<info>
+<datetime>$NOW</datetime>
+<olderThan>$AGE</olderThan>
+<nbSEs>$NB_SES</nbSEs>
+</info>
 EOF
 
+
+# ----------------------------------------------------------------------------------------------------
+# Loop to start checks of all SEs in parralel
+# ----------------------------------------------------------------------------------------------------
+
 # Limit the number of SE checks run in parralel
-MAX_PARRALEL_CHECKS=20
+MAX_PARALLEL_CHECKS=20
+
+# Limit the total number of SE to check (debug feature, set 99999 for no limit)
+MAX_CHECKS_TOTAL=30
 
 # Run the analysis on each SE in parallel
 NB_CHECKS=0
@@ -133,9 +154,9 @@ cat $LISTSE | while read LINE; do
 
     # Limit the number of checks running in parralel: if over the limit, simply wait for others to complete
     NB_CHECK_PARRALEL=`ps h -fHu vapor | grep "check-se.sh --vo $VO" | grep -v "grep check-se.sh --vo $VO" | wc -l`
-    while [ $NB_CHECK_PARRALEL -gt $MAX_PARRALEL_CHECKS ]; do
+    while [ $NB_CHECK_PARRALEL -gt $MAX_PARALLEL_CHECKS ]; do
         NOW=`date "+%Y-%m-%d %H:%M:%S"`
-        echo "$NOW - Currently $NB_CHECK_PARRALEL checks running. Waiting 10mn for others to complete."
+        echo "# $NOW - Currently $NB_CHECK_PARRALEL checks running. Waiting 10mn for some to complete before running a new one."
         # Wait 10 minutes until the next attempt
         sleep 600
         NB_CHECK_PARRALEL=`ps h -fHu vapor | grep "check-se.sh --vo $VO" | grep -v "grep check-se.sh --vo $VO" | wc -l`
@@ -144,20 +165,26 @@ cat $LISTSE | while read LINE; do
     SE_HOSTNAME=`echo $LINE | cut -d ' ' -f 1`
     SE_URL=`echo $LINE | cut -d ' ' -f 5`
     NOW=`date "+%Y-%m-%d %H:%M:%S"`
-    echo "$NOW - Running cleanup process on SE ${SE_HOSTNAME}..."
-    $CLEANUPSE/check-se.sh --vo $VO --se $SE_HOSTNAME --url $SE_URL --older-than $AGE --work-dir $WDIR --result-dir $RESDIR $SIMULATE > $WDIR/${SE_HOSTNAME}.log &
+    echo "# $NOW - Running cleanup process on SE ${SE_HOSTNAME}..."
+    $CLEANUPSE/check-se.sh --vo $VO --se $SE_HOSTNAME --url $SE_URL --older-than $AGE --work-dir $WDIR --result-dir $RESDIR $SIMULATE 2>&1 > $WDIR/${SE_HOSTNAME}.log &
     
-    ####### DEBUG ########
-    if [ "$NB_CHECKS" -ge "30" ]; then
+    if [ "$NB_CHECKS" -ge "$MAX_CHECKS_TOTAL" ]; then
         break
     fi
     NB_CHECKS=`expr $NB_CHECKS + 1`
-    ####### DEBUG ########
+    NOW=`date "+%Y-%m-%d %H:%M:%S"`
+    echo "# $NOW - $NB_CHECKS SE checks started."
     
     # Wait for 1 minute between each run
-    echo "Waiting 1mn before running the next SE check."
+    NOW=`date "+%Y-%m-%d %H:%M:%S"`
+    echo "# $NOW - Waiting 1mn before starting the next SE check."
     sleep 60
 done
+
+NOW=`date "+%Y-%m-%d %H:%M:%S"`
+echo "# --------------------------------------------"
+echo "# $NOW - Exiting $(basename $0)"
+echo "# --------------------------------------------"
 
 exit 0
 

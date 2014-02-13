@@ -114,7 +114,7 @@ mkdir -p $WDIR
 
 NOW=`date "+%Y-%m-%d %H:%M:%S"`
 echo "# --------------------------------------------"
-echo "# $NOW - Starting check of SE ${SE_HOSTNAME}"
+echo "# $NOW - Starting $(basename $0) for SE ${SE_HOSTNAME}"
 echo "# --------------------------------------------"
 
 if [ "$SIMULATE" == "true" ]; then
@@ -146,7 +146,7 @@ NOW=`date "+%Y-%m-%d %H:%M:%S"`
 echo "# $NOW - Running dump-se-files.py on SE ${SE_HOSTNAME}..."
 $CLEANUPSE/dump-se-files.py --url $URL --output-file $SEDUMP --debug
 if [ $? -ne 0 ];
-    then echo "Computation of the difference between LFC and SE failed."; exit 1
+    then echo "Dump of SE failed."; exit 1
 fi
 if [ ! -e $SEDUMP ];
     then echo "SE dump file generation failed, cannot read ${SEDUMP}."; exit 1
@@ -164,6 +164,20 @@ if [ $? -ne 0 ];
 fi
 
 
+########### A CONTINUER
+# Le check-se.sh va s'arrêter là.
+# La suite (ci-dessous) est à mettre dans un autre fichier check-and-clean-se.sh qui sera appelé par le check-all-se.sh.
+# Le check-and-clean-se.sh :
+# - appelle du check-se.sh avec redirection version fichier de log : ... 2>&1 > $WDIR/${SE_HOSTNAME}.log
+# - vérifie le fichier $WDIR/${SE_HOSTNAME}.log pour savoir s'il y a eu une erreur (ligne qui ne commence pas pas "# "
+#   ==> egrep -v "^# |^$" $WDIR/${SE_HOSTNAME}.log | wc -l ==> doit rendre 0
+# Si 0 erreur, continuer normalement avec le cleanup, puis passer le status en "Completed" en fonction du status du cleanup
+# Si au moins une erreur, alors
+#   - NE PAS faire le cleanup, mettre le rapport en status "Comleted with errors"
+#   - ajouter les lignes d'erreur DU LOG dans le rapport web détaillé 
+########### A CONTINUER
+
+
 # ------------------------------------------------------
 # Cleanup dark data found out by the diff script
 # ------------------------------------------------------
@@ -179,7 +193,7 @@ fi
 
 NOW=`date "+%Y-%m-%d %H:%M:%S"`
 echo "# --------------------------------------------"
-echo "# $NOW - Exiting $0"
+echo "# $NOW - Exiting $(basename $0)"
 echo "# --------------------------------------------"
 exit 0
 

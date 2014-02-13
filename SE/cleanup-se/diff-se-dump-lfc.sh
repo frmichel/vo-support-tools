@@ -105,14 +105,14 @@ LIMIT_DATE_TS=`date --date="$AGE months ago" "+%s"`
 
 if test -z "$SILENT"; then
   NOW=`date "+%Y-%m-%d %H:%M:%S"`
-  echo "--------------------------------------------"
-  echo "$NOW - Starting $0"
-  echo "--------------------------------------------"
-  echo "Output file for SE zombies: $OUTPUT_SE_ZOMBIES"
-  echo "Output file for LFC ghosts: $OUTPUT_LFC_GHOSTS"
-  echo "Output file for entries found in LFC and SE: $OUTPUT_COMMON"
-  echo "Zombies modified after $LIMIT_DATE will be ignored."
-  echo "--------------------------------------------"
+  echo "# --------------------------------------------"
+  echo "# $NOW - Starting $(basename $0) for SE ${SE_HOSTNAME}"
+  echo "# --------------------------------------------"
+  echo "# Output file for SE zombies: $OUTPUT_SE_ZOMBIES"
+  echo "# Output file for LFC ghosts: $OUTPUT_LFC_GHOSTS"
+  echo "# Output file for entries found in LFC and SE: $OUTPUT_COMMON"
+  echo "# Zombies modified after $LIMIT_DATE will be ignored."
+  echo "# --------------------------------------------"
 fi
 
 # ----------------------------------------------------------------------------------------------------
@@ -123,7 +123,7 @@ if test "$CONVERT_SE_DUMP" = "true"; then
     echo -n "" > $SE_DUMP_FILES_ONLY
 
     if test -z "$SILENT"; then
-	    echo "Building the list of SURLs from file ${INPUT_SE_DUMP}..."
+	    echo "# Building the list of SURLs from file ${INPUT_SE_DUMP}..."
     fi
 
     # Convert the SE dump output to format YYYY-MM-DD SURL lines
@@ -132,7 +132,7 @@ if test "$CONVERT_SE_DUMP" = "true"; then
     grep ^- $INPUT_SE_DUMP | cut -d ' ' -f 3,5 | sed 's/:84[0-9][0-9]//g' > $SE_DUMP_FILES_ONLY
 
     if test -z "$SILENT"; then
-	    echo "Found `wc -l $SE_DUMP_FILES_ONLY | awk -- '{print $1}'` SURLs in input file $INPUT_SE_DUMP."
+	    echo "# Found `wc -l $SE_DUMP_FILES_ONLY | awk -- '{print $1}'` SURLs in input file $INPUT_SE_DUMP."
     fi
 fi
 
@@ -142,7 +142,7 @@ fi
 # ----------------------------------------------------------------------------------------------------
 
 if test -z "$SILENT"; then
-        echo "Found `cat $INPUT_LFC_DUMP | awk -- '/^$/{next} /^Pro/{next} {print $2}'  | wc -l | awk -- '{print $1}'` SURLs in input file $INPUT_LFC_DUMP."
+        echo "# Found `cat $INPUT_LFC_DUMP | awk -- '/^$/{next} /^Pro/{next} {print $2}'  | wc -l | awk -- '{print $1}'` SURLs in input file $INPUT_LFC_DUMP."
 fi
 
 # ----------------------------------------------------------------------------------------------------
@@ -150,7 +150,7 @@ fi
 # ----------------------------------------------------------------------------------------------------
 
 if test -z "$SILENT"; then
-  echo -n "Looking for SE zombie files... "
+  echo "# Looking for SE zombie files... "
 fi
 
 echo -n "" > $OUTPUT_SE_ZOMBIES
@@ -169,7 +169,7 @@ cat $SE_DUMP_FILES_ONLY | while read LINE; do
 done
 
 if test -z "$SILENT"; then
-  echo "Found `wc -l $OUTPUT_SE_ZOMBIES | awk -- '{print $1}'` zombie files on SE."
+  echo "# Found `wc -l $OUTPUT_SE_ZOMBIES | awk -- '{print $1}'` zombie files on SE."
 fi
 
 # ----------------------------------------------------------------------------------------------------
@@ -177,7 +177,7 @@ fi
 # ----------------------------------------------------------------------------------------------------
 
 if test -z "$SILENT"; then
-  echo -n "Looking for LFC ghost entries... "
+  echo "# Looking for LFC ghost entries... "
 fi
 
 # Loop on lines, skip empty lines and lines starting with "Progress" or "Processing".
@@ -195,8 +195,8 @@ cat $INPUT_LFC_DUMP | awk -- '/^$/{next} /^Pro/{next} {print $2}' | while read S
 done
 
 if test -z "$SILENT"; then
-  echo "Found `wc -l $OUTPUT_LFC_GHOSTS | awk -- '{print $1}'` ghost entries in LFC."
-  echo "Found `wc -l $OUTPUT_COMMON | awk -- '{print $1}'` files common to SE and LFC."
+  echo "# Found `wc -l $OUTPUT_LFC_GHOSTS | awk -- '{print $1}'` ghost entries in LFC."
+  echo "# Found `wc -l $OUTPUT_COMMON | awk -- '{print $1}'` files common to SE and LFC."
 fi
 
 NB_DARK_DATA=`wc -l $OUTPUT_SE_ZOMBIES | cut -d ' ' -f1`
@@ -225,20 +225,21 @@ fi
 # Output xml report
 # ----------------------------------------------------------------------------------------------------
 OUTPUT_FILE=$RESDIR/${SE_HOSTNAME}_check_result.xml
-echo "<checkResult>" > $OUTPUT_FILE
-echo "  <hostname>$SE_HOSTNAME</hostname>" > $OUTPUT_FILE
-echo "  <darkData>$NB_DARK_DATA</darkData>" > $OUTPUT_FILE
-echo "  <percentDarkData>$PERCENT_DARK_DATA</percentDarkData>" > $OUTPUT_FILE
-echo "  <lostFiles>$NB_LOST_FILES</lostFiles>" > $OUTPUT_FILE
-echo "  <percentLostFiles>$PERCENT_LOST_FILES</percentLostFiles>" > $OUTPUT_FILE
-echo "  <nbTotalFilesSEDump>$NB_FILES_TOTAL_SE_DUMP</nbTotalFilesSEDump>" > $OUTPUT_FILE
-echo "</checkResult>" > $OUTPUT_FILE
+touch $OUTPUT_FILE
+echo "<checkResult>" >> $OUTPUT_FILE
+echo "  <hostname>$SE_HOSTNAME</hostname>" >> $OUTPUT_FILE
+echo "  <darkData>$NB_DARK_DATA</darkData>" >> $OUTPUT_FILE
+echo "  <percentDarkData>$PERCENT_DARK_DATA</percentDarkData>" >> $OUTPUT_FILE
+echo "  <lostFiles>$NB_LOST_FILES</lostFiles>" >> $OUTPUT_FILE
+echo "  <percentLostFiles>$PERCENT_LOST_FILES</percentLostFiles>" >> $OUTPUT_FILE
+echo "  <nbTotalFilesSEDump>$NB_FILES_TOTAL_SE_DUMP</nbTotalFilesSEDump>" >> $OUTPUT_FILE
+echo "</checkResult>" >> $OUTPUT_FILE
 
 if test -z "$SILENT"; then
   NOW=`date "+%Y-%m-%d %H:%M:%S"`
-  echo "--------------------------------------------"
-  echo "$NOW - Exiting $0"
-  echo "--------------------------------------------"
+  echo "# --------------------------------------------"
+  echo "# $NOW - Exiting $(basename $0)"
+  echo "# --------------------------------------------"
 fi
 
 exit 0

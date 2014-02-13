@@ -115,7 +115,7 @@ def ls_rec(url,f) :
     try:
         entries = context.listdir(url)
     except Exception, e:
-        print 'error while listing url: ' + url + ' message: ', e
+        print 'Exception caught while calling listdir on url: ' + url + '. Message: ', e
         return
 
     # Build a map (directory name  => stat object)
@@ -130,7 +130,7 @@ def ls_rec(url,f) :
             try:
                 st = context.lstat(url + '/' + entry)
             except Exception,e:
-                print 'error while loading status of url: ' + url  + '/' + entry + ' message: ',e
+                print 'Exception caught while calling lstat on url: ' + url  + '/' + entry + '. Message: ',e
                 continue
             # store the entry with its stat item
             entries_map[entry] = st
@@ -174,7 +174,7 @@ st = ''
 try:
     st = context.lstat(options.url)
 except Exception,e:
-    print 'invalid url: ' + options.url  + ' message: ',e
+    print 'Exception caught when while lstat on url: ' + options.url  + '. Message: ',e
     sys.exit(1)
 
 # Print the url
