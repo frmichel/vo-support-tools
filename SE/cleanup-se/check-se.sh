@@ -29,6 +29,7 @@ help()
   echo " - the output directory of the check"
   echo " - the vo"
   echo " - the minimum age of files to check"
+  echo " - the cleanup dark data option"
   echo
   echo "Usage:"
   echo "$0 [-h|--help]"
@@ -41,11 +42,18 @@ help()
   echo
   echo "  --vo <VO>: the Virtual Organisation to query. Defaults to biomed."
   echo
-  echo "  --older-than <age> : the minimum age of checked files (in months). Defaults to 6 months."
+  echo "  --older-than <age> : the minimum age of checked files (in months). Defaults to 12 months."
   echo
   echo "  --work-dir <work directory>: where to store temporary files. Defaults to '.'."
   echo
   echo "  --result-dir <result directory>: where to store result files. Defaults to '.'."
+  echo
+  echo "  --cleanup-dark-data : remove the dark datadetected. Optionnal,"
+  echo "                        no removal is run if option is not present. The Dark data removal"
+  echo "                        is a not reversible,  be sure of what you do before specifying"
+  echo "                        this option!"
+  echo
+  echo "  --simulate : Does not do any action, just sleep for 1 minute."
   echo
   echo "  -h, --help: display this help"
   echo
@@ -53,7 +61,8 @@ help()
   echo "   ./check-se.sh --se sampase.if.usp.br \ "
   echo "                 --url srm://sampase.if.usp.br:8446/dpm/if.usp.br/home/biomed \ "
   echo "                 --older-than 6 \ "
-  echo "                 --result-dir \$HOME/public_html/myVO/cleanup-se/20140127-120000"
+  echo "                 --result-dir \$HOME/public_html/myVO/cleanup-se/20140127-120000 \ "
+  echo "                 --cleanup-dark-data"
   echo
   exit 1
 }
@@ -73,11 +82,12 @@ if test -z "$LFC_HOST"; then
 fi
 
 CLEANUPSE=$VO_SUPPORT_TOOLS/SE/cleanup-se
-
+CLEANUP_DARK_DATA=false
+SIMULATE=false
 WDIR=`pwd`
 RESDIR=`pwd`
 VO=biomed
-AGE=6		# Default minimum age of zombies to take into account
+AGE=12		# Default minimum age of zombies to take into account
 
 while [ ! -z "$1" ]
 do
@@ -88,6 +98,8 @@ do
     --result-dir ) RESDIR=$2; shift;;
     --work-dir ) WDIR=$2; shift;;
     --url ) URL=$2; shift;;
+    --cleanup-dark-data ) CLEANUP_DARK_DATA=true;;
+    --simulate ) SIMULATE=true;;
     -h | --help ) help;;
     * ) help;;
   esac
@@ -96,36 +108,78 @@ done
 
 if test -z "$SE_HOSTNAME" ; then echo "Option --se is mandatory."; help; fi
 if test -z "$URL" ; then echo "Option --url is mandatory."; help; fi
+
+
 mkdir -p $WDIR
 
+NOW=`date "+%Y-%m-%d %H:%M:%S"`
+echo "# --------------------------------------------"
+echo "# $NOW - Starting check of SE ${SE_HOSTNAME}"
+echo "# --------------------------------------------"
+
+if [ "$SIMULATE" == "true" ]; then
+    echo "# Simulating check of SE ${SE_HOSTNAME}..."
+    sleep 60
+    exit 0
+fi
+
+# ------------------------------------------------------
 # Dump the list of files on the SE based on the catalog
-LFCDUMP=$WDIR/dump_lfc_${SE_HOSTNAME}.txt
-echo "Running LFCBrowseSE on SE ${SE_HOSTNAME}..."
+# ------------------------------------------------------
+LFCDUMP=$WDIR/${SE_HOSTNAME}_dump_lfc.txt
+NOW=`date "+%Y-%m-%d %H:%M:%S"`
+echo "# $NOW - Running LFCBrowseSE on SE ${SE_HOSTNAME}..."
 $VO_SUPPORT_TOOLS/SE/lfc-browse-se/LFCBrowseSE $SE_HOSTNAME --vo $VO --sfn > $LFCDUMP
 if [ $? -ne 0 ];
     then echo "LFCBrowseSE call failed"; exit 1
 fi
 if [ ! -e $LFCDUMP ];
-    then echo "LFC dump file generation failed, cannot read file ${LFCDUMP}."; exit 1;
+    then echo "LFC dump file generation failed, cannot read file ${LFCDUMP}."; exit 1
 fi
 
 
+# ------------------------------------------------------
 # Dump the list of files on the SE based on the SE itself
-SEDUMP=$WDIR/dump_se_${SE_HOSTNAME}.txt
-echo "Running dump-se-files.py on SE ${SE_HOSTNAME}..."
+# ------------------------------------------------------
+SEDUMP=$WDIR/${SE_HOSTNAME}_dump_se.txt
+NOW=`date "+%Y-%m-%d %H:%M:%S"`
+echo "# $NOW - Running dump-se-files.py on SE ${SE_HOSTNAME}..."
 $CLEANUPSE/dump-se-files.py --url $URL --output-file $SEDUMP --debug
 if [ $? -ne 0 ];
-    then echo "dump-se-files.py call failed. Check ${WDIR}/${SE_HOSTNAME}.log."; exit 1
+    then echo "Computation of the difference between LFC and SE failed."; exit 1
 fi
 if [ ! -e $SEDUMP ];
     then echo "SE dump file generation failed, cannot read ${SEDUMP}."; exit 1
 fi
 
+
+# ------------------------------------------------------
 # Run the difference between both dumps LFC and SE
+# ------------------------------------------------------
+NOW=`date "+%Y-%m-%d %H:%M:%S"`
+echo "# $NOW - Computing difference between LFC and SE for SE ${SE_HOSTNAME}..."
 $CLEANUPSE/diff-se-dump-lfc.sh --se-dump $SEDUMP --lfc-dump $LFCDUMP --older-than $AGE --se $SE_HOSTNAME --work-dir $WDIR --result-dir $RESDIR
 if [ $? -ne 0 ];
-    then echo "Difference betwen LFC and SE dumps failed. Check file ${WDIR}/${SE_HOSTNAME}.log"; exit 1;
+    then echo "Difference betwen LFC and SE dumps failed."; exit 1
 fi
 
+
+# ------------------------------------------------------
+# Cleanup dark data found out by the diff script
+# ------------------------------------------------------
+if [ "$CLEANUP_DARK_DATA" == "true" ] ; then
+    echo "# Starting removing dark data files listed in file ${RESDIR}/${SE_HOSTNAME}.cleanup_dark_data.log"
+    # ${CLEANUPSE}/cleanup-dark-data.sh --vo $VO --se $SE_HOSTNAME --surls ${RESDIR}/${SE_HOSTNAME}.cleanup_dark_data.log
+    if [ $? -ne 0 ];
+        then echo "Cleanup of dark data failed."; exit 1
+    fi
+else
+    echo "# Dark data cleanup is deactivated."
+fi
+
+NOW=`date "+%Y-%m-%d %H:%M:%S"`
+echo "# --------------------------------------------"
+echo "# $NOW - Exiting $0"
+echo "# --------------------------------------------"
 exit 0
 

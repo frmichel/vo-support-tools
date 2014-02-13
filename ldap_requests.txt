@@ -44,7 +44,10 @@ ldapsearch "(&(ObjectClass=GlueSA)(GlueChunkKey=GlueSEUniqueID=${SE})(GlueSAAcce
 ldapsearch "(&(objectclass=GlueVOInfo)(GlueChunkKey=GlueSEUniqueID=${SE})(GlueVOInfoAccessControlBaseRule=*${VO}*))"
 
 #--- Find the service endpoint elements of an SE, supporting the VO
-ldapsearch "(&(ObjectClass=GlueService)(GlueServiceUniqueID=*${SE}*)(GlueServiceAccessControlBaseRule=*${VO}*)(GlueServiceType=SRM)(GlueServiceVersion=2*))" GlueServiceType GlueServiceVersion GlueServiceUniqueID 
+ldapsearch "(&(ObjectClass=GlueService)(GlueServiceUniqueID=*${SE}*)(GlueServiceAccessControlBaseRule=*${VO}*)(GlueServiceType=SRM)(GlueServiceVersion=2*))" GlueServiceType GlueServiceVersion GlueServiceUniqueID GlueServiceAccessControlRule
+
+#--- Find the protocols supporting by the endpoint
+ldapsearch "(&(ObjectClass=GlueSEAccessProtocol)(GlueChunkKey=GlueSEUniqueID=${SE}))" GlueSEAccessProtocolLocalID
 
 
 #----------------------------------------------------------

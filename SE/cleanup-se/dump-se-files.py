@@ -152,7 +152,8 @@ def ls_rec(url,f) :
             f.write( mode_to_rights(entry_st.st_mode) + ' ' +
                      str(datetime.datetime.fromtimestamp(int(entry_st.st_ctime)).strftime('%Y-%m-%d')) + ' ' +
                      str(datetime.datetime.fromtimestamp(int(entry_st.st_mtime)).strftime('%Y-%m-%d')) + ' ' +
-                     str(entry_st.st_size) + ' ' + url + '/' + entry_key + '\n')
+                     str(entry_st.st_size) + ' ' + url +
+                     '/' + entry_key + '\n')
 
             # Recursively call the method on current entry directory
             ls_rec(url + '/' + entry_key,f)
@@ -174,12 +175,14 @@ try:
     st = context.lstat(options.url)
 except Exception,e:
     print 'invalid url: ' + options.url  + ' message: ',e
-    exit(1)
+    sys.exit(1)
+
 # Print the url
-if f != '':
-    f.write( mode_to_rights(st.st_mode) + ' ' + str(datetime.datetime.fromtimestamp(int(st.st_ctime)).strftime('%Y-%m-%d')) + ' ' + str(datetime.datetime.fromtimestamp(int(st.st_mtime)).strftime('%Y-%m-%d')) + ' ' + str(st.st_size) + ' ' + options.url + '\n')
-else:
-    print( mode_to_rights(st.st_mode) + ' ' + str(datetime.datetime.fromtimestamp(int(st.st_ctime)).strftime('%Y-%m-%d')) + ' ' + str(datetime.datetime.fromtimestamp(int(st.st_mtime)).strftime('%Y-%m-%d')) + ' ' + str(st.st_size) + ' ' + options.url)
+f.write( mode_to_rights(st.st_mode) + ' ' + 
+        str(datetime.datetime.fromtimestamp(int(st.st_ctime)).strftime('%Y-%m-%d')) + ' ' + 
+        str(datetime.datetime.fromtimestamp(int(st.st_mtime)).strftime('%Y-%m-%d')) + ' ' + 
+        str(st.st_size) + ' ' + 
+        options.url + '\n')
 
 # Start the recursive process
 ls_rec(options.url,f)
@@ -189,3 +192,4 @@ if outputToFile:
     f.close()
 
 sys.exit(0)
+

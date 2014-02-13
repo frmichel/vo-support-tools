@@ -97,7 +97,7 @@ if test -z "$INPUT_SE_DUMP" ; then echo "Option --se-dump is mandatory."; help; 
 OUTPUT_LFC_GHOSTS=${RESDIR}/${SE_HOSTNAME}.output_lfc_lost_files
 OUTPUT_SE_ZOMBIES=${RESDIR}/${SE_HOSTNAME}.output_se_dark_data
 OUTPUT_COMMON=${RESDIR}/${SE_HOSTNAME}.output_common
-INPUT_SE_DUMP_SURLS=${WDIR}/${SE_HOSTNAME}_se_dump_surls
+SE_DUMP_FILES_ONLY=${WDIR}/${SE_HOSTNAME}_dump_se_files.txt
 
 # Files older than $AGE months are considered as zombies. Others are ignored.
 LIMIT_DATE=`date --date="$AGE months ago" "+%Y-%m-%d"`
@@ -106,7 +106,7 @@ LIMIT_DATE_TS=`date --date="$AGE months ago" "+%s"`
 if test -z "$SILENT"; then
   NOW=`date "+%Y-%m-%d %H:%M:%S"`
   echo "--------------------------------------------"
-  echo "Start $0: $NOW"
+  echo "$NOW - Starting $0"
   echo "--------------------------------------------"
   echo "Output file for SE zombies: $OUTPUT_SE_ZOMBIES"
   echo "Output file for LFC ghosts: $OUTPUT_LFC_GHOSTS"
@@ -116,23 +116,23 @@ if test -z "$SILENT"; then
 fi
 
 # ----------------------------------------------------------------------------------------------------
-#--- Convert the SE dump file into a file with only SURLs and dates formated as YYYY-MM-DD
+#--- Convert the SE dump file into a file with only SURLs of files (remove directories)
 # ----------------------------------------------------------------------------------------------------
 
 if test "$CONVERT_SE_DUMP" = "true"; then
-    echo -n "" > $INPUT_SE_DUMP_SURLS
+    echo -n "" > $SE_DUMP_FILES_ONLY
 
     if test -z "$SILENT"; then
-	echo "Building the list of SURLs from file ${INPUT_SE_DUMP}..."
+	    echo "Building the list of SURLs from file ${INPUT_SE_DUMP}..."
     fi
 
     # Convert the SE dump output to format YYYY-MM-DD SURL lines
     # The selected date is the last modification date as creation
     # date may be wrong for gsiftp protocol
-    grep ^- $INPUT_SE_DUMP | cut -d ' ' -f 3,5 | sed 's/:84[0-9][0-9]//g' > $INPUT_SE_DUMP_SURLS
+    grep ^- $INPUT_SE_DUMP | cut -d ' ' -f 3,5 | sed 's/:84[0-9][0-9]//g' > $SE_DUMP_FILES_ONLY
 
     if test -z "$SILENT"; then
-	echo "Found `wc -l $INPUT_SE_DUMP_SURLS | awk -- '{print $1}'` SURLs in input file $INPUT_SE_DUMP."
+	    echo "Found `wc -l $SE_DUMP_FILES_ONLY | awk -- '{print $1}'` SURLs in input file $INPUT_SE_DUMP."
     fi
 fi
 
@@ -154,7 +154,7 @@ if test -z "$SILENT"; then
 fi
 
 echo -n "" > $OUTPUT_SE_ZOMBIES
-cat $INPUT_SE_DUMP_SURLS | while read LINE; do
+cat $SE_DUMP_FILES_ONLY | while read LINE; do
   FILEDATE=`echo $LINE | awk '{print $1}'`
   FILEDATE_TS=`date --date $FILEDATE "+%s"`
   SURL=`echo $LINE | awk '{print $2}'`
@@ -187,7 +187,7 @@ echo -n "" >  ${OUTPUT_COMMON}
 cat $INPUT_LFC_DUMP | awk -- '/^$/{next} /^Pro/{next} {print $2}' | while read SURL; do
 
   # Check if that SURL is also in the SE dump
-  if grep --silent $SURL $INPUT_SE_DUMP_SURLS; then
+  if grep --silent $SURL $SE_DUMP_FILES_ONLY; then
     echo $SURL >> ${OUTPUT_COMMON}
   else
     echo $SURL >> $OUTPUT_LFC_GHOSTS
@@ -207,6 +207,8 @@ NB_COMMON=`wc -l $OUTPUT_COMMON | cut -d ' ' -f1`
 NB_FILES_TOTAL_LFC=$(($NB_LOST_FILES+$NB_COMMON))
 NB_FILES_TOTAL_SE=$(($NB_DARK_DATA+$NB_COMMON))
 
+NB_FILES_TOTAL_SE_DUMP=`wc -l $SE_DUMP_FILES_ONLY | cut -d ' ' -f1`
+
 if [ $NB_FILES_TOTAL_LFC -gt 0 ]; then
     PERCENT_LOST_FILES=$(($NB_LOST_FILES*100/$NB_FILES_TOTAL_LFC))
 else
@@ -219,14 +221,23 @@ else
     PERCENT_DARK_DATA='N/A'
 fi
 
-# output xml data
-echo "<checkResult><hostname>$SE_HOSTNAME</hostname><darkData>$NB_DARK_DATA</darkData><percentDarkData>$PERCENT_DARK_DATA</percentDarkData><lostFiles>$NB_LOST_FILES</lostFiles><percentLostFiles>$PERCENT_LOST_FILES</percentLostFiles></checkResult>" > $RESDIR/${SE_HOSTNAME}_check_result.xml
-
+# ----------------------------------------------------------------------------------------------------
+# Output xml report
+# ----------------------------------------------------------------------------------------------------
+OUTPUT_FILE=$RESDIR/${SE_HOSTNAME}_check_result.xml
+echo "<checkResult>" > $OUTPUT_FILE
+echo "  <hostname>$SE_HOSTNAME</hostname>" > $OUTPUT_FILE
+echo "  <darkData>$NB_DARK_DATA</darkData>" > $OUTPUT_FILE
+echo "  <percentDarkData>$PERCENT_DARK_DATA</percentDarkData>" > $OUTPUT_FILE
+echo "  <lostFiles>$NB_LOST_FILES</lostFiles>" > $OUTPUT_FILE
+echo "  <percentLostFiles>$PERCENT_LOST_FILES</percentLostFiles>" > $OUTPUT_FILE
+echo "  <nbTotalFilesSEDump>$NB_FILES_TOTAL_SE_DUMP</nbTotalFilesSEDump>" > $OUTPUT_FILE
+echo "</checkResult>" > $OUTPUT_FILE
 
 if test -z "$SILENT"; then
   NOW=`date "+%Y-%m-%d %H:%M:%S"`
   echo "--------------------------------------------"
-  echo "Exit $0: $NOW"
+  echo "$NOW - Exiting $0"
   echo "--------------------------------------------"
 fi
 

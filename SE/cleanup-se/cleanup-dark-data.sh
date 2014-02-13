@@ -76,8 +76,9 @@ fi
 # Delete the files
 # ----------------------------------------------------------------------------------------------------
 
-cat $SURLS | while read SURL; do
-  lcg-del --nolfc $VERBOSE --vo $VO --connect-timeout 30 --sendreceive-timeout 900 --bdii-timeout 30 --srm-timeout 300 $SURL 2>&1
+cat $SURLS | head -n 10 | while read SURL; do
+  #lcg-del --nolfc $VERBOSE --vo $VO --connect-timeout 30 --sendreceive-timeout 900 --bdii-timeout 30 --srm-timeout 300 $SURL 2>&1
+  echo "safe mode : scheduling $SURL for deletion"
   if test $? -ne 0; then
     echo "Could not delete $SURL."
   fi
@@ -86,7 +87,8 @@ done
 if test -z "$SILENT"; then
   NOW=`date "+%Y-%m-%d %H:%M:%S"`
   echo "--------------------------------------------"
-  echo "Exit $0 - $NOW"
+  echo "Exiting $0 - $NOW"
   echo "--------------------------------------------"
   lcg-infosites --vo $VO space | egrep "Reserved|Online|$SE_HOSTNAME"
 fi
+

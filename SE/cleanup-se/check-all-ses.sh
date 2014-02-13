@@ -14,8 +14,7 @@
 # - the output directory
 
 help()
-{
-  
+{  
   echo " This script checks the consistency of all active SEs."
   echo " It sequentially does the following actions by calling the"
   echo " corresponding scripts:"
@@ -52,6 +51,9 @@ help()
   echo "           The date is appended to the directory, formatted as <result directory>/YYYYMMDD-HHMMSS."
   echo "           Defaults to './<date>'."
   echo
+  echo "  --simulate : Used for debug. Does not do any action, just list SEs to check,"
+  echo "               for each SE the check will sleep 1 minute."
+  echo
   echo "  -h, --help: display this help"
   echo
   echo "Call example:"
@@ -78,6 +80,7 @@ CLEANUPSE=$VO_SUPPORT_TOOLS/SE/cleanup-se
 NOW=`date "+%Y%m%d-%H%M%S"`
 WDIR=`pwd`/$NOW
 RESDIR=`pwd`/$NOW
+SIMULATE=
 
 VO=biomed
 AGE=6
@@ -93,6 +96,7 @@ do
     --older-than ) AGE=$2; shift;;    
     --work-dir ) WDIR=$2/$NOW; shift;;
     --result-dir ) RESDIR=$2/$NOW; shift;;
+    --simulate ) SIMULATE=--simulate;;
     -h | --help ) help;;
     * ) help;;
   esac
@@ -110,27 +114,8 @@ if [ $? -ne 0 ];
     then echo "list-se-urls.py call failed, check ${WDIR}/list_se_urls.log."; exit 1
 fi
 if [ ! -e $LISTSE ];
-    then echo "List of SEs URLs cannot be found: $LISTSE."; exit 1
+    then echo "List of SEs URLs cannot be found: ${LISTSE}."; exit 1
 fi
-
-nb=1
-# Run the analisys on each SE in parallel
-cat $LISTSE | while read LINE; do
-    SE_HOSTNAME=`echo $LINE | cut -d ' ' -f 1`
-    SE_URL=`echo $LINE | cut -d ' ' -f 5`
-    echo "Running cleanup process on SE ${SE_HOSTNAME}..."
-    $CLEANUPSE/check-se.sh --vo $VO --se $SE_HOSTNAME --url $SE_URL --older-than $AGE --work-dir $WDIR --result-dir $RESDIR > $WDIR/check-se-${SE_HOSTNAME}.log &
-    # Wait for 10 minites between each run
-    
-    ####### DEBUG ########
-    if [ "$nb" -ge "5" ]; then
-        break
-    fi
-    nb=`expr $nb + 1`
-    ####### DEBUG ########
-    
-    sleep 600
-done
 
 # Prepare web report with date and parameters
 rm -f $RESDIR/INFO.xml
@@ -138,6 +123,41 @@ NB_SES=`cat $LISTSE | wc -l`
 cat <<EOF >> $RESDIR/INFO.xml
 <info><datetime>$NOW</datetime><olderThan>$AGE</olderThan><nbSEs>$NB_SES</nbSEs></info>
 EOF
+
+# Limit the number of SE checks run in parralel
+MAX_PARRALEL_CHECKS=20
+
+# Run the analysis on each SE in parallel
+NB_CHECKS=0
+cat $LISTSE | while read LINE; do
+
+    # Limit the number of checks running in parralel: if over the limit, simply wait for others to complete
+    NB_CHECK_PARRALEL=`ps h -fHu vapor | grep "check-se.sh --vo $VO" | grep -v "grep check-se.sh --vo $VO" | wc -l`
+    while [ $NB_CHECK_PARRALEL -gt $MAX_PARRALEL_CHECKS ]; do
+        NOW=`date "+%Y-%m-%d %H:%M:%S"`
+        echo "$NOW - Currently $NB_CHECK_PARRALEL checks running. Waiting 10mn for others to complete."
+        # Wait 10 minutes until the next attempt
+        sleep 600
+        NB_CHECK_PARRALEL=`ps h -fHu vapor | grep "check-se.sh --vo $VO" | grep -v "grep check-se.sh --vo $VO" | wc -l`
+    done
+
+    SE_HOSTNAME=`echo $LINE | cut -d ' ' -f 1`
+    SE_URL=`echo $LINE | cut -d ' ' -f 5`
+    NOW=`date "+%Y-%m-%d %H:%M:%S"`
+    echo "$NOW - Running cleanup process on SE ${SE_HOSTNAME}..."
+    $CLEANUPSE/check-se.sh --vo $VO --se $SE_HOSTNAME --url $SE_URL --older-than $AGE --work-dir $WDIR --result-dir $RESDIR $SIMULATE > $WDIR/${SE_HOSTNAME}.log &
+    
+    ####### DEBUG ########
+    if [ "$NB_CHECKS" -ge "30" ]; then
+        break
+    fi
+    NB_CHECKS=`expr $NB_CHECKS + 1`
+    ####### DEBUG ########
+    
+    # Wait for 1 minute between each run
+    echo "Waiting 1mn before running the next SE check."
+    sleep 60
+done
 
 exit 0
 
