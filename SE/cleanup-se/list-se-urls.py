@@ -224,7 +224,7 @@ for service in services:
         urls.append(srmurl)
         # Write line to output file
         f.write(hostname+' '+site+' '+safreesize+' '+satotalsize+' '+srmurl+'\n')
-        xml_out.write('<se><hostname>'+hostname+'</hostname><site>'+site+'</site><freeSpaceBefore>'+safreesize+'</freeSpaceBefore><freeSpaceAfter>N/A</freeSpaceAfter><totalSize>'+satotalsize+'</totalSize><srmUrl>'+srmurl+'</srmUrl><status>ongoing</status></se>\n')
+        xml_out.write('<se><hostname>'+hostname+'</hostname><site>'+site+'</site><freeSpaceBefore>'+safreesize+'</freeSpaceBefore><freeSpaceAfter>N/A</freeSpaceAfter><totalSize>'+satotalsize+'</totalSize><srmUrl>'+srmurl+'</srmUrl><status>Ongoing</status></se>\n')
 
 xml_out.write('</ses>')
 

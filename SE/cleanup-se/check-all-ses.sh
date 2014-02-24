@@ -145,10 +145,10 @@ EOF
 # Limit the number of SE checks run in parralel
 MAX_PARALLEL_CHECKS=20
 
-# Limit the total number of SE to check (debug feature, set 99999 for no limit)
-MAX_CHECKS_TOTAL=30
+# Limit the total number of SE to check (debug feature, set 9999 for no limit)
+MAX_CHECKS_TOTAL=9999
 
-# Run the analysis on each SE in parallel
+# Loop on the list of SEs to run the analysis on each SE in parallel
 NB_CHECKS=0
 cat $LISTSE | while read LINE; do
 
@@ -165,9 +165,10 @@ cat $LISTSE | while read LINE; do
     SE_HOSTNAME=`echo $LINE | cut -d ' ' -f 1`
     SE_URL=`echo $LINE | cut -d ' ' -f 5`
     NOW=`date "+%Y-%m-%d %H:%M:%S"`
-    echo "# $NOW - Running cleanup process on SE ${SE_HOSTNAME}..."
-    $CLEANUPSE/check-se.sh --vo $VO --se $SE_HOSTNAME --url $SE_URL --older-than $AGE --work-dir $WDIR --result-dir $RESDIR $SIMULATE 2>&1 > $WDIR/${SE_HOSTNAME}.log &
-    
+    echo "# $NOW - Running check-and-cleanup process on SE ${SE_HOSTNAME}..."
+    ${CLEANUPSE}/check-and-clean-se.sh --vo $VO --se $SE_HOSTNAME --url $SE_URL --older-than $AGE --work-dir $WDIR --result-dir $RESDIR $SIMULATE 2>&1 > $WDIR/${SE_HOSTNAME}.log &
+
+    # Limit the total number of checks run (debug feature)
     if [ "$NB_CHECKS" -ge "$MAX_CHECKS_TOTAL" ]; then
         break
     fi

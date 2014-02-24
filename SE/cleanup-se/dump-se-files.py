@@ -17,6 +17,7 @@ import re
 import gfal2
 import stat
 import datetime
+import time
 
 from operator import itemgetter, attrgetter
 from optparse import OptionParser
@@ -53,6 +54,14 @@ outputToFile = options.output_file != ''
 # Define gfal2 context as a global variable
 global context
 context = gfal2.creat_context()
+
+# Define max number of retry when exception is raised
+global MAX_GFAL2_REQUEST_TRY
+MAX_GFAL2_REQUEST_TRY=5
+
+# Define waiting time in seconds when retry
+global MAX_RETRY_WAITING_TIME
+MAX_RETRY_WAITING_TIME=30
 
 # Method that format a stat.st_mode item into `ls -l` like permissions
 def mode_to_rights(st_mode) :
@@ -112,11 +121,20 @@ def ls_rec(url,f) :
     # Assuming given as arg url is a directory
     # List the content of the current url directory
     entries = ''
-    try:
-        entries = context.listdir(url)
-    except Exception, e:
-        print 'Exception caught while calling listdir on url: ' + url + '. Message: ', e
-        return
+    isListDirSuccess=False
+    attemptListDir=1
+    while not isListDirSuccess:
+	try:
+	    entries = context.listdir(url)
+	except Exception, e:
+	    attemptListDir+=1
+	    if attemptListDir > MAX_GFAL2_REQUEST_TRY:
+		print 'Exception caught when calling listdir on url: ' + url + '. Message: ', e
+		return
+	    else:
+		time.sleep(MAX_RETRY_WAITING_TIME)	
+		continue
+	isListDirSuccess=True	    
 
     # Build a map (directory name  => stat object)
     entries_map = {}
@@ -127,12 +145,22 @@ def ls_rec(url,f) :
         if entry[0] != '/':
             # current entry is valid, get its stat item
             st = ''
-            try:
-                st = context.lstat(url + '/' + entry)
-            except Exception,e:
-                print 'Exception caught while calling lstat on url: ' + url  + '/' + entry + '. Message: ',e
-                continue
-            # store the entry with its stat item
+	    isLStatSuccess=False
+	    attemptLStat=1
+	    while not isLStatSuccess:
+		try:
+		    st = context.lstat(url + '/' + entry)
+		except Exception,e:
+		    attemptLStat+=1
+		    if attemptLStat > MAX_GFAL2_REQUEST_TRY:
+			print 'Exception caught when calling lstat on url: ' + url + '/'+ entry + '. Message: ', e
+			break
+		    else:
+			time.sleep(MAX_RETRY_WAITING_TIME)
+			continue
+		isLStatSuccess=True
+
+	    # store the entry with its stat item
             entries_map[entry] = st
 
     # Look for files entries and print them
@@ -165,17 +193,30 @@ def ls_rec(url,f) :
 # Build the file descriptor if specified in argument
 f = ''
 if outputToFile:
-    f = open(options.output_file,'w')
+    try:
+	f = open(options.output_file,'w')
+    except Exception,e:
+	print 'Exception when opening output file: ' + options.output_file + ' Message: ',e
+	sys.exit(1)
 else:
     f = sys.stdout
 
 # Get stat item of url given as argument
 st = ''
-try:
-    st = context.lstat(options.url)
-except Exception,e:
-    print 'Exception caught when while lstat on url: ' + options.url  + '. Message: ',e
-    sys.exit(1)
+isLStatSuccess=False
+attemptLStat=1
+while not isLStatSuccess:
+    try:
+	st = context.lstat(options.url)
+    except Exception,e:
+	attemptLStat+=1
+	if attemptLStat > MAX_GFAL2_REQUEST_TRY:
+	    print 'Exception caught when lstat on url: ' + options.url  + '. Message: ',e
+	    break
+	else:
+	    time.sleep(MAX_RETRY_WAITING_TIME)
+	    continue
+    isLStatSuccess=True
 
 # Print the url
 f.write( mode_to_rights(st.st_mode) + ' ' + 

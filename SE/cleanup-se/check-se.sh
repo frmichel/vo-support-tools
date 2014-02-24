@@ -81,7 +81,7 @@ if test -z "$LFC_HOST"; then
     exit 1
 fi
 
-CLEANUPSE=$VO_SUPPORT_TOOLS/SE/cleanup-se
+CLEANUPSE=${VO_SUPPORT_TOOLS}/SE/cleanup-se
 CLEANUP_DARK_DATA=false
 SIMULATE=false
 WDIR=`pwd`
@@ -124,12 +124,12 @@ if [ "$SIMULATE" == "true" ]; then
 fi
 
 # ------------------------------------------------------
-# Dump the list of files on the SE based on the catalog
+# Dump the list of files on the SE according to the file catalog
 # ------------------------------------------------------
-LFCDUMP=$WDIR/${SE_HOSTNAME}_dump_lfc.txt
+LFCDUMP=${WDIR}/${SE_HOSTNAME}_dump_lfc.txt
 NOW=`date "+%Y-%m-%d %H:%M:%S"`
 echo "# $NOW - Running LFCBrowseSE on SE ${SE_HOSTNAME}..."
-$VO_SUPPORT_TOOLS/SE/lfc-browse-se/LFCBrowseSE $SE_HOSTNAME --vo $VO --sfn > $LFCDUMP
+${VO_SUPPORT_TOOLS}/SE/lfc-browse-se/LFCBrowseSE $SE_HOSTNAME --vo $VO --sfn > $LFCDUMP
 if [ $? -ne 0 ];
     then echo "LFCBrowseSE call failed"; exit 1
 fi
@@ -144,7 +144,7 @@ fi
 SEDUMP=$WDIR/${SE_HOSTNAME}_dump_se.txt
 NOW=`date "+%Y-%m-%d %H:%M:%S"`
 echo "# $NOW - Running dump-se-files.py on SE ${SE_HOSTNAME}..."
-$CLEANUPSE/dump-se-files.py --url $URL --output-file $SEDUMP --debug
+${CLEANUPSE}/dump-se-files.py --url $URL --output-file $SEDUMP --debug 2> /dev/null
 if [ $? -ne 0 ];
     then echo "Dump of SE failed."; exit 1
 fi
@@ -158,38 +158,11 @@ fi
 # ------------------------------------------------------
 NOW=`date "+%Y-%m-%d %H:%M:%S"`
 echo "# $NOW - Computing difference between LFC and SE for SE ${SE_HOSTNAME}..."
-$CLEANUPSE/diff-se-dump-lfc.sh --se-dump $SEDUMP --lfc-dump $LFCDUMP --older-than $AGE --se $SE_HOSTNAME --work-dir $WDIR --result-dir $RESDIR
+${CLEANUPSE}/diff-se-dump-lfc.sh --se-dump $SEDUMP --lfc-dump $LFCDUMP --older-than $AGE --se $SE_HOSTNAME --work-dir $WDIR --result-dir $RESDIR
 if [ $? -ne 0 ];
     then echo "Difference betwen LFC and SE dumps failed."; exit 1
 fi
 
-
-########### A CONTINUER
-# Le check-se.sh va s'arrêter là.
-# La suite (ci-dessous) est à mettre dans un autre fichier check-and-clean-se.sh qui sera appelé par le check-all-se.sh.
-# Le check-and-clean-se.sh :
-# - appelle du check-se.sh avec redirection version fichier de log : ... 2>&1 > $WDIR/${SE_HOSTNAME}.log
-# - vérifie le fichier $WDIR/${SE_HOSTNAME}.log pour savoir s'il y a eu une erreur (ligne qui ne commence pas pas "# "
-#   ==> egrep -v "^# |^$" $WDIR/${SE_HOSTNAME}.log | wc -l ==> doit rendre 0
-# Si 0 erreur, continuer normalement avec le cleanup, puis passer le status en "Completed" en fonction du status du cleanup
-# Si au moins une erreur, alors
-#   - NE PAS faire le cleanup, mettre le rapport en status "Comleted with errors"
-#   - ajouter les lignes d'erreur DU LOG dans le rapport web détaillé 
-########### A CONTINUER
-
-
-# ------------------------------------------------------
-# Cleanup dark data found out by the diff script
-# ------------------------------------------------------
-if [ "$CLEANUP_DARK_DATA" == "true" ] ; then
-    echo "# Starting removing dark data files listed in file ${RESDIR}/${SE_HOSTNAME}.cleanup_dark_data.log"
-    # ${CLEANUPSE}/cleanup-dark-data.sh --vo $VO --se $SE_HOSTNAME --surls ${RESDIR}/${SE_HOSTNAME}.cleanup_dark_data.log
-    if [ $? -ne 0 ];
-        then echo "Cleanup of dark data failed."; exit 1
-    fi
-else
-    echo "# Dark data cleanup is deactivated."
-fi
 
 NOW=`date "+%Y-%m-%d %H:%M:%S"`
 echo "# --------------------------------------------"

@@ -94,10 +94,10 @@ if test -z "$SE_HOSTNAME" ; then echo "Option --se is mandatory."; help; fi
 if test -z "$INPUT_LFC_DUMP" ; then echo "Option --lfc-dump is mandatory."; help; fi
 if test -z "$INPUT_SE_DUMP" ; then echo "Option --se-dump is mandatory."; help; fi
 
-OUTPUT_LFC_GHOSTS=${RESDIR}/${SE_HOSTNAME}.output_lfc_lost_files
-OUTPUT_SE_ZOMBIES=${RESDIR}/${SE_HOSTNAME}.output_se_dark_data
-OUTPUT_COMMON=${RESDIR}/${SE_HOSTNAME}.output_common
-SE_DUMP_FILES_ONLY=${WDIR}/${SE_HOSTNAME}_dump_se_files.txt
+OUTPUT_LFC_GHOSTS=$RESDIR/${SE_HOSTNAME}.output_lfc_lost_files
+OUTPUT_SE_ZOMBIES=$RESDIR/${SE_HOSTNAME}.output_se_dark_data
+OUTPUT_COMMON=$RESDIR/${SE_HOSTNAME}.output_common
+SE_DUMP_FILES_ONLY=$WDIR/${SE_HOSTNAME}_dump_se_files.txt
 
 # Files older than $AGE months are considered as zombies. Others are ignored.
 LIMIT_DATE=`date --date="$AGE months ago" "+%Y-%m-%d"`
@@ -199,14 +199,12 @@ if test -z "$SILENT"; then
   echo "# Found `wc -l $OUTPUT_COMMON | awk -- '{print $1}'` files common to SE and LFC."
 fi
 
+# Calculate the percent of zombie and ghost files found
 NB_DARK_DATA=`wc -l $OUTPUT_SE_ZOMBIES | cut -d ' ' -f1`
 NB_LOST_FILES=`wc -l $OUTPUT_LFC_GHOSTS | cut -d ' ' -f1`
 NB_COMMON=`wc -l $OUTPUT_COMMON | cut -d ' ' -f1`
-
-# Calculate the percent of zombie and ghost files found
 NB_FILES_TOTAL_LFC=$(($NB_LOST_FILES+$NB_COMMON))
 NB_FILES_TOTAL_SE=$(($NB_DARK_DATA+$NB_COMMON))
-
 NB_FILES_TOTAL_SE_DUMP=`wc -l $SE_DUMP_FILES_ONLY | cut -d ' ' -f1`
 
 if [ $NB_FILES_TOTAL_LFC -gt 0 ]; then
@@ -221,12 +219,13 @@ else
     PERCENT_DARK_DATA='N/A'
 fi
 
-# ----------------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------
 # Output xml report
-# ----------------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------
+
 OUTPUT_FILE=$RESDIR/${SE_HOSTNAME}_check_result.xml
 touch $OUTPUT_FILE
-echo "<checkResult>" >> $OUTPUT_FILE
+echo "<checkResult>" > $OUTPUT_FILE
 echo "  <hostname>$SE_HOSTNAME</hostname>" >> $OUTPUT_FILE
 echo "  <darkData>$NB_DARK_DATA</darkData>" >> $OUTPUT_FILE
 echo "  <percentDarkData>$PERCENT_DARK_DATA</percentDarkData>" >> $OUTPUT_FILE
