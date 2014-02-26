@@ -1,5 +1,5 @@
 #!/bin/bash
-# scan-se.sh, v1.1
+# scan-se.sh
 # Author: F. Michel, CNRS I3S, biomed VO support
 #
 # Algo:
@@ -68,9 +68,9 @@ help()
   echo
   echo "Check SEs supporting VO myVO with used space over 90%"
   echo "   ./scan-se.sh --vo myVo --threshold 90"
-  echo "                         --voms-users /tmp/myVo/monitor-se/voms-users.txt"
-  echo "                         --work-dir /tmp/myVo/monitor-se"
-  echo '                         --result-dir $HOME/public_html/myVo/monitor-se'
+  echo "                          --voms-users /tmp/myVo/monitor-se/voms-users.txt"
+  echo "                          --work-dir /tmp/myVo/monitor-se"
+  echo '                          --result-dir $HOME/public_html/myVo/monitor-se'
   echo
   exit 1
 }
@@ -118,7 +118,10 @@ NB_SE=`wc -l $TMP_LIST_SE | cut -d ' ' -f 1`
 mkdir -p $RESDIR
 if $XML_OUTPUT; then
 cat <<EOF >> $RESDIR/INFO.xml
-<ScanDate>$NOW</ScanDate><MinUsedSpacePercentage>${SPACE_THRESHOLD}</MinUsedSpacePercentage><UserMinUsedSpace>${USER_MIN_SPACE}</UserMinUsedSpace><NbSEs>${NB_SE}</NbSEs>
+<ScanDate>$NOW</ScanDate>
+<MinUsedSpacePercentage>${SPACE_THRESHOLD}</MinUsedSpacePercentage>
+<UserMinUsedSpace>${USER_MIN_SPACE}</UserMinUsedSpace>
+<NbSEs>${NB_SE}</NbSEs>
 EOF
 
 else
@@ -128,15 +131,16 @@ SE minimum used space: ${SPACE_THRESHOLD}%<br>
 Users minimum used space: ${USER_MIN_SPACE}GB
 EOF
 fi
+
 # Run the analisys on each SE in parallel
 echo "Starting analysis of SEs over ${SPACE_THRESHOLD}% of used space, reporting users consumming at least ${USER_MIN_SPACE}GB - $NOW_PRETTY"
 for SEHOSTNAME in `cat $TMP_LIST_SE`
 do
-  echo "$SEHOSTNAME"
+  echo "Starting analysis of $SEHOSTNAME"
   if $XML_OUTPUT; then
-    $MONITOR_SE_SPACE/se-heavy-users.sh --xml-output --vo $VO --voms-users $VOMS_USERS --suspended-expired-voms-users $SUSPENDED_EXPIRED_VOMS_USERS --user-min-used $USER_MIN_SPACE --work-dir $WDIR --result-dir $RESDIR $SEHOSTNAME &
+    $MONITOR_SE_SPACE/se-heavy-users.sh --work-dir $WDIR --result-dir $RESDIR --vo $VO --voms-users $VOMS_USERS --suspended-expired-voms-users $SUSPENDED_EXPIRED_VOMS_USERS --user-min-used $USER_MIN_SPACE --xml-output $SEHOSTNAME 2>&1 > $WDIR/${SEHOSTNAME}.log &
   else  
-    $MONITOR_SE_SPACE/se-heavy-users.sh --vo $VO --voms-users $VOMS_USERS --user-min-used $USER_MIN_SPACE --work-dir $WDIR --result-dir $RESDIR $SEHOSTNAME &
+    $MONITOR_SE_SPACE/se-heavy-users.sh --work-dir $WDIR --result-dir $RESDIR --vo $VO --voms-users $VOMS_USERS --user-min-used $USER_MIN_SPACE $SEHOSTNAME &
   fi
   sleep 10
 done

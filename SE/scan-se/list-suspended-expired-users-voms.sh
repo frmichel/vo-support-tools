@@ -53,9 +53,8 @@ voms-admin --vo=$VO --host $VOMS_HOST --port $VOMS_PORT list-expired-users | gre
 voms-admin --vo=$VO --host $VOMS_HOST --port $VOMS_PORT list-users > $VO-voms-users.aux.temp
 
 cat $VO-suspended-voms-users.temp $VO-expired-voms-users.temp | sort | uniq > $VOMS_SUSPENDED_EXPIRED_USERS.temp
-if test -f $VOMS_SUSPENDED_EXPIRED_USERS.aux.temp; then
-    rm $VOMS_SUSPENDED_EXPIRED_USERS.aux.temp
-fi
+
+rm -f $VOMS_SUSPENDED_EXPIRED_USERS.aux.temp
 cat $VOMS_SUSPENDED_EXPIRED_USERS.temp | while read line
 do
     grep -s -h "$line" $VO-voms-users.aux.temp >> $VOMS_SUSPENDED_EXPIRED_USERS.aux.temp
@@ -73,3 +72,4 @@ else
     echo "Failed to build list of users from VOMS."
     exit 1
 fi
+

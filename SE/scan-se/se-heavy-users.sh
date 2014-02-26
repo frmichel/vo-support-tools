@@ -1,5 +1,5 @@
 #!/bin/bash
-# se-heavy-users.sh, v1.1
+# se-heavy-users.sh
 # Author: F. Michel, CNRS I3S, biomed VO support
 #
 # This script looks for users who have more that 100 MB of data on the given SE.
@@ -13,7 +13,10 @@ RESDIR=`pwd`
 VOMS_USERS=$WDIR/voms-users.txt
 SUSPENDED_EXPIRED_VOMS_USERS=$WDIR/suspended-expired-voms-users.txt
 USER_MIN_SPACE=0.1
-XML_OUTPUT=false
+
+# By default XML_OUTPUT is not defined => if $XML_OUTPUT will return 1
+# XML_OUTPUT=false
+
 help()
 {
   echo
@@ -40,7 +43,7 @@ help()
   echo
   echo "  --user-min-used <space in GB>: minimum used space (in GB) for a user to be reported. Defaults to 0.1 = 100 MB."
   echo
-  echo "--xml-output : computes output files under xml format."
+  echo "  --xml-output : computes output files under xml format."
   echo
   echo "  -h, --help: display this help"
   echo
@@ -76,108 +79,144 @@ if test -z "$SEHOSTNAME" ; then
 fi
 
 
-#--- Check additional environment
+# -------------------------------------------------------------
+# --- Check additional environment
+# -------------------------------------------------------------
+
 if test -z "$LFC_HOST"; then
     echo "Please set variable LFC_HOST before calling $0, e.g. export LFC_HOST=lfc-biomed.in2p3.fr"
     exit 1
 fi
 if ! [ -d $WDIR ]; then mkdir -p $WDIR; fi
 
-mkdir -p $WDIR/tmp
-LBS_OUT=$WDIR/tmp/${SEHOSTNAME}_$$.lst
+mkdir -p $WDIR
+LBS_OUT=$WDIR/${SEHOSTNAME}.lst
 
 #--- The hostname_status file will help display the status of the analysis on the web report
-RESULT_STATUS=""
 USED_PERCENT=`lcg-infosites --vo $VO space | awk -f $VO_SUPPORT_TOOLS/SE/show-se-space/parse-lcg-infosites-space.awk | grep "^$SEHOSTNAME" | cut -d"|"  -f5`
-if $XML_OUTPUT; then
-RESULT_STATUS=$RESDIR/${SEHOSTNAME}_status.xml
-SPACE=`lcg-infosites --vo $VO space | awk -f $VO_SUPPORT_TOOLS/SE/show-se-space/parse-lcg-infosites-space.awk | grep "^$SEHOSTNAME"`
-USED_SPACE=`echo $SPACE | cut -d"|" -f3`
-FREE_SPACE=`echo $SPACE | cut -d"|" -f2`
-TOTAL_SPACE=`echo $SPACE | cut -d"|" -f4`
-echo "<HostName>${SEHOSTNAME}</HostName><UsedSpace>${USED_SPACE}</UsedSpace><FreeSpace>${FREE_SPACE}</FreeSpace><TotalSpace>${TOTAL_SPACE}</TotalSpace><UsedSpacePercentage>${USED_PERCENT}</UsedSpacePercentage><Status>ongoing</Status>" > $RESULT_STATUS
 
+if $XML_OUTPUT; then
+    RESULT_STATUS=$RESDIR/${SEHOSTNAME}_status.xml
+    
+    SPACE=`lcg-infosites --vo $VO space | awk -f $VO_SUPPORT_TOOLS/SE/show-se-space/parse-lcg-infosites-space.awk | grep "^$SEHOSTNAME"`
+    USED_SPACE=`echo $SPACE | cut -d"|" -f3`
+    FREE_SPACE=`echo $SPACE | cut -d"|" -f2`
+    TOTAL_SPACE=`echo $SPACE | cut -d"|" -f4`
+    
+    echo "<HostName>${SEHOSTNAME}</HostName>" > $RESULT_STATUS
+    echo "<UsedSpace>${USED_SPACE}</UsedSpace>" >> $RESULT_STATUS
+    echo "<FreeSpace>${FREE_SPACE}</FreeSpace>" >> $RESULT_STATUS
+    echo "<TotalSpace>${TOTAL_SPACE}</TotalSpace>" >> $RESULT_STATUS
+    echo "<UsedSpacePercentage>${USED_PERCENT}</UsedSpacePercentage>" >> $RESULT_STATUS
+    echo "<Status>Ongoing</Status>" >> $RESULT_STATUS
 else
-  RESULT_STATUS=$RESDIR/${SEHOSTNAME}_status
-  echo "${SEHOSTNAME}|ongoing" | awk --field-separator "|" '{ printf "%-50s %s\n",$1,$2; }' > $RESULT_STATUS
+    RESULT_STATUS=$RESDIR/${SEHOSTNAME}_status
+    echo "${SEHOSTNAME}|ongoing" | awk --field-separator "|" '{ printf "%-50s %s\n",$1,$2; }' > $RESULT_STATUS
 fi
-#--- Process the SE: get all VO users having files there
+
+
+# -------------------------------------------------------------
+# --- Read the catalog: get all VO users having files there
+# -------------------------------------------------------------
+
 touch $LBS_OUT
 echo -n "# Starting LFCBrowseSE at " >> $LBS_OUT
 DATE_FORMAT="+%Y-%m-%d %H:%M:%S %Z"
 date "$DATE_FORMAT" >> $LBS_OUT
 
+#--- Run the LFCBrowseSE tool
 $LFC_BROWSE_SE_BIN $SEHOSTNAME --vo $VO --summary 2>&1 >> $LBS_OUT
+if test $? -ne 0; then
+    echo "$(basename $LFC_BROWSE_SE_BIN) failed to retrieve files for SE ${SEHOSTNAME}. Exiting."
+    
+    if $XML_OUTPUT; then
+        echo "<HostName>${SEHOSTNAME}</HostName>" > $RESULT_STATUS
+        echo "<UsedSpace>${USED_SPACE}</UsedSpace>" >> $RESULT_STATUS
+        echo "<FreeSpace>${FREE_SPACE}</FreeSpace>" >> $RESULT_STATUS
+        echo "<TotalSpace>${TOTAL_SPACE}</TotalSpace>" >> $RESULT_STATUS
+        echo "<UsedSpacePercentage>${USED_PERCENT}</UsedSpacePercentage>" >> $RESULT_STATUS
+        echo "<Status>Error</Status>" >> $RESULT_STATUS
+    else
+        echo "${SEHOSTNAME}|${USED_PERCENT}% full," | awk --field-separator "|" '{ printf "<a href=\"#%s\">%-51s</a>, %10s error.\n",$1,$1,$2; }' > $RESULT_STATUS
+    fi
+    exit 0
+fi
 
 echo -n "# LFCBrowseSE completed at " >> $LBS_OUT
 date "$DATE_FORMAT" >> $LBS_OUT
 
-#--- For each user with more than x GB, get his email address from the VOMS
-RESULT=""
-NOTFOUND=""
-SUSPENDED_EXPIRED=""
-RESULT_EMAIL=""
+# -------------------------------------------------------------
+# --- For each user with more than x GB, get his email address from the VOMS
+# -------------------------------------------------------------
+
 if $XML_OUTPUT; then
-  RESULT=$WDIR/${SEHOSTNAME}_users.xml
-  NOTFOUND=$WDIR/${SEHOSTNAME}_unknown.xml
-  SUSPENDED_EXPIRED=$WDIR/${SEHOSTNAME}_suspended-expired.xml
-  RESULT_EMAIL=$RESDIR/${SEHOSTNAME}_email.xml
+    RESULT=$WDIR/${SEHOSTNAME}_users.xml
+    NOTFOUND=$WDIR/${SEHOSTNAME}_unknown.xml
+    SUSPENDED_EXPIRED=$WDIR/${SEHOSTNAME}_suspended-expired.xml
+    RESULT_EMAIL=$RESDIR/${SEHOSTNAME}_email.xml
 else
-  RESULT=$WDIR/${SEHOSTNAME}_users
-  NOTFOUND=$WDIR/${SEHOSTNAME}_unknown
-  RESULT_EMAIL=$RESDIR/${SEHOSTNAME}_email
+    RESULT=$WDIR/${SEHOSTNAME}_users
+    NOTFOUND=$WDIR/${SEHOSTNAME}_unknown
+    RESULT_EMAIL=$RESDIR/${SEHOSTNAME}_email
 fi
 
+
+if $XML_OUTPUT; then
+    echo  "<emails>" >> $RESULT_EMAIL
+fi
+
+# Parse the result of the LFCBrowseSE, and select only DNs with more than x GB
 TMP_PARSE_AWK=$WDIR/parse-lfcbrowsese_$$.awk
 sed "s/@SPACE_THRESHOLD@/$USER_MIN_SPACE/" $MONITOR_SE_SPACE/parse-lfcbrowsese.awk.tpl > $TMP_PARSE_AWK
-
-if $XML_OUTPUT; then
-  echo  "<emails>" >> $RESULT_EMAIL
-fi
 awk -f $TMP_PARSE_AWK $LBS_OUT | while read LINE ; do
   dn=`echo $LINE | cut -d"|" -f1`
   used=`echo $LINE | cut -d"|" -f2`
+  
+  # Loop on line with DNs, DNs start with: "/ANYWORD="
   if [[ $dn =~ ^/[a-zA-Z]+= ]]; then
+  
+    # Is the user among the active users?
     voms_user=`grep "$dn" $VOMS_USERS`
     if test $? -eq 0; then
       # Get the user's email address
       if $XML_OUTPUT; then
-	echo -n "<email>" >> $RESULT_EMAIL
-	# Regexp contains a - or a , depending on the voms-admin version
-	echo -n $voms_user |  awk '{ printf "%s", gensub("^.+,([^ ]+@[^ ]+)$", "\\1", 1); }'  >> $RESULT_EMAIL 
-	echo  "</email>" >> $RESULT_EMAIL
-	echo -n "<User><DN>$dn</DN>"  >> $RESULT
-    	echo -n "<UsedSpace>" >> $RESULT
-	echo -n $used | cut -d ' ' -f 1 | tr -d '\n' >> $RESULT
-	echo "</UsedSpace></User>"  >> $RESULT
+        echo -n "<email>" >> $RESULT_EMAIL
+        # Retreive the email address: it is separated from the DN by a '-' or a ',' depending on the voms-admin version
+        echo -n $voms_user |  awk '{ printf "%s", gensub("^.+,([^ ]+@[^ ]+)$", "\\1", 1); }' >> $RESULT_EMAIL 
+        echo  "</email>" >> $RESULT_EMAIL
+        echo -n "<User><DN>$dn</DN><UsedSpace>" >> $RESULT
+        echo -n $used | cut -d ' ' -f 1 | tr -d '\n' >> $RESULT
+        echo "</UsedSpace></User>" >> $RESULT
       else
- 	echo -n "$dn|"  >> $RESULT
+        echo -n "$dn|"  >> $RESULT
         # Complex parsing due to several ambiguous separators: <user's dn>, <CA dn> - <email address>
-	# Regexp contains a - or a , depending on the voms-admin version
+        # Regexp contains a - or a , depending on the voms-admin version
         echo -n $voms_user | awk '{ printf "%s", gensub("^.+ - ([^ ]+@[^ ]+)$", "\\1", 1); }' >> $RESULT
         echo "|$used"  >> $RESULT
       fi
     else
+      # Is the user among the suspended or expired users?
       suspendedExpiredVomsUser=`grep "$dn" $SUSPENDED_EXPIRED_VOMS_USERS`
       if test $? -eq 0; then
-	if $XML_OUTPUT; then
-	  echo -n "<email>" >> $RESULT_EMAIL
+        if $XML_OUTPUT; then
+          echo -n "<email>" >> $RESULT_EMAIL
           # Regexp contains a - or a , depending on the voms-admin version
           echo -n $suspendedExpiredVomsUser | awk '{ printf "%s", gensub("^.+,([^ ]+@[^ ]+)$", "\\1", 1); }'  >> $RESULT_EMAIL
           echo  "</email>" >> $RESULT_EMAIL
-	  echo -n "<User><DN>$dn</DN><UsedSpace>" >> $SUSPENDED_EXPIRED
+          echo -n "<User><DN>$dn</DN><UsedSpace>" >> $SUSPENDED_EXPIRED
           echo -n $used | cut -d ' ' -f 1 | tr -d '\n' >> $SUSPENDED_EXPIRED
           echo  "</UsedSpace></User>" >> $SUSPENDED_EXPIRED
-	else
-	  echo "$dn|$used" >> $NOTFOUND
-	fi
+        else
+          echo "$dn|$used" >> $NOTFOUND
+        fi
       else
-    	if $XML_OUTPUT; then
-	  echo -n "<User><DN>$dn</DN><UsedSpace>" >> $NOTFOUND
-	  echo -n $used | cut -d ' ' -f 1 | tr -d '\n' >> $NOTFOUND
-	  echo -n "</UsedSpace></User>" >> $NOTFOUND
-    	else
-	  echo "$dn|$used" >> $NOTFOUND
+       # IThe user is not active, suspended nor expired => he is unknown
+        if $XML_OUTPUT; then
+          echo -n "<User><DN>$dn</DN><UsedSpace>" >> $NOTFOUND
+          echo -n $used | cut -d ' ' -f 1 | tr -d '\n' >> $NOTFOUND
+          echo -n "</UsedSpace></User>" >> $NOTFOUND
+        else
+          echo "$dn|$used" >> $NOTFOUND
         fi
       fi
     fi
@@ -185,46 +224,60 @@ awk -f $TMP_PARSE_AWK $LBS_OUT | while read LINE ; do
 done
 
 if $XML_OUTPUT; then
-  echo -n "</emails>" >> $RESULT_EMAIL
+    echo "</emails>" >> $RESULT_EMAIL
 fi
 
-#--- Convert the result into a file preparing the email to send to users
+# -------------------------------------------------------------
+# --- Convert the result into a file preparing the email to send to users
+# -------------------------------------------------------------
+
 mkdir -p $RESDIR
 if ! $XML_OUTPUT; then
-  $MONITOR_SE_SPACE/email-users.sh --vo $VO --users $RESULT --unknown $NOTFOUND > $RESULT_EMAIL
+    $MONITOR_SE_SPACE/email-users.sh --vo $VO --users $RESULT --unknown $NOTFOUND > $RESULT_EMAIL
 fi
 if $XML_OUTPUT; then
-  #--- Export the result file to the result dir in a more readable form
-  cat $RESULT > $RESDIR/${SEHOSTNAME}_users.xml
-
-  if test -f $SUSPENDED_EXPIRED; then
-    cat $SUSPENDED_EXPIRED > $RESDIR/${SEHOSTNAME}_suspended-expired.xml
-  fi
-  #--- Export the list of unkown users to the result dir in a more readable form
-  if test -f $NOTFOUND; then
-    cat $NOTFOUND > $RESDIR/${SEHOSTNAME}_unknown.xml
-  fi
+    #--- Export the result file to the result dir in a more readable form
+    if test -f $RESULT; then
+        cp $RESULT $RESDIR/${SEHOSTNAME}_users.xml
+    fi
+    if test -f $SUSPENDED_EXPIRED; then
+        cp $SUSPENDED_EXPIRED $RESDIR/${SEHOSTNAME}_suspended-expired.xml
+    fi
+    #--- Export the list of unkown users to the result dir in a more readable form
+    if test -f $NOTFOUND; then
+        cp $NOTFOUND $RESDIR/${SEHOSTNAME}_unknown.xml
+    fi
 else
-  #--- Export the result file to the result dir in a more readable form
-  awk --field-separator "|" '{ printf "%-70s %11s\n",$1,$3; }' $RESULT > $RESDIR/${SEHOSTNAME}_users
+    #--- Export the result file to the result dir in a more readable form
+    awk --field-separator "|" '{ printf "%-70s %11s\n",$1,$3; }' $RESULT > $RESDIR/${SEHOSTNAME}_users
 
-  #--- Export the list of unkown users to the result dir in a more readable form
-  if test -f $NOTFOUND; then
-    awk --field-separator "|" '{ printf "%-70s %11s\n",$1,$2; }' $NOTFOUND > $RESDIR/${SEHOSTNAME}_unknown
-  fi
+    #--- Export the list of unkown users to the result dir in a more readable form
+    if test -f $NOTFOUND; then
+        awk --field-separator "|" '{ printf "%-70s %11s\n",$1,$2; }' $NOTFOUND > $RESDIR/${SEHOSTNAME}_unknown
+    fi
 fi
 
 
+# -------------------------------------------------------------
+# --- Make the final status line giving the used space percentage 
+# --- and the link to the list of users
+# -------------------------------------------------------------
 
-#--- Make the final status line giving the used space percentage and the link to the list of users
 if $XML_OUTPUT; then
-  SPACE=`lcg-infosites --vo $VO space | awk -f $VO_SUPPORT_TOOLS/SE/show-se-space/parse-lcg-infosites-space.awk | grep "^$SEHOSTNAME"`	
-  USED_SPACE=`echo $SPACE | cut -d"|" -f3`
-  FREE_SPACE=`echo $SPACE | cut -d"|" -f2`
-  TOTAL_SPACE=`echo $SPACE | cut -d"|" -f4`
-  echo -n "<HostName>${SEHOSTNAME}</HostName><UsedSpace>${USED_SPACE}</UsedSpace><FreeSpace>${FREE_SPACE}</FreeSpace><TotalSpace>${TOTAL_SPACE}</TotalSpace><UsedSpacePercentage>${USED_PERCENT}</UsedSpacePercentage><Status>completed</Status>" > $RESULT_STATUS
+    SPACE=`lcg-infosites --vo $VO space | awk -f $VO_SUPPORT_TOOLS/SE/show-se-space/parse-lcg-infosites-space.awk | grep "^$SEHOSTNAME"`        
+    
+    USED_SPACE=`echo $SPACE | cut -d"|" -f3`
+    FREE_SPACE=`echo $SPACE | cut -d"|" -f2`
+    TOTAL_SPACE=`echo $SPACE | cut -d"|" -f4`
+    
+    echo "<HostName>${SEHOSTNAME}</HostName>" > $RESULT_STATUS
+    echo "<UsedSpace>${USED_SPACE}</UsedSpace>" >> $RESULT_STATUS
+    echo "<FreeSpace>${FREE_SPACE}</FreeSpace>" >> $RESULT_STATUS
+    echo "<TotalSpace>${TOTAL_SPACE}</TotalSpace>" >> $RESULT_STATUS
+    echo "<UsedSpacePercentage>${USED_PERCENT}</UsedSpacePercentage>" >> $RESULT_STATUS
+    echo "<Status>Completed</Status>" >> $RESULT_STATUS
 else
-  echo "${SEHOSTNAME}|${USED_PERCENT}% full," | awk --field-separator "|" '{ printf "<a href=\"#%s\">%-51s</a>, %10s completed.\n",$1,$1,$2; }' > $RESULT_STATUS
+    echo "${SEHOSTNAME}|${USED_PERCENT}% full," | awk --field-separator "|" '{ printf "<a href=\"#%s\">%-51s</a>, %10s completed.\n",$1,$1,$2; }' > $RESULT_STATUS
 fi
 rm -f $TMP_PARSE_AWK
 

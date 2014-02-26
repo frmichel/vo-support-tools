@@ -5,7 +5,7 @@
 VO=biomed
 VOMS_HOST=voms-biomed.in2p3.fr
 VOMS_PORT=8443
-VOMS_USERS=`pwd`/voms-users.txt
+OUTPUT=`pwd`/voms-users.txt
 VOMS_SUSPENDED_EXPIRED_USERS=`pwd`/suspended-expired-voms-users.txt
 help()
 {
@@ -41,7 +41,7 @@ while [ ! -z "$1" ]
 do
   case "$1" in
     --vo ) VO=$2; shift;;
-    --out ) VOMS_USERS=$2; shift;;
+    --out ) OUTPUT=$2; shift;;
     --voms-host ) VOMS_HOST=$2; shift;;
     --voms-port ) VOMS_PORT=$2; shift;;
     --suspended-expired-voms-users ) VOMS_SUSPENDED_EXPIRED_USERS=$2; shift;;
@@ -52,19 +52,19 @@ do
 done
 
 # Get the current list of users from the VOMS server
-voms-admin --vo=$VO --host $VOMS_HOST --port $VOMS_PORT list-users > $VOMS_USERS.temp
-cat $VOMS_SUSPENDED_EXPIRED_USERS | while read line 
+voms-admin --vo=$VO --host $VOMS_HOST --port $VOMS_PORT list-users > $OUTPUT.temp
+
+# Make the diff with list of expired/suspended users
+cat $VOMS_SUSPENDED_EXPIRED_USERS | while read line
 do
     dn=`echo "$line" | cut -d ',' -f 1`  
-    grep -v "$dn" $VOMS_USERS.temp > $VOMS_USERS.aux.temp
-    cat $VOMS_USERS.aux.temp > $VOMS_USERS.temp
+    grep -v "$dn" $OUTPUT.temp > $OUTPUT.aux.temp
+    mv $OUTPUT.aux.temp $OUTPUT.temp
 done
 
-if test -f $VOMS_USERS.temp; then
-    cp $VOMS_USERS.temp $VOMS_USERS
-    rm $VOMS_USERS.aux.temp
-    rm $VOMS_USERS.temp
-    echo "Users list built successfully: $VOMS_USERS."
+if test -f $OUTPUT.temp; then
+    mv $OUTPUT.temp $OUTPUT
+    echo "Users list built successfully: $OUTPUT"
     exit 0
 else
     echo "Failed to build list of users from VOMS."
