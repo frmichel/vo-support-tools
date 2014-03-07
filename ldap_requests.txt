@@ -47,7 +47,7 @@ ldapsearch "(&(objectclass=GlueVOInfo)(GlueChunkKey=GlueSEUniqueID=${SE})(GlueVO
 ldapsearch "(&(ObjectClass=GlueService)(GlueServiceUniqueID=*${SE}*)(GlueServiceAccessControlBaseRule=*${VO}*)(GlueServiceType=SRM)(GlueServiceVersion=2*))" GlueServiceType GlueServiceVersion GlueServiceUniqueID GlueServiceAccessControlRule
 
 
-#--- Find the protocols supporting by the endpoint
+#--- Find the protocols supported by the endpoint
 ldapsearch "(&(ObjectClass=GlueSEAccessProtocol)(GlueChunkKey=GlueSEUniqueID=${SE}))" GlueSEAccessProtocolLocalID GlueSEAccessProtocolType GlueSEAccessProtocolEndpoint
 
 #--- Find the file access endpoint supporting gsftp

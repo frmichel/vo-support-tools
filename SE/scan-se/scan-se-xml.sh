@@ -1,16 +1,17 @@
 #!/bin/bash
-# scan-se.sh
+# scan-se-xml.sh
 # Author: F. Michel, CNRS I3S, biomed VO support
 #
 # Algo:
 #   Get the list of SEs sorted by %age of used space
 #   Select only SEs with used space over $SPACE_THRESHOLD
 #   For each one:
-#      Run the LFCBrosweSE tool to get the list of users (summary)
-#      For each user above a given threshold
+#      Check the cataflog by running the LFCBrosweSE tool to get the list of users (summary) who have files on that SE
+#      For each user who own more than a given threshold on the SE (default: 0.1GB)
 #         Get user's email address from the VOMS server
-#         Send a mail notification
-
+#         Send an mail notification
+#
+# This version returns the results as xml files, that are later exploited by php scripts in ./web_display.
 
 # Default threshold of used space over which to analyse an SE
 SPACE_THRESHOLD=95
@@ -111,10 +112,11 @@ NB_SE=`wc -l $TMP_LIST_SE | cut -d ' ' -f 1`
 
 # Prepare web report with a title, threshold of used space and date/time
 mkdir -p $RESDIR
-cat <<EOF >> $RESDIR/INFO.htm
-Report started $NOW_PRETTY<br>
-SE minimum used space: ${SPACE_THRESHOLD}%<br>
-Users minimum used space: ${USER_MIN_SPACE}GB
+cat <<EOF >> $RESDIR/INFO.xml
+<ScanDate>$NOW</ScanDate>
+<MinUsedSpacePercentage>${SPACE_THRESHOLD}</MinUsedSpacePercentage>
+<UserMinUsedSpace>${USER_MIN_SPACE}</UserMinUsedSpace>
+<NbSEs>${NB_SE}</NbSEs>
 EOF
 
 # Run the analisys on each SE in parallel
@@ -122,7 +124,14 @@ echo "Starting analysis of SEs over ${SPACE_THRESHOLD}% of used space, reporting
 for SEHOSTNAME in `cat $TMP_LIST_SE`
 do
   echo "Starting analysis of $SEHOSTNAME"
-  $MONITOR_SE_SPACE/se-heavy-users.sh --work-dir $WDIR --result-dir $RESDIR --vo $VO --voms-users $VOMS_USERS --user-min-used $USER_MIN_SPACE $SEHOSTNAME &
+  $MONITOR_SE_SPACE/se-heavy-users-xml.sh \
+    --work-dir $WDIR \
+    --result-dir $RESDIR \
+    --vo $VO \
+    --voms-users $VOMS_USERS \
+    --suspended-expired-voms-users $SUSPENDED_EXPIRED_VOMS_USERS \
+    --user-min-used $USER_MIN_SPACE $SEHOSTNAME \
+    2>&1 > $WDIR/${SEHOSTNAME}.log &
   sleep 10
 done
 echo "Analysis started."
@@ -130,5 +139,4 @@ echo "Analysis started."
 # Clean up
 rm -f $TMP_LIST_SE
 rm -f $TMP_PARSE_AWK
-
 
