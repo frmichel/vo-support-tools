@@ -105,7 +105,6 @@ def ls(url):
 # Define gfal2 context as a global variable
 global context
 context = gfal2.creat_context()
-entries = context.listdir(options.url)
 
 # Get stat item of url given as argument
 st = ''
@@ -121,7 +120,6 @@ print ( mode_to_rights(st.st_mode) + ' ' +
         str(datetime.datetime.fromtimestamp(int(st.st_mtime)).strftime('%Y-%m-%d')) + ' ' + 
         str(st.st_size) + ' ' + options.url)
 
-# Start the recursive process
 ls(options.url)
 
 sys.exit(0)

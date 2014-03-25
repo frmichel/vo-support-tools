@@ -47,7 +47,7 @@ optParser.add_option("--debug", action = "store_true", dest = "debug",
 # Check options validity
 if options.url == '':
     optParser.error("Option --url is mandatory.")
-    exit(1)
+    sys.exit(1)
 
 outputToFile = options.output_file != ''
 
@@ -55,15 +55,19 @@ outputToFile = options.output_file != ''
 global context
 context = gfal2.creat_context()
 
-# Define max number of retry when exception is raised
+# Define max number of retries when an exception is raised
 global MAX_GFAL2_REQUEST_TRY
-MAX_GFAL2_REQUEST_TRY=5
+MAX_GFAL2_REQUEST_TRY = 5
 
 # Define waiting time in seconds when retry
 global MAX_RETRY_WAITING_TIME
-MAX_RETRY_WAITING_TIME=30
+MAX_RETRY_WAITING_TIME = 30
 
+# ---------------------------------------------------------------
 # Method that format a stat.st_mode item into `ls -l` like permissions
+# Parameters:
+#   @param st_mode: permissions to format
+# ---------------------------------------------------------------
 def mode_to_rights(st_mode) :
 
     # Variable containing the result permission string
@@ -98,7 +102,7 @@ def mode_to_rights(st_mode) :
 # ------------------------------------------------------------------------------------
 # Recursive method that goes through the files tree of given url.
 # Parameters:
-#   @param url: the current url
+#   @param url: the current url, this must be a directory, not a simple file
 #   @param f: the output file descriptor
 #       if f =  = '' then output is written to stdout
 # The recursion algorithm is:
@@ -118,59 +122,59 @@ def mode_to_rights(st_mode) :
 # ------------------------------------------------------------------------------------
 
 def ls_rec(url,f) :
-    # Assuming given as arg url is a directory
-    # List the content of the current url directory
-    entries = ''
-    isListDirSuccess=False
-    attemptListDir=1
-    while not isListDirSuccess:
-	try:
-	    entries = context.listdir(url)
-	except Exception, e:
-	    attemptListDir+=1
-	    if attemptListDir > MAX_GFAL2_REQUEST_TRY:
-		print 'Exception caught when calling listdir on url: ' + url + '. Message: ', e
-		return
-	    else:
-		time.sleep(MAX_RETRY_WAITING_TIME)	
-		continue
-	isListDirSuccess=True	    
+    # List the content of the current directory
+    dir = ''
+    isOpSuccess = False
+    nbAttempts = 1
+    while not isOpSuccess:
+        try:
+            dir = context.opendir(url)
+            isOpSuccess = True
+        except Exception, e:
+            nbAttempts += 1
+            if nbAttempts > MAX_GFAL2_REQUEST_TRY:
+                print 'Exception caught when calling opendir on url: ' + url + '. Message: ', e
+                return
+            else:
+                time.sleep(MAX_RETRY_WAITING_TIME)    
 
     # Build a map (directory name  => stat object)
     entries_map = {}
 
-    # Check each entry in the current directory
-    for entry in entries:
-        # check that filename doesn't begin by '/' (workaround until gfal2.5 version is released)
-        if entry[0] != '/':
-            # current entry is valid, get its stat item
-            st = ''
-	    isLStatSuccess=False
-	    attemptLStat=1
-	    while not isLStatSuccess:
-		try:
-		    st = context.lstat(url + '/' + entry)
-		except Exception,e:
-		    attemptLStat+=1
-		    if attemptLStat > MAX_GFAL2_REQUEST_TRY:
-			print 'Exception caught when calling lstat on url: ' + url + '/'+ entry + '. Message: ', e
-			break
-		    else:
-			time.sleep(MAX_RETRY_WAITING_TIME)
-			continue
-		isLStatSuccess=True
+    # Check each entry of the current directory
+    while True:
+        isOpSuccess = False
+        nbAttempts = 1
+        dirent = st = ''
+        while not isOpSuccess:
+            try:
+                (dirent, st) = dir.readpp()
+                isOpSuccess = True
+            except Exception, e:
+                nbAttempts += 1
+                if nbAttempts > MAX_GFAL2_REQUEST_TRY:
+                    print 'Exception caught when calling readpp on url: ' + url + '. Message: ', e
+                    # We stop looking for this entry but will continue to check other entries of the directory
+                    break
+                else:
+                    time.sleep(MAX_RETRY_WAITING_TIME)    
 
-	    # store the entry with its stat item
-            entries_map[entry] = st
+        if isOpSuccess:
+            # Stop if we reached the last entry
+            if dirent is None:
+                break
+            # Current entry is valid, get its stat item and continue
+            entries_map[dirent.d_name] = st
+    # End of the while loop to read each entry of the current directory
 
-    # Look for files entries and print them
-    for (entry_key,entry_st) in entries_map.iteritems():
+    # Look for file entries and print them
+    for (entry_key, entry_st) in entries_map.iteritems():
         # Check if entry is a file
         if not stat.S_ISDIR(entry_st.st_mode):
             f.write( mode_to_rights(entry_st.st_mode) + ' ' +
-                     str(datetime.datetime.fromtimestamp(int(entry_st.st_ctime)).strftime('%Y-%m-%d')) + ' ' +
-                     str(datetime.datetime.fromtimestamp(int(entry_st.st_mtime)).strftime('%Y-%m-%d')) + ' ' +
-                     str(entry_st.st_size) + ' ' + url + '/' + entry_key + '\n')
+                 str(datetime.datetime.fromtimestamp(int(entry_st.st_ctime)).strftime('%Y-%m-%d')) + ' ' +
+                 str(datetime.datetime.fromtimestamp(int(entry_st.st_mtime)).strftime('%Y-%m-%d')) + ' ' +
+                 str(entry_st.st_size) + ' ' + url + '/' + entry_key + '\n')
 
     # Look for directory entries, for each print it then recursively call the function on this directory
     for (entry_key,entry_st) in entries_map.iteritems():
@@ -178,59 +182,63 @@ def ls_rec(url,f) :
         if stat.S_ISDIR(entry_st.st_mode):
             # print the directory line
             f.write( mode_to_rights(entry_st.st_mode) + ' ' +
-                     str(datetime.datetime.fromtimestamp(int(entry_st.st_ctime)).strftime('%Y-%m-%d')) + ' ' +
-                     str(datetime.datetime.fromtimestamp(int(entry_st.st_mtime)).strftime('%Y-%m-%d')) + ' ' +
-                     str(entry_st.st_size) + ' ' + url +
-                     '/' + entry_key + '\n')
+                 str(datetime.datetime.fromtimestamp(int(entry_st.st_ctime)).strftime('%Y-%m-%d')) + ' ' +
+                 str(datetime.datetime.fromtimestamp(int(entry_st.st_mtime)).strftime('%Y-%m-%d')) + ' ' +
+                 str(entry_st.st_size) + ' ' + url +
+                 '/' + entry_key + '\n')
 
             # Recursively call the method on current entry directory
-            ls_rec(url + '/' + entry_key,f)
+            ls_rec(url + '/' + entry_key, f)
 
 # ---------------------------------------------------------------------------------------
 # Main block:
 # ---------------------------------------------------------------------------------------
 
-# Build the file descriptor if specified in argument
-f = ''
-if outputToFile:
-    try:
-	f = open(options.output_file,'w')
-    except Exception,e:
-	print 'Exception when opening output file: ' + options.output_file + ' Message: ',e
-	sys.exit(1)
-else:
-    f = sys.stdout
+try:
+    # Build the file descriptor if specified in argument
+    f = ''
+    if outputToFile:
+        try:
+            f = open(options.output_file, 'w')
+        except Exception,e:
+            print 'Exception when opening output file: ' + options.output_file + ' Message: ', e
+            sys.exit(1)
+    else:
+        f = sys.stdout
 
-# Get stat item of url given as argument
-st = ''
-isLStatSuccess=False
-attemptLStat=1
-while not isLStatSuccess:
-    try:
-	st = context.lstat(options.url)
-    except Exception,e:
-	attemptLStat+=1
-	if attemptLStat > MAX_GFAL2_REQUEST_TRY:
-	    print 'Exception caught when lstat on url: ' + options.url  + '. Message: ',e
-	    break
-	else:
-	    time.sleep(MAX_RETRY_WAITING_TIME)
-	    continue
-    isLStatSuccess=True
+    # Get stat item of the url given as argument
+    st = ''
+    isLStatSuccess = False
+    attemptLStat = 1
+    while not isLStatSuccess:
+        try:
+            st = context.lstat(options.url)
+            isLStatSuccess = True
+        except Exception, e:
+            attemptLStat += 1
+            if attemptLStat > MAX_GFAL2_REQUEST_TRY:
+                print 'Exception caught in lstat on url: ' + options.url  + '. Message: ', e
+                sys.exit(1)
+            else:
+                time.sleep(MAX_RETRY_WAITING_TIME)
 
-# Print the url
-f.write( mode_to_rights(st.st_mode) + ' ' + 
+    # Print the url
+    f.write( mode_to_rights(st.st_mode) + ' ' + 
         str(datetime.datetime.fromtimestamp(int(st.st_ctime)).strftime('%Y-%m-%d')) + ' ' + 
         str(datetime.datetime.fromtimestamp(int(st.st_mtime)).strftime('%Y-%m-%d')) + ' ' + 
         str(st.st_size) + ' ' + 
         options.url + '\n')
 
-# Start the recursive process
-ls_rec(options.url,f)
+    # Start the recursive process
+    ls_rec(options.url,f)
 
-# Final cleanup
-if outputToFile:
-    f.close()
-
+    # Final cleanup
+    if outputToFile:
+        f.close()
+        
+except Exception,e:
+    print 'Unexpected exception caught when computing url: ' + options.url  + '. Message: ', e
+    sys.exit(1)
+    
 sys.exit(0)
 

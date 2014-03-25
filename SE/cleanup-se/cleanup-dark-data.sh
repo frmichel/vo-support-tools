@@ -77,7 +77,7 @@ fi
 # ----------------------------------------------------------------------------------------------------
 
 cat $SURLS | head -n 10 | while read SURL; do
-  #lcg-del --nolfc $VERBOSE --vo $VO --connect-timeout 30 --sendreceive-timeout 900 --bdii-timeout 30 --srm-timeout 300 $SURL 2>&1
+  lcg-del --nolfc $VERBOSE --vo $VO --connect-timeout 30 --sendreceive-timeout 900 --bdii-timeout 30 --srm-timeout 300 $SURL 2>&1
   echo "safe mode : scheduling $SURL for deletion"
   if test $? -ne 0; then
     echo "Could not delete $SURL."
