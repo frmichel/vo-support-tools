@@ -110,10 +110,14 @@ NOW=`date "+%Y-%m-%d %H:%M:%S"`
 echo "# $NOW - Running LFCBrowseSE on SE ${SE_HOSTNAME}..."
 ${VO_SUPPORT_TOOLS}/SE/lfc-browse-se/LFCBrowseSE $SE_HOSTNAME --vo $VO --sfn > $LFCDUMP
 if [ $? -ne 0 ];
-    then echo "Command LFCBrowseSE failed to build the LFC dump."; exit 1
+    NOW=`date "+%Y-%m-%d %H:%M:%S"`
+    then echo "$NOW - Command LFCBrowseSE failed to build the LFC dump."
+    exit 1
 fi
 if [ ! -e $LFCDUMP ];
-    then echo "LFC dump file generation failed, cannot read file ${LFCDUMP}."; exit 1
+    NOW=`date "+%Y-%m-%d %H:%M:%S"`
+    then echo "$NOW - LFC dump file generation failed, cannot read file ${LFCDUMP}."
+    exit 1
 fi
 
 
@@ -125,10 +129,14 @@ NOW=`date "+%Y-%m-%d %H:%M:%S"`
 echo "# $NOW - Running dump-se-files.py on SE ${SE_HOSTNAME}..."
 ${CLEANUPSE}/dump-se-files.py --url $ACCESS_URL --output-file $SEDUMP --debug 2>&1
 if [ $? -ne 0 ];
-    then echo "Dump of SE failed."; exit 1
+    NOW=`date "+%Y-%m-%d %H:%M:%S"`
+    then echo "$NOW - Failed to dump the list of files on the SE."
+    exit 1
 fi
 if [ ! -e $SEDUMP ];
-    then echo "SE dump file generation failed, cannot read ${SEDUMP}."; exit 1
+    NOW=`date "+%Y-%m-%d %H:%M:%S"`
+    then echo "$NOW - SE dump file generation failed, cannot read ${SEDUMP}."
+    exit 1
 fi
 
 
@@ -146,7 +154,9 @@ ${CLEANUPSE}/diff-se-dump-lfc.sh \
     --result-dir $RESDIR
     
 if [ $? -ne 0 ];
-    then echo "Difference betwen LFC and SE dumps failed."; exit 1
+    NOW=`date "+%Y-%m-%d %H:%M:%S"`
+    then echo "$NOW - Difference betwen LFC and SE dumps failed."
+    exit 1
 fi
 
 NOW=`date "+%Y-%m-%d %H:%M:%S"`

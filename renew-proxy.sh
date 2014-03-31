@@ -50,5 +50,14 @@ done
 
 USERID=`id --user`
 PROXY_FILE=/tmp/x509up_${VO}_u${USERID}
-voms-proxy-init -quiet -out $PROXY_FILE -voms $VO $CERT $KEY -pwstdin < $PASS
+voms-proxy-init -quiet -out ${PROXY_FILE}_tmp -voms $VO $CERT $KEY -pwstdin < $PASS 2>&1
+
+if [ $? -ne 0 ]; then
+    NOW=`date "+%Y-%m-%d %H:%M:%S"`
+	echo "$NOW - Failed to generated a new proxy. Keeping previous one."
+	exit 1
+fi
+
+# Use the new proxy file
+mv ${PROXY_FILE}_tmp ${PROXY_FILE}
 

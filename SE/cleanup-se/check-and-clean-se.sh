@@ -134,22 +134,25 @@ ${CLEANUPSE}/check-se.sh \
     --result-dir $RESDIR \
     2>&1
 
+IS_ERROR="false"
 if [ $? -ne 0 ]; then
     IS_ERROR="true"
-	echo "# Execution of check-se.sh failed. Removal of dark data will NOT be performed."
+	echo "# Execution of check-se.sh failed."
 fi
 
-# Analyse the log fileproduced by this script to see if any error was raised: 
+# Analyse the log file produced by this script to see if any error was raised: 
 # all comment lines start with "#", any other line is considered an error.
 sleep 10
 NB_LINES_IN_ERROR=`egrep -v "^# |^$" ${WDIR}/${SE_HOSTNAME}.log | wc -l`
 if [ $NB_LINES_IN_ERROR -ne 0 ]; 
 then
-    IS_ERROR="true"
-	echo "# Execution of check-se.sh returned errors. Removal of dark data will NOT be performed."
+    if [ "$IS_ERROR" != "true" ]; then
+        echo "# Execution of check-se.sh returned errors."
+        IS_ERROR="true"
+    fi
 fi
-	
-if [ $IS_ERROR == "true" ]; then
+
+if [ "$IS_ERROR" == "true" ]; then
 	echo "<freeSpaceAfter>N/A</freeSpaceAfter>" >> $XML_OUTPUT_FILE
 	echo "<status>Completed with errors</status>" >> $XML_OUTPUT_FILE
 	echo "<errorsFile>$RESDIR/${SE_HOSTNAME}.errors</errorsFile>" >> $XML_OUTPUT_FILE
@@ -166,17 +169,38 @@ fi
 # Remove dark data as no error was raised by check-se.sh
 # ------------------------------------------------------
 
-if [ $CLEANUP_DARK_DATA == "true" ]; then
+if [ "$CLEANUP_DARK_DATA" == "true" ]; then
     echo "# Starting removing dark data files listed in file $RESDIR/${SE_HOSTNAME}.output_se_dark_data"
     ${CLEANUPSE}/cleanup-dark-data.sh --vo $VO --se $SE_HOSTNAME --surls $RESDIR/${SE_HOSTNAME}.output_se_dark_data
     if [ $? -ne 0 ];
-        then echo "# Cleanup of dark data failed."
+        NOW=`date "+%Y-%m-%d %H:%M:%S"`
+        then echo "$NOW - Cleanup of dark data failed."
     fi
 else
     echo "# Removal of dark data files is not activated."
 fi
 
-# Wait 10 minutes before reading the space again from the SE (hopefully sufficient for space update in the BDII)
+# Analyse the log file produced by this script to see if any error was raised: 
+# all comment lines start with "#", any other line is considered an error.
+sleep 10
+NB_LINES_IN_ERROR=`egrep -v "^# |^$" ${WDIR}/${SE_HOSTNAME}.log | wc -l`
+if [ $NB_LINES_IN_ERROR -ne 0 ]; 
+then
+    sleep 600
+    FREE_SPACE_AFTER=`lcg-infosites --vo $VO space | egrep "Reserved|Online|$SE_HOSTNAME" | tail -n 1 | awk '{ print $1}'`
+    echo "<freeSpaceAfter>${FREE_SPACE_AFTER}</freeSpaceAfter>" >> $XML_OUTPUT_FILE
+	echo "<status>Completed with errors</status>" >> $XML_OUTPUT_FILE
+	echo "<errorsFile>$RESDIR/${SE_HOSTNAME}.errors</errorsFile>" >> $XML_OUTPUT_FILE
+	
+	# Copy error lines into a report file for web display
+	egrep -v "^# |^$" $WDIR/${SE_HOSTNAME}.log > $RESDIR/${SE_HOSTNAME}.errors
+
+    echo "# --------------------------------------------"
+    echo "# $NOW - Exiting $(basename $0)"
+	exit 0
+fi
+
+# Wait 10 minutes before reading the space from the SE (hopefully sufficient for space update in the BDII)
 sleep 600
 FREE_SPACE_AFTER=`lcg-infosites --vo $VO space | egrep "Reserved|Online|$SE_HOSTNAME" | tail -n 1 | awk '{ print $1}'`
 
