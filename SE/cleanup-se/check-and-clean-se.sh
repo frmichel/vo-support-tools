@@ -147,8 +147,8 @@ NB_LINES_IN_ERROR=`egrep -v "^# |^$" ${WDIR}/${SE_HOSTNAME}.log | wc -l`
 if [ $NB_LINES_IN_ERROR -ne 0 ]; 
 then
     if [ "$IS_ERROR" != "true" ]; then
-        echo "# Execution of check-se.sh returned errors."
         IS_ERROR="true"
+        echo "# Execution of check-se.sh returned errors."
     fi
 fi
 
@@ -172,9 +172,9 @@ fi
 if [ "$CLEANUP_DARK_DATA" == "true" ]; then
     echo "# Starting removing dark data files listed in file $RESDIR/${SE_HOSTNAME}.output_se_dark_data"
     ${CLEANUPSE}/cleanup-dark-data.sh --vo $VO --se $SE_HOSTNAME --surls $RESDIR/${SE_HOSTNAME}.output_se_dark_data
-    if [ $? -ne 0 ];
+    if [ $? -ne 0 ]; then
         NOW=`date "+%Y-%m-%d %H:%M:%S"`
-        then echo "$NOW - Cleanup of dark data failed."
+        echo "$NOW - Cleanup of dark data failed."
     fi
 else
     echo "# Removal of dark data files is not activated."
