@@ -1,31 +1,28 @@
 The aim of this README is to describe VAPOR cleanup SE functionality.
-The goal of cleanup SE is to list the Dark Data and Lost Files on a VO SEs
-and then to remove the Dark Data files. This functionality presents 2 parts:
+
+The goal of cleanup SE is to list the Dark Data and Lost Files on a VO SEs and then to remove the Dark Data files. This functionality presents 2 parts:
 - a script part that contains the core functions of the cleanup SE.
 - a webapp part that give an easy to read overview on the actions executed
-    by the cleanup SE scripts. (In a similar way that for the scan SE functionality)
-To give the main guide lines of the cleanup SE algorithm, we can distinguish
-the following actions organization:
-In a first time, we get the list of the SEs and their associated surls 
-(following gsiftp protocols if found or else srm protocol) supporting a given
-VO. Then for each SE we get the list of files it contains according to the lfc.
-We also get the list of files it contains according to the gfal2 tool.
-We then compare the both lists: lfc and gfal2.
-From the 2 lists comparison we can define 3 lists of files:
-The Dark Data files that have no entry in the lfc but are detected on the SE by gfal2.
-The lost files that have an entry in lfc but are not present on the SE anymore.
-The regular files that have an entry in the lfc and are physically present on the SE.
-(those are the files that are common to the 2 lists)
-Then the final goal of the cleanup SE consists in removing the Dark Data files on the SE.
-(In theory the lost files should be also removed from the lfc but this won't be done
-for administrative reasons)
+  by the cleanup SE scripts. (In a similar way that for the scan SE functionality)
+
+The cleanup SE is implemented as the following workflow:
+1. We get the list of the SEs and their associated SRM URLs, and access URLs. The access URL, used to list files, is preferably a gsiftp URL, or srm if gsiftp is not suported.
+2. For each SE, we get the list of files registered on it according to the file catalog (LFC).
+We also get the list of files it actually contains using the GFAL2 API (list physical files in the VO space of the SE).
+3. Then, we compare both lists. The comparison results in 3 reports:
+- Dark Data: files on the SE but with no entry in the LFC;
+- Lost files: entries registered in lfc but with no corresponding physical file on the SE.
+- Regular files that are consistently registered on both the SE and the LFC.
+4. The final (optional) step of the cleanup SE consists in removing the Dark Data files from the SE.
+(lost files should be also removed from the LFC, however only the LFC manager can do this).
 
 Let's describe in details the different scripts of the algorithm:
-The entry point script is the check-all-ses.sh script.
-This script is called for a given datetime, vo, and age of cleaned up files.
-The datetime must have format YYYYMMDD-HHmmSS and must be given as result directory argument 
-to the script. The general information of the check-all-ses.sh scipt call are generated
-under xml data in the INFO.xml file. Below is an example of INFO.xml file content:
+
+1. The entry point script is the check-all-ses.sh script.
+This script is called for a given datetime, vo, and minimum age of dark data to report.
+The datetime is formatted as YYYYMMDD-HHmmSS and must be given as result directory argument 
+to the script. The general information of the check-all-ses.sh srcipt call is generated
+in xml in the INFO.xml file. Below is an example of INFO.xml file content:
 
 <info>
     <datetime>20140204-165500</datetime>
@@ -33,10 +30,7 @@ under xml data in the INFO.xml file. Below is an example of INFO.xml file conten
     <nbSEs>101</nbSEs>
 </info>
 
-The check-all-ses.sh script then calls the list-se-urls.py script that request the Lavoisier 
-view find-se-vo-full to return the list of the SEs and their surls supporting the given VO.
-The list_ses_surls.xml file is generated to propose xml data that can be used by the web app
-to display information. Below is an example of the list_ses_surls.xml file content:
+The check-all-ses.sh script then calls the list-se-urls.py script that requests the Lavoisier view find-se-vo-full to return the list of the SEs and their surls and GridFTP urls. The generated list_ses_surls.xml file is used by the web application to display information. Below is an example of the list_ses_surls.xml file content:
 
 <ses>
     <se>
@@ -45,7 +39,7 @@ to display information. Below is an example of the list_ses_surls.xml file conte
 	<freeSpaceBefore>1252</freeSpaceBefore>
 	<freeSpaceAfter>N/A</freeSpaceAfter>
 	<totalSize>2199</totalSize>
-	<srmUrl>srm://ccsrm02.in2p3.fr:8443</srmUrl>
+	<url>srm://ccsrm02.in2p3.fr:8443</biomedsrmUrl>
 	<status>ongoing</status>
     </se>
     <se>
@@ -54,25 +48,24 @@ to display information. Below is an example of the list_ses_surls.xml file conte
 	<freeSpaceBefore>2047</freeSpaceBefore>
 	<freeSpaceAfter>N/A</freeSpaceAfter>
 	<totalSize>2112</totalSize>
-	<srmUrl>srm://se.polgrid.pl:8446/dpm/polgrid.pl/home/biomed</srmUrl>
+    <url>gsiftp://se.polgrid.pl:2811/dpm/polgrid.pl/home/biomed</url>
 	<status>ongoing</status>
     </se>
 </ses>
 
-Then for each SE of the list, the check-and-clean-se.sh script is called.
-The aim of this script is to call the check-se.sh script to get the Dark Data list.
-Then if the check-se.sh raised errors during its execution: the <se_hostname>.errors
-file is generated to be displayed in the web app, else, if no errors are raised, the
-cleanup-dark-data.sh script is call to remove dark data from the SE.
+2. For each SE of the list, the check-and-clean-se.sh script is called.
+In turn, it calls script check-se.sh that will list dark data and lost files and run the comparison.
+If the check-se.sh raised errors during its execution: the <se_hostname>.errors
+file is generated to be displayed in the web app. If no error is raised, the
+cleanup-dark-data.sh script is called to remove dark data from the SE.
+
 The check-se.sh script is called on a specific SE and sequentially executes the following actions:
-1. call of the LFCBrowseSE tool to get the lfc list of files presents on the SE.
-2. call of the dump-se-files.py script to get the gfal2 list of files presents on the SE.
-3. call of the diff-se-dump-lfc.sh script that make the comparison between the lfc dump and 
-gfal2 dump to output 3 lists of files: the DarkData, the Lost Files and the common files.
-The DarkData and Lost Files dump being available in the web app for download by click on the details button.
-The diff-se-dump-lfc.sh script also output a <se_hostname>_check_result.xml file that give information
-on the comparison result available on the webapp by clicking on the details button.
-Below is an example of the content of an <se_hostname>_check_result.xml :
+a. call of the LFCBrowseSE tool to get the list of files registered on the SE according to the file catalog.
+b. call of the dump-se-files.py script to get the actual list of physdical files presents on the SE.
+c. call of the diff-se-dump-lfc.sh script that make the comparison between the LFC dump and SE dump to output 3 lists of files: the dark data, the lost files and the common files.
+The dark data and lost files dump being available in the web app for download by clicking on the details button.
+The diff-se-dump-lfc.sh script also outputs a <se_hostname>_check_result.xml file that give information on the comparison result, available from the webapp by clicking on the details button.
+Below is an example of the content of an <se_hostname>_check_result.xml:
 
 <checkResult>
     <hostname>se.srce.egi.cro-ngi.hr</hostname>
@@ -83,9 +76,7 @@ Below is an example of the content of an <se_hostname>_check_result.xml :
     <nbTotalFilesSEDump>56</nbTotalFilesSEDump>
 </checkResult>
 
-After the call to the check-se.sh script, the check-and-clean-se.sh output an xml file changing
-the status of the SE check from "ongoing" to "completed" if no errors have been raised or to
-"completed with errors" if errors have been raised. The xml file is named <se_hostname>_cleanup_result.xml 
+After the check-se.sh script completes, the check-and-clean-se.sh outputs an xml file changing the status of the SE check from "ongoing" to "completed" if no errors have been raised, or to "completed with errors" if errors have been raised. The xml file is named  <se_hostname>_cleanup_result.xml.
 Below is an example of the content of this file in case  when no error is raised:
 
 <hostname>se.srce.egi.cro-ngi.hr</hostname>
@@ -102,7 +93,7 @@ Below is an example of the content of this file in case when errors are raised:
 <status>completed with errors</status>
 <errorsFile>/tmp/biomed/cleanup-se/20140204-165500//grid2.fe.infn.it.log</errorsFile>
 
-The transition of the check status from "ongoing" to "completed" or to "completed with errors"
-is tricky and is done by a Lavoisier view that intersect the 2 xml streams coming from
-<se_hostname>_check_result.xml and <se_hostname>_cleanup_result.xml.
+The transition of the check status from "ongoing" to "completed" or to "completed with errors" is tricky and is done by a Lavoisier view that intersects the 2 xml streams coming from <se_hostname>_check_result.xml and <se_hostname>_cleanup_result.xml.
 The Lavoisier view is defined in file cleanup-se-report.xml in views-lavoisier2 directory.
+
+

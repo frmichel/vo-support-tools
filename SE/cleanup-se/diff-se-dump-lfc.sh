@@ -68,10 +68,6 @@ help()
   exit 1
 }
 
-# Set to true to skip the convertion into SURLs (time consuming).
-# To use when the file is already present in the local directory.
-CONVERT_SE_DUMP=true
-
 # ----------------------------------------------------------------------------------------------------
 # Check parameters and set environment variables
 # ----------------------------------------------------------------------------------------------------
@@ -129,48 +125,45 @@ if test -z "$SILENT"; then
 fi
 
 # ----------------------------------------------------------------------------------------------------
-#--- Convert the SE dump file into a file with last modification date and SURLs of files only (no directories)
-#    The LFC lists URLs in srm://hostname/path (no port) while the dump list URLs with possibly another access
-#    protocol like gsiftp
-#    ==> we have to convert the dump so that the URLs from the SE dump and from the LFC can be compared.
+# Convertion of the SE dump so that URLs be in the same format as in the LFC dump:
+# - Remove directories: convert the SE dump file into a file with last modification date and SURLs of files only.
+# - The LFC lists URLs in srm://hostname/path (port removed in check-se.sh) while the SE dump lists URLs with
+#   possibly another access protocol like gsiftp and the port number.
+#   => we convert the URLs of the SE dump so that they can be compared with URLs from the LFC:
+#      replace gsiftp://hostname:2811/path with srm://hostname/path
 # ----------------------------------------------------------------------------------------------------
+if test -z "$SILENT"; then
+    echo "# Building the list of SURLs from file ${INPUT_SE_DUMP}..."
+fi
 
-# Get the base of gsiftp URL, and escape slash characters. Expected format: gsiftp:\/\/hostname:port
+# Get the base of gsiftp URL, and escape slash characters (because we will use sed). Expected format: gsiftp:\/\/hostname:port
 GSIFTP_URL_BASE=`echo $GSIFTP_URL | grep -o -E "(gsiftp|srm)://.*:[0-9]{4}" | sed 's/\//\\\\\//g'`
 
-# Get the base of srm URL and escape slash characters. Expected format: srm:\/\/hostname:port  
+# Get the base of srm URL, escape slash characters, remove optional port number. Expected format: srm:\/\/hostname
 SRM_URL_BASE=`echo $SRM_URL | grep -o -E srm://.*:[0-9]{4} | sed 's/\//\\\\\//g'`
 SRM_URL_BASE_NO_PORT=`echo $SRM_URL_BASE | sed 's/:[0-9]\{4\}//g'`
 
-if test "$CONVERT_SE_DUMP" = "true"; then
-    if test -z "$SILENT"; then
-	    echo "# Building the list of SURLs from file ${INPUT_SE_DUMP}..."
-    fi
-    echo -n "" > $SE_DUMP_FILES_ONLY
+# In the gfal2 SE dump, keep only lines starting with "-" (files), 
+# and replace the gsiftp URL base with the srm URL base (without the port)
+echo -n "" > $SE_DUMP_FILES_ONLY
+grep ^- $INPUT_SE_DUMP | cut -d ' ' -f 3,5 | sed "s/${GSIFTP_URL_BASE}/${SRM_URL_BASE_NO_PORT}/g" > $SE_DUMP_FILES_ONLY
 
-    # In the gfal2 SE dump, replace the gsiftp URL base with the srm URL base without the port
-    grep ^- $INPUT_SE_DUMP | cut -d ' ' -f 3,5 | sed "s/${GSIFTP_URL_BASE}/${SRM_URL_BASE_NO_PORT}/g" > $SE_DUMP_FILES_ONLY
-
-    if test -z "$SILENT"; then
-	    echo "# Found `wc -l $SE_DUMP_FILES_ONLY | awk -- '{print $1}'` SURLs in input file $INPUT_SE_DUMP."
-    fi
-fi
 
 # ----------------------------------------------------------------------------------------------------
-# --- Display the number of files found in LFC dump
+# --- Display the number of files in LFC dump and the SE dump
 # ----------------------------------------------------------------------------------------------------
 
 if test -z "$SILENT"; then
-        echo "# Found `cat $INPUT_LFC_DUMP | awk -- '/^$/{next} /^Pro/{next} {print $2}'  | wc -l | awk -- '{print $1}'` SURLs in input file $INPUT_LFC_DUMP."
+    echo "# Found `wc -l $SE_DUMP_FILES_ONLY | awk -- '{print $1}'` SURLs in input file $INPUT_SE_DUMP."
+    echo "# Found `cat $INPUT_LFC_DUMP | wc -l | awk -- '{print $1}'` SURLs in input file $INPUT_LFC_DUMP."
 fi
+
 
 # ----------------------------------------------------------------------------------------------------
 # --- Check zombie files: loop on all SURLs in the SE dump, and search each one in the LFC dump
 # ----------------------------------------------------------------------------------------------------
 
-if test -z "$SILENT"; then
-  echo "# Looking for SE zombie files... "
-fi
+if test -z "$SILENT"; then echo "# Looking for dark data files... "; fi
 echo -n "" > $OUTPUT_SE_ZOMBIES
 
 # Loop on all files from the converted SE dump
@@ -192,22 +185,19 @@ cat $SE_DUMP_FILES_ONLY | while read LINE; do
 done
 
 if test -z "$SILENT"; then
-  echo "# Found `wc -l $OUTPUT_SE_ZOMBIES | awk -- '{print $1}'` zombie files on SE."
+  echo "# Found `wc -l $OUTPUT_SE_ZOMBIES | awk -- '{print $1}'` dark data files on SE."
 fi
 
 # ----------------------------------------------------------------------------------------------------
 #--- Check LFC ghost entries: loop on all files listed in the LFC dump, and search each one in the SE dump
 # ----------------------------------------------------------------------------------------------------
 
-if test -z "$SILENT"; then
-  echo "# Looking for LFC ghost entries... "
-fi
+if test -z "$SILENT"; then echo "# Looking for lost files... "; fi
 
-# Loop on lines, skip empty lines and lines starting with "Progress" or "Processing".
-# Keep only second word on the line ($2) => the SURL
+# Loop on lines, keep only second word on the line ($2) => the SURL
 echo -n "" > $OUTPUT_LFC_GHOSTS
 echo -n "" >  ${OUTPUT_COMMON}
-cat $INPUT_LFC_DUMP | awk -- '/^$/{next} /^Pro/{next} {print $2}' | while read SURL; do
+cat $INPUT_LFC_DUMP | while read SURL; do
 
   # Check if that SURL is also in the SE dump
   if grep --silent $SURL $SE_DUMP_FILES_ONLY; then
@@ -218,7 +208,7 @@ cat $INPUT_LFC_DUMP | awk -- '/^$/{next} /^Pro/{next} {print $2}' | while read S
 done
 
 if test -z "$SILENT"; then
-  echo "# Found `wc -l $OUTPUT_LFC_GHOSTS | awk -- '{print $1}'` ghost entries in LFC."
+  echo "# Found `wc -l $OUTPUT_LFC_GHOSTS | awk -- '{print $1}'` lost file entries in LFC."
   echo "# Found `wc -l $OUTPUT_COMMON | awk -- '{print $1}'` files common to SE and LFC."
 fi
 

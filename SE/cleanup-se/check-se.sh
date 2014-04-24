@@ -9,8 +9,9 @@
 #
 # This script takes as arguments:
 # - the SE hostname
-# - the vo
-# - the srm and access URLs of the SE (they may be the same)
+# - the VO name
+# - the SRM and access URLs of the SE (they may be the same)
+# - the path to the space reserved in the storage area, which is a substring of the SRM and access paths
 # - the minimum age of dark data files to list
 
 help()
@@ -32,6 +33,9 @@ help()
   echo
   echo "  --access-url <accessUrl>: The URL used to list files through an access protocol supported by the SE"
   echo
+  echo "  --vo-sa-path <path>: The relative path to the space reserved for the VO. In the BDII this is either "
+  echo "                       the VOInfo/VOInfoPath or GlueSA/GlueSAPath. Mandatory."
+  echo 
   echo "  --vo <VO>: the Virtual Organisation to query. Defaults to biomed."
   echo
   echo "  --older-than <age> : the minimum age of checked files (in months). Defaults to 12 months."
@@ -48,6 +52,7 @@ help()
   echo "                 --se sampase.if.usp.br \ "
   echo "                 --srm-url srm://sampase.if.usp.br:8446/dpm/if.usp.br/home/biomed \ "
   echo "                 --access-url gsiftp://sampase.if.usp.br:2811/dpm/if.usp.br/home/biomed \ "
+  echo "                 --vo-sa-path /dpm/if.usp.br/home/biomed \ "
   echo "                 --older-than 6 \ "
   echo "                 --result-dir \$HOME/public_html/myVO/cleanup-se/20140127-120000 "
   echo
@@ -75,6 +80,7 @@ VO=biomed
 AGE=12		# Default minimum age of zombies to take into account
 SRM_URL=
 ACCESS_URL=
+VOSAPATH=
 
 while [ ! -z "$1" ]
 do
@@ -86,6 +92,7 @@ do
     --work-dir ) WDIR=$2; shift;;
     --srm-url ) SRM_URL=$2; shift;;
     --access-url ) ACCESS_URL=$2; shift;;
+    --vo-sa-path ) VOSAPATH=$2; shift;;
     -h | --help ) help;;
     * ) help;;
   esac
@@ -95,6 +102,7 @@ done
 if test -z "$SE_HOSTNAME" ; then echo "Option --se is mandatory."; help; fi
 if test -z "$SRM_URL" ; then echo "Option --srm-url is mandatory."; help; fi
 if test -z "$ACCESS_URL" ; then echo "Option --access-url is mandatory."; help; fi
+if test -z "$VOSAPATH" ; then echo "Option --vo-sa-path is mandatory."; help; fi
 
 mkdir -p $WDIR
 
@@ -103,23 +111,30 @@ echo "# --------------------------------------------"
 echo "# $NOW - Starting $(basename $0) for SE ${SE_HOSTNAME}"
 
 # ------------------------------------------------------
-# Dump the list of files on the SE according to the file catalog
+# Dump the list of files on the SE according to the LFC
 # ------------------------------------------------------
 LFCDUMP=${WDIR}/${SE_HOSTNAME}_dump_lfc.txt
+LFCDUMPTMP=${LFCDUMP}_tmp
 NOW=`date "+%Y-%m-%d %H:%M:%S"`
 echo "# $NOW - Running LFCBrowseSE on SE ${SE_HOSTNAME}..."
-${VO_SUPPORT_TOOLS}/SE/lfc-browse-se/LFCBrowseSE $SE_HOSTNAME --vo $VO --sfn > $LFCDUMP
+${VO_SUPPORT_TOOLS}/SE/lfc-browse-se/LFCBrowseSE $SE_HOSTNAME --vo $VO --sfn > $LFCDUMPTMP
 if [ $? -ne 0 ]; then
     NOW=`date "+%Y-%m-%d %H:%M:%S"`
     echo "$NOW - Command LFCBrowseSE failed to build the LFC dump."
     exit 1
 fi
-if [ ! -e $LFCDUMP ]; then
+if [ ! -e $LFCDUMPTMP ]; then
     NOW=`date "+%Y-%m-%d %H:%M:%S"`
-    echo "$NOW - LFC dump file generation failed, cannot read file ${LFCDUMP}."
+    echo "$NOW - LFC dump file generation failed, cannot read file ${LFCDUMPTMP}."
     exit 1
 fi
 
+# LFC dump clean-up:
+# - the current LFCBrowseSE returns files for all VOs => we filter (grep) only the URLs that contain the $VOSAPATH.
+# - remove empty lines and lines with comments, like: Processing... Progress...
+# - remove the port number like ":8446" in case it exists.
+grep $VOSAPATH $LFCDUMPTMP | awk -- '/^$/{next} /^Pro/{next} {print $2}' | sed 's/:[0-9]\{4\}//g' > $LFCDUMP
+rm -f $LFCDUMPTMP
 
 # ------------------------------------------------------
 # Dump the list of files on the SE based on the SE itself

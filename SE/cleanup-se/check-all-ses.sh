@@ -166,18 +166,21 @@ cat $LISTSE | while read LINE; do
     SE_HOSTNAME=`echo $LINE | cut -d ' ' -f 1`
     SRM_URL=`echo $LINE | cut -d ' ' -f 5`
     ACCESS_URL=`echo $LINE | cut -d ' ' -f 6`
+    VOSAPATH=`echo $LINE | cut -d ' ' -f 7`
     NOW=`date "+%Y-%m-%d %H:%M:%S"`
     echo "# $NOW - Running check-and-cleanup process on SE ${SE_HOSTNAME}..."
-    ${CLEANUPSE}/check-and-clean-se.sh \
+    COMMAND="${CLEANUPSE}/check-and-clean-se.sh \
         --vo $VO \
         --se $SE_HOSTNAME \
         --srm-url $SRM_URL \
         --access-url $ACCESS_URL \
+        --vo-sa-path $VOSAPATH \
         --older-than $AGE \
         ${CLEANUP_DARK_DATA} \
         --work-dir $WDIR \
-        --result-dir $RESDIR \
-        2>&1 > $WDIR/${SE_HOSTNAME}.log &
+        --result-dir $RESDIR"
+    echo "# $NOW - Command line: $COMMAND"
+    $COMMAND 2>&1 > $WDIR/${SE_HOSTNAME}.log &
 
     # Limit the total number of checks run (debug feature)
     if [ "$NB_CHECKS" -ge "$MAX_CHECKS" ]; then

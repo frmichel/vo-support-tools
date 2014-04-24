@@ -9,6 +9,7 @@
 # - the SE hostname
 # - the vo
 # - the srm and access URLs of the SE (they may be the same)
+# - the path to the space reserved in the storage area, which is a substring of the SRM and access paths
 # - the minimum age (in months) of the files to check
 # - the cleanup dark data option
 # - the working directory
@@ -35,6 +36,9 @@ help()
   echo "  --access-url <accessUrl>: The URL used to list files through an access protocol supported by the SE."
   echo "                            Mandatory. This may be the same as the srm URL."
   echo
+  echo "  --vo-sa-path <path>: The relative path to the space reserved for the VO. In the BDII this is either "
+  echo "                       the VOInfo/VOInfoPath or GlueSA/GlueSAPath. Mandatory."
+  echo 
   echo "  --vo <VO>: the Virtual Organisation to query. Defaults to biomed."
   echo
   echo "  --older-than <age> : the minimum age of checked files (in months). Defaults to 12 months."
@@ -55,6 +59,7 @@ help()
   echo "                 --se sampase.if.usp.br \ "
   echo "                 --srm-url srm://sampase.if.usp.br:8446/dpm/if.usp.br/home/biomed \ "
   echo "                 --access-url gsiftp://sampase.if.usp.br:2811/dpm/if.usp.br/home/biomed \ "
+  echo "                 --vo-sa-path /dpm/if.usp.br/home/biomed \ "
   echo "                 --older-than 6 \ "
   echo "                 --result-dir \$HOME/public_html/myVO/cleanup-se/20140127-120000 \ "
   echo "                 --work-dir /tmp/myVo/cleanup-se \ "
@@ -86,6 +91,7 @@ AGE=12		# Default minimum age of zombies to take into account
 SE_HOSTNAME=
 SRM_URL=
 ACCESS_URL=
+VOSAPATH=
 
 while [ ! -z "$1" ]
 do
@@ -98,6 +104,7 @@ do
     --work-dir ) WDIR=$2; shift;;
     --srm-url ) SRM_URL=$2; shift;;
     --access-url ) ACCESS_URL=$2; shift;;
+    --vo-sa-path ) VOSAPATH=$2; shift;;
     -h | --help ) help;;
     * ) help;;
   esac
@@ -130,6 +137,7 @@ ${CLEANUPSE}/check-se.sh \
     --older-than $AGE \
     --srm-url $SRM_URL \
     --access-url $ACCESS_URL \
+    --vo-sa-path $VOSAPATH \
     --work-dir $WDIR \
     --result-dir $RESDIR \
     2>&1
