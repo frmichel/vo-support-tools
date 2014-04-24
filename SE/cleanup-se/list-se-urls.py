@@ -8,6 +8,7 @@
 #   - SA total size
 #   - srm URL
 #   - gsiftp URL if any
+#   - VOInfoPath if it exists or SAPath otherwise
 # In addition, an xml file is produced with the list of SEs, free and available space on each, and site names.
 
 import sys
@@ -56,7 +57,8 @@ from optparse import OptionParser
 #            <Version>1.0.0</Version>
 #            <Endpoint>gsiftp://ccdcacli022.in2p3.fr:2811</Endpoint>
 #            <GsiftpUrl>gsiftp://ccdcacli022.in2p3.fr:2811/pnfs/in2p3.fr/data/biomed/</GsiftpUrl>
-#        </GridFTPAccessProtocol>#        <StorageArea>
+#        </GridFTPAccessProtocol>
+#        <StorageArea>
 #            <SAPath>/pnfs/in2p3.fr/data/biomed/</SAPath>
 #            <SATotalOnlineSize>2199</SATotalOnlineSize>
 #            <SAUsedOnlineSize>937</SAUsedOnlineSize>
@@ -91,7 +93,7 @@ optParser.add_option("--xml-output-file", action="store", dest="xml_output_file"
                      help="xml output file. Mandatory.")
 
 optParser.add_option("--output-file", action="store", dest="output_file", default='',
-                     help="output file. Mandatory.")
+                     help="output file. Default to the standard output.")
 
 optParser.add_option("--max", action="store", dest="maxNbSEs", default='9999',
                      help="Maximum number of SEs to list. Defaults to 9999 = none.")
@@ -111,26 +113,24 @@ LAVOISIER_PORT = options.lavoisier_port
 USE_SRM_URL = options.use_srm_url
 
 # Check options validity
-if options.output_file == '': 
-    optParser.error("Option --output-file is mandatory.")
-    exit(1)
-
 if options.xml_output_file == '':
     optParser.error("Option --xml-output-file is mandatory.")
     exit(1)
 
-
 # Build the file descriptor for output file
 f = ''
 try:
-    f = open(options.output_file,'w')
+    if options.output_file == '': 
+        f = sys.stdout
+    else:
+        f = open(options.output_file, 'w')
 except Exception,e:
     print "Can't create output file. Message: ",e
     exit(1)
 
 xml_out = ''
 try: 
-    xml_out = open(options.xml_output_file,'w')
+    xml_out = open(options.xml_output_file, 'w')
 except Exception,e:
     print "Can't create xml output file. Message: ", e
     exit(1)
@@ -186,24 +186,29 @@ for service in services:
             print 'Reached ' + str(nbSEs) +' SEs. Stopping.'
         break
 
+    # Get the HostName
+    if service.getElementsByTagName("HostName").length == 0:
+        print 'Error: no Hostname element'
+        continue
+    hostname = getText(service.getElementsByTagName("HostName")[0].childNodes)
+
     # Check the Status element
     if service.getElementsByTagName("Status").length == 0:
-        print 'Error: no Status element for entry ' + service
+        print 'Error: no Status element for Hostname ' + hostname
         continue
     status = service.getElementsByTagName("Status")[0]
 
     # Ignore services not in production or in downtime
     if getText(status.childNodes).lower() != "production":
+        if options.debug:
+            print "Ignoring service not in production: " + hostname
         continue
     if service.getElementsByTagName("Downtime"):
+        if options.debug:
+            print "Ignoring service in downtime: " + hostname
         continue
-
-    # Get the fields to print: HostName, SA Free size, SA Total size, SRM Url
-    if service.getElementsByTagName("HostName").length == 0:
-        print 'Error: no Hostname element'
-        continue
-    hostname = getText(service.getElementsByTagName("HostName")[0].childNodes)
     
+    # Get the fields to print: SA Free size, SA Total size, SRM Url
     if service.getElementsByTagName("SiteId").length == 0:
         print 'Error: no SiteId element for Hostname ' + hostname
         continue
@@ -214,38 +219,55 @@ for service in services:
         continue
     sa = service.getElementsByTagName("StorageArea")[0]
     
-    if service.getElementsByTagName("SATotalOnlineSize").length == 0:
+    if sa.getElementsByTagName("SATotalOnlineSize").length == 0:
         print 'Error: no SATotalOnlineSize element for Hostname ' + hostname
         continue
     satotalsize = getText(sa.getElementsByTagName("SATotalOnlineSize")[0].childNodes)
     
-    if service.getElementsByTagName("SAFreeOnlineSize").length == 0:
+    if sa.getElementsByTagName("SAFreeOnlineSize").length == 0:
         print 'Error: no SAFreeOnlineSize element for Hostname ' + hostname
         continue
     safreesize = getText(sa.getElementsByTagName("SAFreeOnlineSize")[0].childNodes)
+
+    # The SAPath is optional
+    saPath = ''
+    if sa.getElementsByTagName("SAPath").length != 0:
+        saPath = getText(sa.getElementsByTagName("SAPath")[0].childNodes)
     
     if service.getElementsByTagName("SRMv2").length == 0 and service.getElementsByTagName("SRMv1").length == 0:
         print 'Error: no SRMv1 nor SRMv2 element for Hostname ' + hostname
         continue
 
+    # Get the SAPath
+    voInfoPath = ''
+    if service.getElementsByTagName("VOInfoPath").length == 0:
+        print 'Warning: no VOInfoPath element for Hostname ' + hostname
+    else:
+        voInfoPath = getText(service.getElementsByTagName("VOInfoPath")[0].childNodes)        
+        
+    if saPath == '' and voInfoPath == '':
+        print 'Error: no SAPth nor VOInfoPath element for Hostname ' + hostname
+        continue
+    saPath = voInfoPath
+
     # Read the gsiftp URL if any
     gsiftpUrl = ''
-    if service.getElementsByTagName("GridFTPAccessProtocol").length == 1:
-        if service.getElementsByTagName("GridFTPAccessProtocol")[0].getElementsByTagName("GsiftpUrl").length ==1:
+    if service.getElementsByTagName("GridFTPAccessProtocol").length != 0:
+        if service.getElementsByTagName("GridFTPAccessProtocol")[0].getElementsByTagName("GsiftpUrl").length != 0:
             gsiftpUrl = getText(service.getElementsByTagName("GridFTPAccessProtocol")[0].getElementsByTagName("GsiftpUrl")[0].childNodes)
 
     # Read the srm URL first in SRMv2 and SRMv1 otherwise
-    srmUrl=''
-    if service.getElementsByTagName("SRMv2").length == 1:
-            if service.getElementsByTagName("SRMv2")[0].getElementsByTagName("SRMUrl").length == 1:
-                srmUrl = getText(service.getElementsByTagName("SRMv2")[0].getElementsByTagName("SRMUrl")[0].childNodes)    
+    srmUrl = ''
+    if service.getElementsByTagName("SRMv2").length != 0:
+        if service.getElementsByTagName("SRMv2")[0].getElementsByTagName("SRMUrl").length != 0:
+            srmUrl = getText(service.getElementsByTagName("SRMv2")[0].getElementsByTagName("SRMUrl")[0].childNodes)    
     if srmUrl == '':
-        if service.getElementsByTagName("SRMv1").length == 1:
-            if service.getElementsByTagName("SRMv1")[0].getElementsByTagName("SRMUrl").length == 1:
+        if service.getElementsByTagName("SRMv1").length != 0:
+            if service.getElementsByTagName("SRMv1")[0].getElementsByTagName("SRMUrl").length != 0:
                 srmUrl = getText(service.getElementsByTagName("SRMv1")[0].getElementsByTagName("SRMUrl")[0].childNodes)
 
     if srmUrl == '':
-        print 'Error: no SRMv1 nor SRMv2 urls for Hostname ' + hostname
+        print 'Error: no SRMv1 nor SRMv2 url for Hostname ' + hostname
         continue
     else:
         # In case there is no gsiftp URL, we use the SRM url as the access url (if option --use-srm-url is present)
@@ -253,7 +275,7 @@ for service in services:
             if USE_SRM_URL:
                 gsiftpUrl = srmUrl
             else:
-                # Ignore SEs with no an gsiftp URL
+                # Ignore SEs with no gsiftp URL
                 continue
  
     # Do not add multiple times the same SURL
@@ -264,7 +286,7 @@ for service in services:
         srmUrls.append(srmUrl)
         gsiftpUrls.append(gsiftpUrl)
         # Write line to output file
-        f.write(hostname + ' ' + site + ' ' + safreesize + ' ' + satotalsize + ' ' + srmUrl + ' ' + gsiftpUrl + '\n')
+        f.write(hostname + ' ' + site + ' ' + safreesize + ' ' + satotalsize + ' ' + srmUrl + ' ' + gsiftpUrl + ' ' + saPath + '\n')
         xml_out.write('<se>\n' +
             '  <hostname>' + hostname + '</hostname>\n' +
             '  <site>' + site + '</site>\n' +
