@@ -16,7 +16,7 @@ def convertServiceFlavour(flav):
     flav = flav.replace('local-data-location-interface','Local-LFC')
     return flav
 
-def useServiceFlavour(flav):
+def isServiceFlavour(flav):
     return flav in flavors
 
 l = ldap.initialize('ldap://topbdii.grif.fr:2170')
@@ -28,19 +28,19 @@ if r == {}:
 
 sites = {};
 for dn,entry in r:
-   site_name   = entry['GlueForeignKey'][0].replace('GlueSiteUniqueID=','');
-   service_name= entry['GlueServiceType'][0];
-   endpoint    = re.search('(?<=//).*:',entry['GlueServiceEndpoint'][0]);
+   site_name    = entry['GlueForeignKey'][0].replace('GlueSiteUniqueID=','');
+   service_name = entry['GlueServiceType'][0];
+   endpoint     = re.search('(?<=//).*:',entry['GlueServiceEndpoint'][0]);
    endpoint_str = "";
    try:
-     endpoint_str=endpoint.group(0).replace(':','');
+     endpoint_str = endpoint.group(0).replace(':','');
    except:
      pass;
    if endpoint_str != "" :
      try :
-       sites[site_name][endpoint_str]=entry['GlueServiceType'][0];
+       sites[site_name][endpoint_str] = entry['GlueServiceType'][0];
      except KeyError:
-       sites[site_name]={endpoint_str : entry['GlueServiceType'][0]};
+       sites[site_name] = {endpoint_str : entry['GlueServiceType'][0]};
 
 print "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>";
 print "<root xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"atp_vo_feed_schema.xsd\">";
@@ -52,13 +52,21 @@ print "  <vo>biomed</vo>";
 
 for site in sorted(sites):
   if not re.match('Glue.*',site) :
-    print "  <atp_site name=\""+site+"\">";
+    siteEntry = "  <atp_site name=\"" + site + "\">\n";
+
+    isAtLeastOneServer = False
     for box in sites[site]:
-      if useServiceFlavour(sites[site][box]):
-        print "    <service hostname=\""+box+"\" flavour=\""+convertServiceFlavour(sites[site][box])+"\"/>";
-    print "    <group name=\"Tier-2\" type=\"biomed_Tier\" />";
-    print "    <group name=\""+site+"\" type=\"biomed_Site\" />";
-    print "  </atp_site>";
+      if isServiceFlavour(sites[site][box]):
+        siteEntry += "    <service hostname=\"" + box + "\" flavour=\"" + convertServiceFlavour(sites[site][box]) + "\"/>\n";
+        isAtLeastOneServer = True
+
+    siteEntry += "    <group name=\"Tier-2\" type=\"biomed_Tier\" />\n";
+    siteEntry += "    <group name=\"" + site + "\" type=\"biomed_Site\" />\n";
+    siteEntry += "  </atp_site>";
+
+    if isAtLeastOneServer:
+      print siteEntry;
 
 print "</root>";
 
+                                                
