@@ -99,14 +99,14 @@ do
     --se ) SE_HOSTNAME=$2; shift;;
     --vo ) VO=$2; shift;;
     --older-than ) AGE=$2; shift;;
-    --cleanup-dark-data ) CLEANUP_DARK_DATA="true"; shift;;
+    --cleanup-dark-data ) CLEANUP_DARK_DATA="true";;
     --result-dir ) RESDIR=$2; shift;;
     --work-dir ) WDIR=$2; shift;;
     --srm-url ) SRM_URL=$2; shift;;
     --access-url ) ACCESS_URL=$2; shift;;
     --vo-sa-path ) VOSAPATH=$2; shift;;
     -h | --help ) help;;
-    * ) help;;
+    * ) echo "Error: unknown option $1."; help;;
   esac
   shift
 done
@@ -145,11 +145,12 @@ ${CLEANUPSE}/check-se.sh \
 IS_ERROR="false"
 if [ $? -ne 0 ]; then
     IS_ERROR="true"
-	echo "# Execution of check-se.sh failed."
+	echo "Execution of check-se.sh failed."
 fi
 
-# Analyse the log file produced by this script to see if any error was raised: 
-# all comment lines start with "#", any other line is considered an error.
+# Analyse the log produced by this current script (this is quite bad actually, as we're not sure that
+# at this point, everything that has been written was flushed to the file. 
+# Check if any error occured: all comment lines start with "#", any other line is considered an error.
 sleep 10
 NB_LINES_IN_ERROR=`egrep -v "^# |^$" ${WDIR}/${SE_HOSTNAME}.log | wc -l`
 if [ $NB_LINES_IN_ERROR -ne 0 ]; 
@@ -201,7 +202,7 @@ then
 	echo "<errorsFile>$RESDIR/${SE_HOSTNAME}.errors</errorsFile>" >> $XML_OUTPUT_FILE
 	
 	# Copy error lines into a report file for web display
-	egrep -v "^# |^$" $WDIR/${SE_HOSTNAME}.log > $RESDIR/${SE_HOSTNAME}.errors
+	egrep -v "^#|^$" $WDIR/${SE_HOSTNAME}.log > $RESDIR/${SE_HOSTNAME}.errors
 
     echo "# --------------------------------------------"
     echo "# $NOW - Exiting $(basename $0)"

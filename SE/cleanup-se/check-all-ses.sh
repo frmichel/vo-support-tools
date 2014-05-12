@@ -98,12 +98,12 @@ do
     --lavoisier-host ) LAVOISIER_HOST=$2; shift;;
     --lavoisier-port ) LAVOISIER_PORT=$2; shift;;
     --older-than ) AGE=$2; shift;;
-    --cleanup-dark-data ) CLEANUP_DARK_DATA="--cleanup-dark-data"; shift;;
+    --cleanup-dark-data ) CLEANUP_DARK_DATA="--cleanup-dark-data";;
     --work-dir ) WDIR=$2/$NOW_COMPACT_FORMAT; shift;;
     --result-dir ) RESDIR=$2/$NOW_COMPACT_FORMAT; shift;;
     --max ) MAX_CHECKS=$2; shift;;
     -h | --help ) help;;
-    * ) help;;
+    * ) echo "Error: unknown option $1."; help;;
   esac
   shift
 done
@@ -179,6 +179,7 @@ cat $LISTSE | while read LINE; do
         ${CLEANUP_DARK_DATA} \
         --work-dir $WDIR \
         --result-dir $RESDIR"
+    echo "# $NOW - Starting check of $SE_HOSTNAME"
     echo "# $NOW - Command line: $COMMAND"
     $COMMAND 2>&1 > $WDIR/${SE_HOSTNAME}.log &
 

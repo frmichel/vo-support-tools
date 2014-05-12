@@ -234,10 +234,6 @@ for service in services:
     if sa.getElementsByTagName("SAPath").length != 0:
         saPath = getText(sa.getElementsByTagName("SAPath")[0].childNodes)
     
-    if service.getElementsByTagName("SRMv2").length == 0 and service.getElementsByTagName("SRMv1").length == 0:
-        print 'Error: no SRMv1 nor SRMv2 element for Hostname ' + hostname
-        continue
-
     # Get the SAPath
     voInfoPath = ''
     if service.getElementsByTagName("VOInfoPath").length == 0:
@@ -248,7 +244,8 @@ for service in services:
     if saPath == '' and voInfoPath == '':
         print 'Error: no SAPth nor VOInfoPath element for Hostname ' + hostname
         continue
-    saPath = voInfoPath
+    if saPath == '':
+        saPath = voInfoPath
 
     # Read the gsiftp URL if any
     gsiftpUrl = ''

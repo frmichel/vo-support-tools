@@ -94,7 +94,7 @@ do
     --access-url ) ACCESS_URL=$2; shift;;
     --vo-sa-path ) VOSAPATH=$2; shift;;
     -h | --help ) help;;
-    * ) help;;
+    * ) echo "Error: unknown option $1."; help;;
   esac
   shift
 done

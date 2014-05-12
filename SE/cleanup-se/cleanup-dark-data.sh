@@ -53,7 +53,7 @@ do
         SILENT=true
         VERBOSE=;;
     -h | --help ) help;;
-    * ) help;;
+    * ) echo "Error: unknown option $1."; help;;
   esac
   shift
 done
@@ -63,22 +63,20 @@ if test -z "$SE_HOSTNAME" ; then help; fi
 
 if test -z "$SILENT"; then
   NOW=`date "+%Y-%m-%d %H:%M:%S"`
-  echo "--------------------------------------------"
-  echo "Start $0: $NOW"
-  echo "--------------------------------------------"
-  echo "VO: $VO"
-  echo "LCG_GFAL_INFOSYS: $LCG_GFAL_INFOSYS"
-  echo "--------------------------------------------"
-  lcg-infosites --vo $VO space | egrep "Reserved|Online|$SE_HOSTNAME"
+  echo "# --------------------------------------------"
+  echo "# $NOW - Starting $0"
+  echo "# VO: $VO"
+  echo "# LCG_GFAL_INFOSYS: $LCG_GFAL_INFOSYS"
+  echo "# --------------------------------------------"
 fi
 
 # ----------------------------------------------------------------------------------------------------
 # Delete the files
 # ----------------------------------------------------------------------------------------------------
 
-cat $SURLS | head -n 10 | while read SURL; do
+cat $SURLS | while read SURL; do
   lcg-del --nolfc $VERBOSE --vo $VO --connect-timeout 30 --sendreceive-timeout 900 --bdii-timeout 30 --srm-timeout 300 $SURL 2>&1
-  echo "safe mode : scheduling $SURL for deletion"
+  echo "# Deleting $SURL"
   if test $? -ne 0; then
     echo "Could not delete $SURL."
   fi
@@ -86,9 +84,8 @@ done
 
 if test -z "$SILENT"; then
   NOW=`date "+%Y-%m-%d %H:%M:%S"`
-  echo "--------------------------------------------"
-  echo "Exiting $0 - $NOW"
-  echo "--------------------------------------------"
-  lcg-infosites --vo $VO space | egrep "Reserved|Online|$SE_HOSTNAME"
+  echo "# --------------------------------------------"
+  echo "# $NOW - Exiting $0"
+  echo "# --------------------------------------------"
 fi
 

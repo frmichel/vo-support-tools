@@ -92,7 +92,7 @@ do
     --access-url ) GSIFTP_URL=$2; shift;;
     -s | --silent ) SILENT=true;;
     -h | --help ) help;;
-    * ) help;;
+    * ) echo "Error: unknown option $1."; help;;
   esac
   shift
 done
