@@ -26,7 +26,7 @@ help()
   echo "  -h, --help: display this help"
   echo
   echo "Call example:"
-  echo "   ./cleanup-zombies.sh --vo biomed --surls gridse.ilc.cnr.it_zombie_files "
+  echo "   ./cleanup-dark-data.sh --vo biomed --surls gridse.ilc.cnr.it_zombie_files "
   echo
   exit 1
 }
@@ -75,10 +75,11 @@ fi
 # ----------------------------------------------------------------------------------------------------
 
 cat $SURLS | while read SURL; do
-  lcg-del --nolfc $VERBOSE --vo $VO --connect-timeout 30 --sendreceive-timeout 900 --bdii-timeout 30 --srm-timeout 300 $SURL 2>&1
-  echo "# Deleting $SURL"
+  LCGDEL_RESULT=`lcg-del --nolfc $VERBOSE --vo $VO --connect-timeout 30 --sendreceive-timeout 900 --bdii-timeout 30 --srm-timeout 300 $SURL 2>&1`
   if test $? -ne 0; then
-    echo "Could not delete $SURL."
+    NOW=`date "+%Y-%m-%d %H:%M:%S"`
+    echo "$NOW - Could not delete $SURL. Cause:"
+    echo $LCGDEL_RESULT
   fi
 done
 

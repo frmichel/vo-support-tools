@@ -183,7 +183,7 @@ if [ "$CLEANUP_DARK_DATA" == "true" ]; then
     ${CLEANUPSE}/cleanup-dark-data.sh --vo $VO --se $SE_HOSTNAME --surls $RESDIR/${SE_HOSTNAME}.output_se_dark_data
     if [ $? -ne 0 ]; then
         NOW=`date "+%Y-%m-%d %H:%M:%S"`
-        echo "$NOW - Cleanup of dark data failed."
+        echo "$NOW - Some errors occured during the dark data cleanup."
     fi
 else
     echo "# Removal of dark data files is not activated."
@@ -201,7 +201,7 @@ then
 	echo "<status>Completed with errors</status>" >> $XML_OUTPUT_FILE
 	echo "<errorsFile>$RESDIR/${SE_HOSTNAME}.errors</errorsFile>" >> $XML_OUTPUT_FILE
 	
-	# Copy error lines into a report file for web display
+	# Copy error lines into a report file for web display.
 	egrep -v "^#|^$" $WDIR/${SE_HOSTNAME}.log > $RESDIR/${SE_HOSTNAME}.errors
 
     echo "# --------------------------------------------"
