@@ -146,7 +146,7 @@ SRM_URL_BASE_NO_PORT=`echo $SRM_URL_BASE | sed 's/:[0-9]\{4\}//g'`
 # In the gfal2 SE dump, keep only lines starting with "-" (files), 
 # and replace the gsiftp URL base with the srm URL base (without the port)
 echo -n "" > $SE_DUMP_FILES_ONLY
-grep ^- $INPUT_SE_DUMP | cut -d ' ' -f 3,5 | sed "s/${GSIFTP_URL_BASE}/${SRM_URL_BASE_NO_PORT}/g" > $SE_DUMP_FILES_ONLY
+grep ^- $INPUT_SE_DUMP | egrep -v "/\.{1,2}$" | cut -d ' ' -f 3,5 | sed "s/${GSIFTP_URL_BASE}/${SRM_URL_BASE_NO_PORT}/g" > $SE_DUMP_FILES_ONLY
 
 
 # ----------------------------------------------------------------------------------------------------
