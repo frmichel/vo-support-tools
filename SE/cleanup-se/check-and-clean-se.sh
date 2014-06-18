@@ -170,6 +170,7 @@ if [ "$IS_ERROR" == "true" ]; then
 	egrep -v "^# |^$" $WDIR/${SE_HOSTNAME}.log > $RESDIR/${SE_HOSTNAME}.errors
 
     echo "# --------------------------------------------"
+    NOW=`date "+%Y-%m-%d %H:%M:%S"`
     echo "# $NOW - Exiting $(basename $0)"
 	exit 0
 fi
@@ -205,6 +206,7 @@ then
 	egrep -v "^#|^$" $WDIR/${SE_HOSTNAME}.log > $RESDIR/${SE_HOSTNAME}.errors
 
     echo "# --------------------------------------------"
+    NOW=`date "+%Y-%m-%d %H:%M:%S"`
     echo "# $NOW - Exiting $(basename $0)"
 	exit 0
 fi

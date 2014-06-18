@@ -5,7 +5,7 @@
 #   $VO_SUPPORT_TOOLS, $SCAN_SE, $LFC_HOST, $VOMS_HOST, $VOMS_PORT
 # - set varialbes $THRESHOLD and $USER_MIN_USED.
 
-export TMP=/tmp/$VO/scan-se
+export TMP=$TMP/scan-se
 
 $SCANSE/list-suspended-expired-users-voms.sh \
     --vo $VO \

@@ -8,6 +8,11 @@
 #   - the last modification date
 #   - the size
 #   - the full file path
+# 
+# Fault tolerance mechanisms:
+# - in case a query to the SE fails, a maximum of 4 retries is performed, with 30 seconds wait in between.
+#   Only after the 5th failed attempt shall we report the error.
+# - in case more than 100 failures are reported, we give up the process with an error status.
 
 import sys
 import os
@@ -51,17 +56,22 @@ if options.url == '':
 
 outputToFile = options.output_file != ''
 
-# Define gfal2 context as a global variable
+# Gfal2 context global variable
 global context
 context = gfal2.creat_context()
 
-# Define max number of retries when an exception is raised
+# Max number of retries when an exception is raised
 global MAX_GFAL2_REQUEST_TRY
 MAX_GFAL2_REQUEST_TRY = 5
 
-# Define waiting time in seconds when retry
+# Waiting time in seconds when retry
 global MAX_RETRY_WAITING_TIME
 MAX_RETRY_WAITING_TIME = 30
+
+# Number of errors caught during the process, and max number of errors caught overall
+global MAX_ERRORS, errorCount
+MAX_ERRORS = 100
+errorCount = 0
 
 # ---------------------------------------------------------------
 # Method that format a stat.st_mode item into `ls -l` like permissions
@@ -122,6 +132,8 @@ def mode_to_rights(st_mode) :
 # ------------------------------------------------------------------------------------
 
 def ls_rec(url,f) :
+    global errorCount
+
     # List the content of the current directory
     dir = ''
     isOpSuccess = False
@@ -134,6 +146,10 @@ def ls_rec(url,f) :
             nbAttempts += 1
             if nbAttempts > MAX_GFAL2_REQUEST_TRY:
                 print 'Exception caught when calling opendir on url: ' + url + '. Message: ', e
+                errorCount += 1
+                if errorCount >= MAX_ERRORS:
+                    print 'Too many errors (' + str(MAX_ERRORS) + ') caught. Giving up process.'
+                    sys.exit(1)
                 return
             else:
                 time.sleep(MAX_RETRY_WAITING_TIME)    
@@ -155,6 +171,10 @@ def ls_rec(url,f) :
                 if nbAttempts > MAX_GFAL2_REQUEST_TRY:
                     print 'Exception caught when calling readpp on url: ' + url + '. Message: ', e
                     # We stop looking for this entry but will continue to check other entries of the directory
+                    errorCount += 1
+                    if errorCount >= MAX_ERRORS:
+                        print 'Too many errors (' + str(MAX_ERRORS) + ') caught. Giving up process.'
+                        sys.exit(1)
                     break
                 else:
                     time.sleep(MAX_RETRY_WAITING_TIME)    
@@ -189,6 +209,8 @@ def ls_rec(url,f) :
 
             # Recursively call the method on current entry directory
             ls_rec(url + '/' + entry_key, f)
+    
+    # End of function ls_rec
 
 # ---------------------------------------------------------------------------------------
 # Main block:
@@ -205,7 +227,7 @@ try:
             sys.exit(1)
     else:
         f = sys.stdout
-
+        
     # Get stat item of the url given as argument
     st = ''
     isLStatSuccess = False

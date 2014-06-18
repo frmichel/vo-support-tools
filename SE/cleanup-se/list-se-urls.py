@@ -10,6 +10,8 @@
 #   - gsiftp URL if any
 #   - VOInfoPath if it exists or SAPath otherwise
 # In addition, an xml file is produced with the list of SEs, free and available space on each, and site names.
+# Duplicated storage elements are ignored: this may happen when an SE has several access points. In that case we
+# only consider the first one.
 
 import sys
 import os
@@ -93,10 +95,10 @@ optParser.add_option("--xml-output-file", action="store", dest="xml_output_file"
                      help="xml output file. Mandatory.")
 
 optParser.add_option("--output-file", action="store", dest="output_file", default='',
-                     help="output file. Default to the standard output.")
+                     help="output file. Defaults to the standard output.")
 
 optParser.add_option("--max", action="store", dest="maxNbSEs", default='9999',
-                     help="Maximum number of SEs to list. Defaults to 9999 = none.")
+                     help="Maximum number of SEs to list. Defaults to 9999 = all.")
 
 optParser.add_option("--debug", action="store_true", dest="debug",
                      help="Add debug traces")
@@ -174,6 +176,7 @@ xml_out.write('<ses>\n')
 srmUrls = []
 gsiftpUrls = []
 nbSEs = 0
+hostnames = []
 
 # Get the services tags
 services = dom.getElementsByTagName("service")
@@ -275,11 +278,12 @@ for service in services:
                 # Ignore SEs with no gsiftp URL
                 continue
  
-    # Do not add multiple times the same SURL
+    # Do not add multiple times the same SE or SURL
     if options.debug:
         if ((srmUrl in srmUrls) or (gsiftpUrl in gsiftpUrls)):
             print "Ignoring duplicate url entry: " + srmUrl + " " + gsiftpUrl
-    if ((not srmUrl in srmUrls) and (not gsiftpUrl in gsiftpUrls)):
+    if ((not hostname in hostnames) and (not srmUrl in srmUrls) and (not gsiftpUrl in gsiftpUrls)):
+        hostnames.append(hostname)
         srmUrls.append(srmUrl)
         gsiftpUrls.append(gsiftpUrl)
         # Write line to output file
