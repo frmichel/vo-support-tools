@@ -40,8 +40,6 @@ optParser.add_option("--url", action = "store", dest = "url", default = '',
 optParser.add_option("--output-file", action = "store", dest = "output_file", default = '',
                      help = "output file to write results. Defaults to stdout")
 
-optParser.add_option("--debug", action = "store_true", dest = "debug",
-                     help = "Add debug traces")
 
 # -------------------------------------------------------------------------
 # Parameters check

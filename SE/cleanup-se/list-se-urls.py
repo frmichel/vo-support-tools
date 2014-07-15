@@ -256,6 +256,14 @@ for service in services:
         if service.getElementsByTagName("GridFTPAccessProtocol")[0].getElementsByTagName("GsiftpUrl").length != 0:
             gsiftpUrl = getText(service.getElementsByTagName("GridFTPAccessProtocol")[0].getElementsByTagName("GsiftpUrl")[0].childNodes)
 
+    # Trick for site UKI-LT2-IC-HEP: the VOInfoPath must not be concatenated to the endpoint. See 
+    # https://ggus.eu/index.php?mode=ticket_info&ticket_id=105942 and
+    # https://ggus.eu/index.php?mode=ticket_info&ticket_id=106369
+    if hostname == 'gfe02.grid.hep.ph.ic.ac.uk' and gsiftpUrl != '':
+        (strhost, strport, strpath) = gsiftpUrl.partition("2811")
+        gsiftpUrl = strhost + strport
+        saPath = ''
+
     # Read the srm URL first in SRMv2 and SRMv1 otherwise
     srmUrl = ''
     if service.getElementsByTagName("SRMv2").length != 0:

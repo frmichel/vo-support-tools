@@ -22,6 +22,8 @@ from optparse import OptionParser
 optParser  =  OptionParser(version = "%prog 1.0", description = """This script is an 'ls -l' like list of files and directories from an SURL, using the gfal2 python api. Outut columns are: unix-like rights, creation date, modification date, size, full path.""")
 optParser.add_option("--url", action = "store", dest = "url", default = '',
                      help = "The url of the SE to list. Mandatory.")
+optParser.add_option("--debug", action = "store_true", dest = "debug",
+                     help = "Add debug traces")
 (options, args)  =  optParser.parse_args()
 
 # Check options validity
@@ -77,18 +79,22 @@ def ls(url):
     # Assuming given as arg url is a directory
     entries = ''
     try:
+        if options.debug:
+            print "DEBUG dir = context.opendir(" + url + ")"
         dir = context.opendir(url)
     except Exception, e:
         print 'Error while listing url: ' + url + ' message: ', e
         return
 
     while True:
-       (dirent, st)=dir.readpp()
+        if options.debug:
+            print "DEBUG dir.readpp()"
+        (dirent, st) = dir.readpp()
         # Check that filename doesn't begin by '/' (workaround until gfal2.5 version is released)
-       if dirent is None:
+        if dirent is None:
             break        
         
-       print ( mode_to_rights(st.st_mode) + ' ' +
+        print ( mode_to_rights(st.st_mode) + ' ' +
                 str(datetime.datetime.fromtimestamp(int(st.st_ctime)).strftime('%Y-%m-%d')) + ' ' +
                 str(datetime.datetime.fromtimestamp(int(st.st_mtime)).strftime('%Y-%m-%d')) + ' ' +
                 str(st.st_size) + ' ' + url + '/' + dirent.d_name)
@@ -105,6 +111,8 @@ context = gfal2.creat_context()
 # Get stat item of url given as argument
 st = ''
 try:
+    if options.debug:
+        print "DEBUG st = context.lstat(" + options.url + ")"
     st = context.lstat(options.url)
 except Exception,e:
     print 'Invalid url: ' + options.url  + ' message: ',e

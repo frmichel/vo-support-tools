@@ -22,6 +22,8 @@ from optparse import OptionParser
 optParser  =  OptionParser(version = "%prog 1.0", description = """This script is an 'ls -l' like list of files and directories from an SURL, using the gfal2 python api. Outut columns are: unix-like rights, creation date, modification date, size, full path.""")
 optParser.add_option("--url", action = "store", dest = "url", default = '',
                      help = "The url of the SE to list. Mandatory.")
+optParser.add_option("--debug", action = "store_true", dest = "debug",
+                     help = "Add debug traces")
 (options, args)  =  optParser.parse_args()
 
 # Check options validity
@@ -77,6 +79,8 @@ def ls(url):
     # Assuming given as arg url is a directory
     entries = ''
     try:
+        if options.debug:
+            print "DEBUG dir = context.listdir(" + url + ")"
         entries = context.listdir(url)
     except Exception, e:
         print 'Error while listing url: ' + url + ' message: ', e
@@ -88,6 +92,8 @@ def ls(url):
         if entry[0] != '/':
             st = ''
             try:
+                if options.debug:
+                    print "DEBUG dir = context.lstat(" + url + '/' + entry + ")"
                 st = context.lstat(url + '/' + entry)
             except Exception,e:
                 print 'Error while loading status of url: ' + url  + '/' + entry + ' message: ',e
@@ -109,6 +115,8 @@ context = gfal2.creat_context()
 # Get stat item of url given as argument
 st = ''
 try:
+    if options.debug:
+        print "DEBUG dir = context.lstat(" + options.url + ")"
     st = context.lstat(options.url)
 except Exception,e:
     print 'Invalid url: ' + options.url  + ' message: ',e
