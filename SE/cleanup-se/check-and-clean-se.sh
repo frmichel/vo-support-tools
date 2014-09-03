@@ -116,6 +116,7 @@ if test -z "$SRM_URL" ; then echo "Option --srm-url is mandatory."; help; fi
 if test -z "$ACCESS_URL" ; then echo "Option --access-url is mandatory."; help; fi
 
 mkdir -p $WDIR
+mkdir -p $RESDIR
 
 NOW=`date "+%Y-%m-%d %H:%M:%S"`
 echo "# --------------------------------------------"

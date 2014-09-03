@@ -2,7 +2,7 @@
 # Generate a proxy certificate with a VO extension.
 # The proxy file name is /tmp/x509_up_${VO}_u$[USERID}, e.g. /tmp/x509up_biomed_u499
 #
-# This script helps is intended to be run by a cron job, like:
+# This script is intended to be run by a cron job, like:
 # 0 0,8,16 * * * /path/vo-support-tools/renew-proxy.sh --vo biomed --key $HOME/.globus/userkey.pem --cert $HOME/.globus/usecert.pem --pass $HOME/.globus/cert_pass.txt
 
 help()
@@ -48,14 +48,17 @@ do
   shift
 done
 
-USERID=`id --user`
-PROXY_FILE=/tmp/x509up_${VO}_u${USERID}
+PROXY_FILE=$X509_USER_PROXY
+if test -z "$PROXY_FILE"; then
+    USERID=`id --user`
+    PROXY_FILE=/tmp/x509up_${VO}_u${USERID}
+fi
 voms-proxy-init -quiet -out ${PROXY_FILE}_tmp -voms $VO $CERT $KEY -pwstdin < $PASS 2>&1
 
 if [ $? -ne 0 ]; then
     NOW=`date "+%Y-%m-%d %H:%M:%S"`
-	echo "$NOW - Failed to generated a new proxy. Keeping previous one."
-	exit 1
+    echo "$NOW - Failed to generated a new proxy. Keeping previous one."
+    exit 1
 fi
 
 # Use the new proxy file

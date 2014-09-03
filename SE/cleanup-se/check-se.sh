@@ -142,7 +142,7 @@ rm -f $LFCDUMPTMP
 SEDUMP=$WDIR/${SE_HOSTNAME}_dump_se.txt
 NOW=`date "+%Y-%m-%d %H:%M:%S"`
 echo "# $NOW - Running dump-se-files.py on SE ${SE_HOSTNAME}..."
-${CLEANUPSE}/dump-se-files.py --url $ACCESS_URL --output-file $SEDUMP --debug 2>&1
+${CLEANUPSE}/dump-se-files.py --url $ACCESS_URL --output-file $SEDUMP 2>&1
 if [ $? -ne 0 ]; then
     NOW=`date "+%Y-%m-%d %H:%M:%S"`
     echo "$NOW - Failed to dump the list of files on the SE."
