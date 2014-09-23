@@ -1,0 +1,7 @@
+Executable    = "test.sh";
+StdOutput     = "cvmfs.out";
+StdError      = "cvmfs.err";
+InputSandbox = {"test_ce.jdl", "test.sh"};
+OutputSandbox = {"cvmfs.out","cvmfs.err"};
+RetryCount  =  0;
+ShallowRetryCount  =  0;

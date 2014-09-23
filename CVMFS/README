@@ -1,0 +1,19 @@
+This direcoty provides tools that help check what sites support CVMFS for biomed or not.
+They must be used in the following order:
+
+1. launch.sh
+This script submits jobs to all CEs supporting biomed. The list of CEs is stored in _jobids.txt, and the list of job IDs is in _jobids.txt.
+
+2. retrieve_output.sh
+To be run the next day (enough time after submission so that jobs are all completed).
+This script retrieves the output of all successful jobs in /tmp/jobOutput.
+File _jobids_ce_dir.txt is built at the same time, it gathers the job IDs, the CE queue on which they were submitted, and the result directory starting with /tmp/jobOutput.
+
+3. listSites.sh
+Exploits the output of successful jobs to figure out which sites support CVMFS for which VOs: alice, atlas, mice, biomed.
+Results are stored in files vo_<VO name>.txt.
+Additionally, file vo_no_biomed.txt lists specifically those sites that support CVMFS for at least one VO but not for biomed.
+
+Those files can be sorted by site name simply:
+cat vo_no_biomed.txt | sort -k 2
+
