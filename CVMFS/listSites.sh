@@ -24,7 +24,7 @@ do
 done
 
 echo "Listing sites supporting biomed"
-for fn in `egrep "^/cvmfs/biomed.gridpp.ac.uk/vip" /tmp/jobOutput/*/*.out | cut -d':' -f1 | sort | uniq`
+for fn in `egrep "^/cvmfs/biomed.(gridpp.ac.uk|egi.eu)/vip" /tmp/jobOutput/*/*.out | cut -d':' -f1 | sort | uniq`
 do
     echo -n "$fn - " >> vo_biomed.txt
     cat $fn | grep "Site:" >> vo_biomed.txt
@@ -35,7 +35,7 @@ echo "Listing CEs supporting CVMFS but not biomed"
 for fn in `egrep "^/cvmfs/" /tmp/jobOutput/*/*.out | cut -d':' -f1 | sort | uniq`
 do
     # Among them, list those that do not support biomed
-    if ! egrep --silent "^/cvmfs/biomed.gridpp.ac.uk" $fn; then
+    if ! egrep --silent "^/cvmfs/biomed.(gridpp.ac.uk|egi.eu)" $fn; then
         echo -n "$fn - " >> vo_no_biomed.txt
         cat $fn | grep "Site:" >> vo_no_biomed.txt
     fi
@@ -46,6 +46,6 @@ nbsites_cvmfs=`grep "^/cvmfs/" /tmp/jobOutput/*/*.out | cut -d':' -f1 | sort | u
 echo
 echo "*** $nbsites_cvmfs CEs support CVMFS out of $nbsites CEs where jobs were successfull."
 echo
-echo "*** List of CEs supporting CVMFS but not biomed sorted by site:"
+echo "*** List of CEs supporting CVMFS but not biomed, sorted by site name:"
 cat vo_no_biomed.txt | sort -k 2
 

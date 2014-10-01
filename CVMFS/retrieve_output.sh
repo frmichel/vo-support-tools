@@ -7,6 +7,7 @@ rm -f $OUTPUT
 
 for job in `cat _jobids.txt | grep -v '^#'`;
 do
+    echo "Retrieving output for job $job ..."
     if glite-wms-job-output $job > /tmp/glite-wms-job-output; then
         dir=`cat /tmp/glite-wms-job-output | grep '/tmp/jobOutput'`
         # Retrieve the CE to which the job was submitted
