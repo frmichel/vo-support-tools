@@ -1,8 +1,9 @@
 #!/bin/bash
 
 export ldapsearch='ldapsearch -x -LLL -s sub -H ldap://cclcgtopbdii01.in2p3.fr:2170 -b mds-vo-name=local,o=grid'
-export OUTPUT=/tmp/list_CEs_supporting_biomed_and_CVMFS.txt
-rm -r $OUTPUT
+export OUTPUT=_CEs_biomed_CVMFS.txt
+export TMP=/tmp/$OUTPUT
+rm -r $OUTPUT $TMP
 
 # Get the list of sites
 SITES=`cat vo_biomed.txt | cut -d' ' -f4 | sort | uniq`
@@ -22,18 +23,16 @@ do
         for CEID in $CES
         do
             echo "        CE: $CEID"
-            echo $CEID >> $OUTPUT
+            echo $CEID >> $TMP
         done
     done
 done
 
 # Sort and remove duplicates
-cat $OUTPUT | sort | uniq > list_CE_from_sites_supporting_biomed_and_CVMFS.txt
+cat $TMP | sort | uniq > $OUTPUT
 
 echo
 echo "### List of CEs supporting biomed and providing biomed with CVMFS :"
 echo
-cat list_CE_from_sites_supporting_biomed_and_CVMFS.txt
-echo
-echo "### Check result in: list_CE_from_sites_supporting_biomed_and_CVMFS.txt"
+cat $OUTPUT
 

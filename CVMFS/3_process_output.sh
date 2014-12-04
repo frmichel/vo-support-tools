@@ -44,7 +44,7 @@ done
 nbsites=`ls -l /tmp/jobOutput/*/*.out | wc -l`
 nbsites_cvmfs=`grep "^/cvmfs/" /tmp/jobOutput/*/*.out | cut -d':' -f1 | sort | uniq | wc -l`
 echo
-echo "*** $nbsites_cvmfs CEs support CVMFS out of $nbsites CEs where jobs were successfull."
+echo "*** $nbsites_cvmfs CEs support CVMFS out of $nbsites CEs where jobs were executed."
 echo
 echo "*** List of sites supporting CVMFS but not biomed:"
 cat vo_no_biomed.txt | cut -d' ' -f4 | sort | uniq

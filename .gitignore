@@ -1,6 +1,4 @@
-RECV.log
-SENT.log
-TEST.log
+*.log
 *.swp
 *~
 *.pyc
