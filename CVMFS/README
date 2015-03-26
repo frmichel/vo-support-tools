@@ -1,19 +1,23 @@
-This direcoty provides tools that help check what sites support CVMFS for biomed or not.
-They must be used in the following order:
+The tools in this directory help find out which computing elements support CVMFS for a given VO. Here is a manual on how to use the set of scripts.
 
-1. launch.sh
-This script submits jobs to all CEs supporting biomed. The list of CEs is stored in _jobids.txt, and the list of job IDs is in _jobids.txt.
+1. Run the 1_launch.sh script: this will submit one job on each CE supporting the VO. The job consists of test.sh and test_ce.jdl.
+Output: _job_ids.txt = IDs of jobs run, _ce_list.txt = list of CEs retrieved from BDII (lcg-infosites)
 
-2. retrieve_output.sh
-To be run the next day (enough time after submission so that jobs are all completed).
-This script retrieves the output of all successful jobs in /tmp/jobOutput.
-File _jobids_ce_dir.txt is built at the same time, it gathers the job IDs, the CE queue on which they were submitted, and the result directory starting with /tmp/jobOutput.
+2. The day after, run 2_retrieve_output.sh, this retrieves the output of all jobs whom IDs are listed in _jobids.txt. When output is successful, file _jobids_ce_dir.txt is appended with job id, CE name and output directory.
+Output: _jobids_ce_dir.txt
+Output: jobs output in /tmp/jobOutput/...
 
-3. listSites.sh
-Exploits the output of successful jobs to figure out which sites support CVMFS for which VOs: alice, atlas, mice, biomed.
-Results are stored in files vo_<VO name>.txt.
-Additionally, file vo_no_biomed.txt lists specifically those sites that support CVMFS for at least one VO but not for biomed.
+3. Run 3_process_output.sh: this analyzes job outputs and creates files:
+Output: vo_alice.txt, vo_atlas.txt, vo_biomed.txt, vo_mice.txt, vo_no_biomed.txt
+vo_biomed.txt = list of sites that support biomed and CVMFS
+vo_no_biomed.txt = list of sites that support CVMFS but not biomed
 
-Those files can be sorted by site name simply:
-cat vo_no_biomed.txt | sort -k 2
+4. Run 4_list_CEs_biomed_CVMFS.sh: this script analyzes file vo_biomed.txt and builds the list of CEs from sites that support biomed and provide CVMFS.
+Output: _CEs_biomed_CVMFS.txt
+
+5. Finally, 5_script tag_CEs.sh adds a tag to all CEs retrieved in the previous step by reading file _CEs_biomed_CVMFS.txt.
+Output: 5_tag_CEs.sh_failed.log = CEs that could not be tagged
+
+6. To double check which CEs were successfully tagged, use look_for_cvmfs.jdl. Run the command:
+   glite-wms-job-list-match -a look_for_cvmfs.jdl
 
