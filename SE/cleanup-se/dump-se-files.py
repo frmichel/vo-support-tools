@@ -1,8 +1,8 @@
 #!/usr/bin/python
 # This script lists the files of a SE using the gfal2 python api.
-# The SE whose file are listed is the one corresponding to the url given as argument.
-# This script output is the filename given as argument or stdout if no filename is specified.
-# The output dump file list the following information for each file:
+# The SE whose files are listed is the one corresponding to the url given as argument.
+# This script outputs a file of which filename is given as argument or stdout if no filename is specified.
+# The output dump file provides the following information for each file:
 #   - the type: file or directory
 #   - the creation date
 #   - the last modification date
@@ -29,8 +29,8 @@ from optparse import OptionParser
 
 optParser  =  OptionParser(version = "%prog 1.0", description = """This script lists the files of a SE using the gfal2 python api.
 The SE whose file are listed is the one corresponding to the url given as argument.
-This script output is the filename given as argument or stdout if no filename is specified.
-The output dump file list the following information for each file:
+This script outputs a file of which filename is given as argument, or stdout if no filename is specified.
+The output dump file provides the following information for each file:
 the type: file or directory, the creation date, the last modification date,
 the size, the full file path.""")
 

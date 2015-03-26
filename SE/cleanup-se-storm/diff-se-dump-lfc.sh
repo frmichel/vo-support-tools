@@ -1,11 +1,12 @@
 #!/bin/bash
 # This script looks for differences between an SE dump and an LFC dump in order to detect zombie files (dark data) on SE,
 # and ghost files (lost entries on the LFC).
-# It takes as input a dump of the SE obtained either using the dump-se-files.py:
-#       dump-se-files.py --url srm://<se_hostname>/dpm/<domain_name>/home/<vo_name>
-# or, for DPM SEs only, with command:
-#       dpns-ls -lR <se_hostname>:/dpm/<domain_name>/home/<vo_name>
-# and a dump of the LFC obtained with the LFCBrowseSE tool:
+# It takes as input 
+# 1. a dump of the SE obtained from a site admin, that generally consits of one line 
+#    per directory, then one line for each file within the dirtectory, like this:
+#       ./026a272d-5310-4d15-9d72-4f6b6231ea5d/persistent:
+#       -rw-rwx---+ 1 storm storm    232381 Mar  5 15:18 1425565082015_b8fad9d2-d36d
+# 2. and a dump of the LFC obtained with the LFCBrowseSE tool:
 #       LFCBrowseSE <se_hostname> --vo <vo_name> --sfn
 # It produces 3 output files:
 # - <se_hostname>_lfc_ghosts: SURLs of files only registered in the LFC (ghosts, aka. lost files)
@@ -13,8 +14,6 @@
 # - <se_hostname>_common: SURLs of files found on both the SE and the LFC
 #
 # By default only dark data files older than 12 months are listed.
-#
-# Author: F. Michel, CNRS I3S
 
 help()
 {
@@ -34,20 +33,16 @@ help()
   echo
   echo "  --se <SE hostname>: the storage element host name"
   echo
+  echo "  --srm-url <srmUrl>: The SRM url to of the SE. Mandatory."
+  echo
   echo "  --older-than <age>: only files older than <age> months are listed in <se_hostname>_se_zombies."
   echo "        Defaults to 12 months."
   echo
-  echo "  --se-dump <filename>: dump of the SE. For DPM SEs, this is possibly obtained with command:"
-  echo "        dpns-ls -lR <se_hostname>:/dpm/<domain_name>/home/<vo_name>"
-  echo "        dump-se-files.py --url srm://<se_hostname>/dpm/<domain_name>/home/<vo_name>"
+  echo "  --se-dump <filename>: dump of the SE obtained from a site admin. That consists of one line"
+  echo "                        per directory, then one line for each file within the dirtectory"
   echo
   echo "  --lfc-dump <filename>: dump of the LFC obtained with the LFCBrowseSE tool:"
   echo "        LFCBrowseSE <se_hostname> --vo <vo_name> --sfn"
-  echo
-  echo "  --srm-url <srm url>: the srm URL of the VO space on the SE. Mandatory."
-  echo
-  echo "  --access-url <access url>: the access URL to list files on the SE. Mandatory."
-  echo "               This may be the same as the srm URL or a URL using another access protocol such as gsiftp."
   echo
   echo "  --work-dir <work directory>: where to store temporary files. Defaults to '.'."
   echo
@@ -58,12 +53,11 @@ help()
   echo "  -s, --silence: be as silent as possible"
   echo
   echo "Call example:"
-  echo "   ./diff-se-dump-lfc.sh --se gridse.ilc.cnr.it \ "
+  echo "   ./diff-se-dump-lfc.sh --se stormfe1.pi.infn.it \ "
+  echo "                     --srm-url srm://stormfe1.pi.infn.it:8444/biomed \ "
   echo "                     --older-than 6 \ "
-  echo "                     --se-dump gridse.ilc.cnr.it.dpns-ls-lR \ "
-  echo "                     --lfc-dump gridse.ilc.cnr.it.lfcbrowsese-sfn \ "
-  echo "                     --srm-url srm://gridse.ilc.cnr.it:8446/dpm/ilc.cnr.it/home/biomed\ "
-  echo "                     --access-url gsiftp://gridse.ilc.cnr.it:2811/dpm/ilc.cnr.it/home/biomed"
+  echo "                     --se-dump stormfe1.pi.infn.it_dump_se.txt \ "
+  echo "                     --lfc-dump stormfe1.pi.infn.it_dump_lfc.txt \ "
   echo
   exit 1
 }
@@ -77,7 +71,6 @@ RESDIR=`pwd`
 WDIR=`pwd`
 SILENT=
 SRM_URL=
-GSIFTP_URL=
 
 while [ ! -z "$1" ]
 do
@@ -86,10 +79,9 @@ do
     --older-than ) AGE=$2; shift;;
     --lfc-dump ) INPUT_LFC_DUMP=$2; shift;;
     --se-dump ) INPUT_SE_DUMP=$2; shift;;
+    --srm-url ) SRM_URL=$2; shift;;
     --result-dir ) RESDIR=$2; shift;;
     --work-dir ) WDIR=$2; shift;;
-    --srm-url ) SRM_URL=$2; shift;;
-    --access-url ) GSIFTP_URL=$2; shift;;
     -s | --silent ) SILENT=true;;
     -h | --help ) help;;
     * ) echo "Error: unknown option $1."; help;;
@@ -101,13 +93,13 @@ if test -z "$SE_HOSTNAME" ; then echo "Option --se is mandatory."; help; fi
 if test -z "$INPUT_LFC_DUMP" ; then echo "Option --lfc-dump is mandatory."; help; fi
 if test -z "$INPUT_SE_DUMP" ; then echo "Option --se-dump is mandatory."; help; fi
 if test -z "$SRM_URL" ; then echo "Option --srm-url is mandatory."; help; fi
-if test -z "$GSIFTP_URL" ; then echo "Option --access-url is mandatory."; help; fi
 
 
 OUTPUT_LFC_GHOSTS=$RESDIR/${SE_HOSTNAME}.output_lfc_lost_files
 OUTPUT_SE_ZOMBIES=$RESDIR/${SE_HOSTNAME}.output_se_dark_data
 OUTPUT_COMMON=$RESDIR/${SE_HOSTNAME}.output_common
-SE_DUMP_FILES_ONLY=$WDIR/${SE_HOSTNAME}_dump_se_files.txt
+SE_DUMP_FILES_ONLY=$WDIR/${INPUT_SE_DUMP}_reformatted
+LFCDUMPTMP=${INPUT_LFC_DUMP}_reformatted
 
 # Files older than $AGE months are considered as zombies. Others are ignored.
 LIMIT_DATE=`date --date="$AGE months ago" "+%Y-%m-%d"`
@@ -124,38 +116,44 @@ if test -z "$SILENT"; then
   echo "# --------------------------------------------"
 fi
 
+
 # ----------------------------------------------------------------------------------------------------
-# Convertion of the SE dump so that URLs be in the same format as in the LFC dump:
-# - Remove directories: convert the SE dump file into a file with last modification date and SURLs of files only.
-# - The LFC lists URLs in srm://hostname/path (port removed in check-se.sh) while the SE dump lists URLs with
-#   possibly another access protocol like gsiftp and the port number.
-#   => we convert the URLs of the SE dump so that they can be compared with URLs from the LFC:
-#      replace gsiftp://hostname:2811/path with srm://hostname/path
+# LFC dump clean-up:
+# - remove empty lines and lines with comments, like: Processing... Progress...
+# - remove the port number like ":8446" in case it exists.
 # ----------------------------------------------------------------------------------------------------
+cat $INPUT_LFC_DUMP | awk -- '/^$/{next} /^Pro/{next} {print $2}' | sed 's/:[0-9]\{4\}//g' > $LFCDUMPTMP
+
+
+# ----------------------------------------------------------------------------------------------------
+# Transform the raw SE dump received from the admin into a dump that gives 
+# the date and SRM URL of each file.
+# ----------------------------------------------------------------------------------------------------
+
 if test -z "$SILENT"; then
     echo "# Building the list of SURLs from file ${INPUT_SE_DUMP}..."
 fi
 
-# Get the base of gsiftp URL, and escape slash characters (because we will use sed). Expected format: gsiftp:\/\/hostname:port
-GSIFTP_URL_BASE=`echo $GSIFTP_URL | grep -o -E "(gsiftp|srm)://.*:[0-9]{4}" | sed 's/\//\\\\\//g'`
+# Remove optional port number from the SRM URL and escape back slashes
+SRM_URL_NO_PORT=`echo $SRM_URL | sed 's/:[0-9]\{4\}//g' | sed 's/\//\\\\\//g'`
 
-# Get the base of srm URL, escape slash characters, remove optional port number. Expected format: srm:\/\/hostname
-SRM_URL_BASE=`echo $SRM_URL | grep -o -E srm://.*:[0-9]{4} | sed 's/\//\\\\\//g'`
-SRM_URL_BASE_NO_PORT=`echo $SRM_URL_BASE | sed 's/:[0-9]\{4\}//g'`
+# Instantiate the awk file to generate the reformated dump
+TMP_PARSE_AWK=${INPUT_SE_DUMP}_parse.awk
+sed "s/@SRM_URL@/$SRM_URL_NO_PORT/g" parse-se-dump.awk.tpl > $TMP_PARSE_AWK
 
-# In the gfal2 SE dump, keep only lines starting with "-" (files), 
-# and replace the gsiftp URL base with the srm URL base (without the port)
-echo -n "" > $SE_DUMP_FILES_ONLY
-grep ^- $INPUT_SE_DUMP | egrep -v "/\.{1,2}$" | cut -d ' ' -f 3,5 | sed "s/${GSIFTP_URL_BASE}/${SRM_URL_BASE_NO_PORT}/g" > $SE_DUMP_FILES_ONLY
+# Generate the reformated dump
+awk -f $TMP_PARSE_AWK $INPUT_SE_DUMP > $SE_DUMP_FILES_ONLY
 
+
+# Cleanup temp files
+rm -f $TMP_PARSE_AWK
 
 # ----------------------------------------------------------------------------------------------------
 # --- Display the number of files in LFC dump and the SE dump
 # ----------------------------------------------------------------------------------------------------
-
 if test -z "$SILENT"; then
     echo "# Found `wc -l $SE_DUMP_FILES_ONLY | awk -- '{print $1}'` SURLs in input file $INPUT_SE_DUMP."
-    echo "# Found `cat $INPUT_LFC_DUMP | wc -l | awk -- '{print $1}'` SURLs in input file $INPUT_LFC_DUMP."
+    echo "# Found `cat $LFCDUMPTMP | wc -l | awk -- '{print $1}'` SURLs in input file $INPUT_LFC_DUMP."
 fi
 
 
@@ -168,20 +166,17 @@ echo -n "" > $OUTPUT_SE_ZOMBIES
 
 # Loop on all files from the converted SE dump
 cat $SE_DUMP_FILES_ONLY | while read LINE; do
-  FILEDATE=`echo $LINE | awk '{print $1}'`
-  FILEDATE_TS=`date --date $FILEDATE "+%s"`
+  #FILEDATE=`echo $LINE | awk '{print $1}'`
+  #FILEDATE_TS=`date --date $FILEDATE "+%s"`
   SURL=`echo $LINE | awk '{print $2}'`
 
   # Check if that file is older than $AGE months. If not it is ignored.
-  if ((FILEDATE_TS < LIMIT_DATE_TS)); then
+  #if ((FILEDATE_TS < LIMIT_DATE_TS)); then
     # Check if that SURL is also in the LFC dump
-    if ! grep --silent $SURL $INPUT_LFC_DUMP; then
-      # Reset the initial URL (that we replaced with the srm URL to be able to do the diff)
-      # echo $SURL | sed "s/${SRM_URL_BASE_NO_PORT}/${GSIFTP_URL_BASE}/g" >> $OUTPUT_SE_ZOMBIES
-      # or keep the srm URL
+    if ! grep --silent $SURL $LFCDUMPTMP; then
       echo $SURL >> $OUTPUT_SE_ZOMBIES
     fi
-  fi
+  #fi
 done
 
 if test -z "$SILENT"; then
@@ -197,7 +192,7 @@ if test -z "$SILENT"; then echo "# Looking for lost files... "; fi
 # Loop on lines, keep only second word on the line ($2) => the SURL
 echo -n "" > $OUTPUT_LFC_GHOSTS
 echo -n "" >  ${OUTPUT_COMMON}
-cat $INPUT_LFC_DUMP | while read SURL; do
+cat $LFCDUMPTMP | while read SURL; do
 
   # Check if that SURL is also in the SE dump
   if grep --silent $SURL $SE_DUMP_FILES_ONLY; then
@@ -253,5 +248,9 @@ if test -z "$SILENT"; then
   echo "# $NOW - Exiting $(basename $0)"
 fi
 
+rm -f $LFCDUMPTMP $SE_DUMP_FILES_ONLY $TMP_PARSE_AWK
+
 exit 0
+
+
 

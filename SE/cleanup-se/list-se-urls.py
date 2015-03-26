@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # This script lists the access URLs of SEs in production. Access URLs are preferably gsiftp, or srm otherwise.
-# This script output is the filename given as argument or stdout if no filename is specified.
-# The output dump file list the following information for each SE:
+# The output is the file whose name is given as argument, or stdout if no filename is specified.
+# The output dump file lists the following information for each SE:
 #   - SE hostname
 #   - site name
 #   - SA free size
@@ -76,7 +76,9 @@ This script lists the access URLs of SEs in production. Access URLs are preferab
 This script output is the filename given as argument or stdout if no filename is specified.
 The output lists the following information for each SE:
 SE hostname, SA free size, SA total size, srm URL, gsiftp URL is any.
-An xml output file dedicated for web status display lists the SEs, free space, available space, and site names. It 
+An xml output file dedicated for web status display lists the SEs, free space, available space, and site names. 
+Duplicated storage elements are ignored: this may happen when an SE has several access points. In that case we
+only consider the first one.
 """)
 
 optParser.add_option("--vo", action="store", dest="vo", default='biomed',
