@@ -58,8 +58,8 @@ do
   shift
 done
 
-if test -z "$SURLS" ; then help; fi
-if test -z "$SE_HOSTNAME" ; then help; fi
+if test -z "$SURLS" ; then echo "*** Error: option --surls must be provided."; help; fi
+if test -z "$SE_HOSTNAME" ; then echo "*** Error: option --se must be provided."; help; fi
 
 if test -z "$SILENT"; then
   NOW=`date "+%Y-%m-%d %H:%M:%S"`

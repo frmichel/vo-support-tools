@@ -1,0 +1,36 @@
+This tool (cleanup-se-storm) is derived from tool cleanup-se and applicable to StoRM storage elements.
+
+Tool cleanup-se applies to DPM and dCache SEs, using the GFAL API with GSIFTP access URLs.
+StoRM does not support GSIFTP as an access protocol, only SRM is available but it is very limited and does not allow long listing (limit to 2000 files by directory).
+
+=> As a result, the clean up of a StoRM SE can be done only using the dump of files provided by an administrator.
+
+This is based on the experience we had with SE stormfe1.pi.infn.it.
+
+Procedure:
+----------
+
+Inputs:
+- SE dump provided by the admin in example/stormfe1.pi.infn.it_dump_se.txt
+- LFC dump for that SE obtained with command:
+  $VO_SUPPORT_TOOLS/SE/lfc-browse-se/LFCBrowseSE stormfe1.pi.infn.it --vo biomed --sfn | tee stormfe1.pi.infn.it_dump_lfc.txt
+
+Make the diff between both dumps: 
+- Pick up the SRM URL from VAPOR (https://operations-portal.egi.eu/vapor/vapor-voSupportingResources?vo=biomed) 
+  in column "SRMv2 URL".
+- Run this command:
+  ./diff-se-dump-lfc.sh --se stormfe1.pi.infn.it \
+                        --lfc-dump stormfe1.pi.infn.it_dump_lfc.txt \
+                        --se-dump stormfe1.pi.infn.it_dump_se.txt \
+                        --srm-url srm://stormfe1.pi.infn.it:8444/biomed
+
+  This will produce several 3 files stormfe1.pi.infn.it.output_*.
+
+Then, delete dark data:
+   ../cleanup-se/cleanup-dark-data.sh --vo biomed \
+                                      --surls stormfe1.pi.infn.it.output_se_dark_data \
+                                      --se stormfe1.pi.infn.it \
+                                       | tee stormfe1.pi.infn.it_del_dark_data.log
+
+WARNING: in the diff-se-dump-lfc.sh, I've dectivated the check on file dates => any dark data file will be removed with no safeguard.
+
