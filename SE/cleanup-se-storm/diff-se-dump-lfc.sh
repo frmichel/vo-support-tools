@@ -1,13 +1,19 @@
 #!/bin/bash
 # This script looks for differences between an SE dump and an LFC dump in order to detect zombie files (dark data) on SE,
 # and ghost files (lost entries on the LFC).
-# It takes as input 
-# 1. a dump of the SE obtained from a site admin, that generally consits of one line 
-#    per directory, then one line for each file within the dirtectory, like this:
+#
+# It takes as input:
+# 1. a dump of the SE obtained from a site admin. Two different formats have been noticed so far, 
+#    named after the site that first sent that type of dump:
+#  - The Pisa-style dump that consits of one line per directory, then one line for each file
+#    within the dirtectory, like this:
 #       ./026a272d-5310-4d15-9d72-4f6b6231ea5d/persistent:
 #       -rw-rwx---+ 1 storm storm    232381 Mar  5 15:18 1425565082015_b8fad9d2-d36d
+#  - The Roma-style dump with one line per file, like this:
+#       1889    Nov 15 2011      293a2edb-8c/tmp/132135307686717f186b3bc48.tar
 # 2. and a dump of the LFC obtained with the LFCBrowseSE tool:
 #       LFCBrowseSE <se_hostname> --vo <vo_name> --sfn
+#
 # It produces 3 output files:
 # - <se_hostname>_lfc_ghosts: SURLs of files only registered in the LFC (ghosts, aka. lost files)
 # - <se_hostname>_se_zombies: SURLs of files only registered in the SE (zombies, aka. dark data)
@@ -30,6 +36,11 @@ help()
   echo "Usage:"
   echo "$0 [-h|--help]"
   echo "$0 [-s|--silent] [--older-than <age>] --se <SE hostname> --se-dump <file name> --lfc-dump <file name>"
+  echo
+  echo "  --pisa-style: the dump consits of one line per directory then one line for each file "
+  echo "                within the dirtectory (exclusive with --roma-style)"
+  echo
+  echo "  --roma-style: the dump consits of one line per file (exclusive with --pisa-style)"
   echo
   echo "  --se <SE hostname>: the storage element host name"
   echo
@@ -71,10 +82,13 @@ RESDIR=`pwd`
 WDIR=`pwd`
 SILENT=
 SRM_URL=
+DUMP_STYLE="PISA"
 
 while [ ! -z "$1" ]
 do
   case "$1" in
+    --pisa-style ) DUMP_STYLE="PISA";;
+    --roma-style ) DUMP_STYLE="ROMA";;
     --se ) SE_HOSTNAME=$2; shift;;
     --older-than ) AGE=$2; shift;;
     --lfc-dump ) INPUT_LFC_DUMP=$2; shift;;
@@ -138,8 +152,11 @@ fi
 SRM_URL_NO_PORT=`echo $SRM_URL | sed 's/:[0-9]\{4\}//g' | sed 's/\//\\\\\//g'`
 
 # Instantiate the awk file to generate the reformated dump
+if [[ $DUMP_STYLE == "PISA" ]]; then AWK_TPL=parse-se-dump-pisastyle.awk.tpl; fi
+if [[ $DUMP_STYLE == "ROMA" ]]; then AWK_TPL=parse-se-dump-romastyle.awk.tpl; fi
+
 TMP_PARSE_AWK=${INPUT_SE_DUMP}_parse.awk
-sed "s/@SRM_URL@/$SRM_URL_NO_PORT/g" parse-se-dump.awk.tpl > $TMP_PARSE_AWK
+sed "s/@SRM_URL@/$SRM_URL_NO_PORT/g" $AWK_TPL > $TMP_PARSE_AWK
 
 # Generate the reformated dump
 awk -f $TMP_PARSE_AWK $INPUT_SE_DUMP > $SE_DUMP_FILES_ONLY
@@ -166,17 +183,17 @@ echo -n "" > $OUTPUT_SE_ZOMBIES
 
 # Loop on all files from the converted SE dump
 cat $SE_DUMP_FILES_ONLY | while read LINE; do
-  #FILEDATE=`echo $LINE | awk '{print $1}'`
-  #FILEDATE_TS=`date --date $FILEDATE "+%s"`
+  FILEDATE=`echo $LINE | awk '{print $1}'`
+  FILEDATE_TS=`date --date $FILEDATE "+%s"`
   SURL=`echo $LINE | awk '{print $2}'`
 
   # Check if that file is older than $AGE months. If not it is ignored.
-  #if ((FILEDATE_TS < LIMIT_DATE_TS)); then
+  if ((FILEDATE_TS < LIMIT_DATE_TS)); then
     # Check if that SURL is also in the LFC dump
     if ! grep --silent $SURL $LFCDUMPTMP; then
       echo $SURL >> $OUTPUT_SE_ZOMBIES
     fi
-  #fi
+  fi
 done
 
 if test -z "$SILENT"; then

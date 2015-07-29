@@ -1,8 +1,0 @@
-<checkResult>
-  <hostname>stormfe1.pi.infn.it</hostname>
-  <darkData>66658</darkData>
-  <percentDarkData>99</percentDarkData>
-  <lostFiles>18</lostFiles>
-  <percentLostFiles>16</percentLostFiles>
-  <nbTotalFilesSEDump>66747</nbTotalFilesSEDump>
-</checkResult>

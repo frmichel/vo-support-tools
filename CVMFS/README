@@ -1,7 +1,7 @@
 The tools in this directory help find out which computing elements support CVMFS for a given VO. Here is a manual on how to use the set of scripts.
 
 1. Run the 1_launch.sh script: this will submit one job on each CE supporting the VO. The job consists of test.sh and test_ce.jdl.
-Output: _job_ids.txt = IDs of jobs run, _ce_list.txt = list of CEs retrieved from BDII (lcg-infosites)
+Output: _jobids.txt = IDs of jobs run, _celist.txt = list of CEs retrieved from BDII (lcg-infosites)
 
 2. The day after, run 2_retrieve_output.sh, this retrieves the output of all jobs whom IDs are listed in _jobids.txt. When output is successful, file _jobids_ce_dir.txt is appended with job id, CE name and output directory.
 Output: _jobids_ce_dir.txt

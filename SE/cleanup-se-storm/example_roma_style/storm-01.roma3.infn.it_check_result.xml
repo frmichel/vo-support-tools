@@ -1,0 +1,8 @@
+<checkResult>
+  <hostname>storm-01.roma3.infn.it</hostname>
+  <darkData>14437</darkData>
+  <percentDarkData>85</percentDarkData>
+  <lostFiles>5685</lostFiles>
+  <percentLostFiles>70</percentLostFiles>
+  <nbTotalFilesSEDump>41980</nbTotalFilesSEDump>
+</checkResult>

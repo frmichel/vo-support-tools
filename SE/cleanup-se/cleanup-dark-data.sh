@@ -15,7 +15,7 @@ help()
   echo "$0 [-h|--help]"
   echo "$0 [-s|--silent] [--vo <VO>] --se <SE hostname> --surls <filename>"
   echo
-  echo "  --vo <VO>: the Virtual Organisation file owners belong to. Defaults to biomed."
+  echo "  --vo <VO>: the Virtual Organisation file owners belong to. Default value: biomed."
   echo
   echo "  --se <SE hostname>: the storage element host name"
   echo
@@ -26,7 +26,7 @@ help()
   echo "  -h, --help: display this help"
   echo
   echo "Call example:"
-  echo "   ./cleanup-dark-data.sh --vo biomed --surls gridse.ilc.cnr.it_zombie_files "
+  echo "   ./cleanup-dark-data.sh --vo biomed --se gridse.ilc.cnr.it --surls gridse.ilc.cnr.it_zombie_files "
   echo
   exit 1
 }

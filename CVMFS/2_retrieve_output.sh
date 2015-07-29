@@ -11,7 +11,7 @@ do
     if glite-wms-job-output $job > /tmp/glite-wms-job-output; then
         dir=`cat /tmp/glite-wms-job-output | grep '/tmp/jobOutput'`
         # Retrieve the CE to which the job was submitted
-        ce=`glite-wms-job-logging-info $job | awk -F'=' '/- Dest id/{sub(/^[ ]+/, "", $2); print $2}'`
+        ce=`glite-wms-job-logging-info --noint $job | awk -F'=' '/- Dest id/{sub(/^[ ]+/, "", $2); print $2}'`
         echo "$job - $ce - $dir" >> $OUTPUT
     else echo "$job - failed to retrieve output" >> $OUTPUT
     fi
