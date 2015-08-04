@@ -16,7 +16,14 @@ vo_no_biomed.txt = list of sites that support CVMFS but not biomed
 Output: _CEs_biomed_CVMFS.txt
 
 5. Finally, 5_script tag_CEs.sh adds a tag to all CEs retrieved in the previous step by reading file _CEs_biomed_CVMFS.txt.
+To do this you need to have a proxy certificate with role lcgadmin. You initialize it like this:
+  $ voms-proxy-init --voms biomed:/biomed/Role=lcgadmin
 Output: 5_tag_CEs.sh_failed.log = CEs that could not be tagged
+
+IMPORTANT: ARC CEs do not support the lcg_tag command, thus this script will fail for them.
+To fix this: 
+- select ARC CEs using VAPOR (https://operations-portal.egi.eu/vapor/vapor-voSupportingResources?vo=biomed), column 'Impl. name' = 'ARC-CE'
+- submit a ticket to the sites asking them to manually add the tag for us.
 
 6. To double check which CEs were successfully tagged, use look_for_cvmfs.jdl. Run the command:
    glite-wms-job-list-match -a look_for_cvmfs.jdl

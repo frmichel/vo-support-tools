@@ -15,7 +15,7 @@ echo "*** Starting CVMFS test on `hostname`"
 printf "Site: %-21s  WN: %-36s\n" $SITE_NAME `hostname`
 
 echo -n "*** Number of CVMFS packages installed: "
-rpm -qa cvmfs* | wc -l
+rpm -qa | grep -i cvmfs | wc -l
 
 listDir /cvmfs
 listDir /cvmfs/atlas

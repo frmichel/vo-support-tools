@@ -4,7 +4,7 @@
 # voms-proxy-init --voms biomed:/biomed/Role=lcgadmin
 
 VO=biomed
-LISTCE=_CEs_biomed_CVMFS.txt
+LISTCE=_CEs_biomed_CVMFS_nontagged.txt
 TAG=VO-biomed-CVMFS
 FAILED=$0_failed.log
 
