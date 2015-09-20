@@ -4,9 +4,17 @@ Tool cleanup-se applies to DPM and dCache SEs, using the GFAL API with GSIFTP ac
 Therefore, the clean up of a StoRM SE can be done only using the dump of files provided by an administrator.
 
 This is based on the experience we had with SE stormfe1.pi.infn.it (Pisa-style dump) and storm-01.roma3.infn.it (Roma-style dump).
+Before running, check the type of the dump you received, and make sure it is one of the 2 expected formats:
 
-CAUTION: before running, check the type of the dump you received, and make sure it is one of the 2 expected formats.
+- The Pisa-style dump consits of one line per directory, the directory is relative to the physycal root and starts with "./", 
+  then one line for each file within the dirtectory, like this:
+     ./026a272d-5310-4d15-9d72-4f6b6231ea5d/persistent:
+     -rw-rwx---+ 1 storm storm    232381 Mar  5 15:18 1425565082015_b8fad9d2-d36d
+  CAUTION: the dump can be created with related paths or with absolute paths.
+  Make sure that the paths are exactly like the example, i.e. relative starting with "./".
 
+- The Roma-style dump with one line per file, like this:
+     1889    Nov 15 2011      293a2edb-8c/tmp/132135307686717f186b3bc48.tar
 
 Procedure:
 ----------

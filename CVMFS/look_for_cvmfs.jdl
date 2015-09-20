@@ -6,3 +6,4 @@ OutputSandbox = {"cvmfs.out","cvmfs.err"};
 RetryCount  =  0;
 ShallowRetryCount  =  0;
 Requirements  = Member("VO-biomed-CVMFS", other.GlueHostApplicationSoftwareRunTimeEnvironment);
+

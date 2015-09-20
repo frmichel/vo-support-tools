@@ -9,6 +9,8 @@
 #    within the dirtectory, like this:
 #       ./026a272d-5310-4d15-9d72-4f6b6231ea5d/persistent:
 #       -rw-rwx---+ 1 storm storm    232381 Mar  5 15:18 1425565082015_b8fad9d2-d36d
+#    Caution: the dump can be made like above with related paths, or with absolute paths.
+#    Check that the paths are exactly like the example, that is relative.
 #  - The Roma-style dump with one line per file, like this:
 #       1889    Nov 15 2011      293a2edb-8c/tmp/132135307686717f186b3bc48.tar
 # 2. and a dump of the LFC obtained with the LFCBrowseSE tool:
