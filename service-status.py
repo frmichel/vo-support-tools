@@ -55,11 +55,11 @@ optParser.add_option("--cert", action="store", dest="cert_file",
                   default=os.environ['HOME'] + "/.globus/usercert.pem",
                   help="Public key certificate. Defaults to $HOME/.globus/usercert.pem")
 optParser.add_option("--key", action="store", dest="key_file", 
-                  default=os.environ['HOME'] + "/.globus/userkey.pem",
-                  help="Private key. Defaults to $HOME/.globus/userkey.pem")
+                  default=os.environ['HOME'] + "/.globus/userkey_nopass.pem",
+                  help="Private key. Defaults to $HOME/.globus/userkey_nopass.pem")
 optParser.add_option("--pass", action="store", dest="passphrase", 
-                  default=os.environ['HOME'] + "/.globus/proxy_pass.txt",
-                  help="File containing the private key pass phrase. Defaults to $HOME/.globus/proxy_pass.txt")
+                  default=os.environ['HOME'] + "/.globus/userpass.txt",
+                  help="File containing the private key pass phrase. Defaults to $HOME/.globus/userpass.txt")
 
 optParser.add_option("--bdii", action="store", dest="bdii", default=DEFAULT_TOPBDII,
                      help="top BDII hostname and port. Defaults to \"" + DEFAULT_TOPBDII + "\"")
@@ -98,7 +98,8 @@ ldapSE = ldapSearch + "\'(&(ObjectClass=GlueSE)(GlueSEUniqueID=%(SE)s))\' " + at
 
 # The curl is used instead of Python std lib like HTTPSConnection,
 # as it does not support key pass phrase nor timeouts (in Python 2.4)
-CURL_CMD="curl --silent --insecure --connect-timeout 30 --max-time 60 --pass \"`cat " + KEY_PASS + "`\" --cert " + CERT_FILE + " --key " + KEY_FILE + " --url "
+CURL_CMD="curl --silent --insecure --connect-timeout 30 --max-time 60 --cert " + CERT_FILE + " --key " + KEY_FILE + " --url "
+#CURL_CMD="curl --silent --insecure --connect-timeout 30 --max-time 60 --pass \"`cat " + KEY_PASS + "`\" --cert " + CERT_FILE + " --key " + KEY_FILE + " --url "
 
 GOCDB_URL = "https://goc.egi.eu/gocdbpi/private/"
 GOCDB_DOWNTIME_URL = GOCDB_URL + "?method=get_downtime&ongoing_only=yes&topentity="

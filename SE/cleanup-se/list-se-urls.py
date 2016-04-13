@@ -286,12 +286,15 @@ for service in services:
                 gsiftpUrl = srmUrl
             else:
                 # Ignore SEs with no gsiftp URL
+                if options.debug:
+                    print "Ignore SE with no gsiftp URL: " + hostname
                 continue
  
     # Do not add multiple times the same SE or SURL
     if options.debug:
         if ((srmUrl in srmUrls) or (gsiftpUrl in gsiftpUrls)):
             print "Ignoring duplicate url entry: " + srmUrl + " " + gsiftpUrl
+
     if ((not hostname in hostnames) and (not srmUrl in srmUrls) and (not gsiftpUrl in gsiftpUrls)):
         hostnames.append(hostname)
         srmUrls.append(srmUrl)
