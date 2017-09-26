@@ -1,0 +1,109 @@
+=============================== Usual LDAP requests ===================================
+
+# ldapsearch command options:
+# -s  base|one|sub|children: Specify the scope of the search to be one of base, one, sub, or children
+#     to specify a base object, one-level, subtree, or children search. The default is sub. 
+# -L: Search results are displayed in LDAP Data Interchange Format detailed in ldif(5).
+#     A single -L restricts the output to LDIFv1. A second -L disables comments. 
+#     A third -L disables printing of the LDIF version. The default is to use an extended version of LDIF.
+# -H  ldapuri: Specify URI(s) referring to the ldap server(s); only the protocol/host/port fields are allowed;
+#     a list of URI, separated by whitespace or commas is expected.
+# -b  searchbase: Use searchbase as the starting point for the search instead of the default.
+
+alias ldapsearch='ldapsearch -x -LLL -s sub -H ldap://cclcgtopbdii01.in2p3.fr:2170'
+
+BASE=GLUE2GroupID=grid,o=glue
+
+VO=biomed
+SITE=IN2P3-IRES
+SE=sbgse1.in2p3.fr
+CE=sbgce1.in2p3.fr
+
+
+#----------------------------------------------------------
+# Queries about sites
+#----------------------------------------------------------
+
+# List all sites
+ldapsearch -b $BASE objectclass=GLUE2Domain 
+
+# Get all objects for one site
+ldapsearch -b "GLUE2DomainID=$SITE,$BASE"
+
+#----------------------------------------------------------
+# Queries about storage elements
+#----------------------------------------------------------
+
+#--- Find all SEs of type Storm or dCache
+ldapsearch -b "$BASE" "(&(ObjectClass=GLUE2StorageEndpoint)(|(GLUE2EndpointImplementationName=StoRM)(GLUE2EndpointImplementationName=dCache)))" GLUE2EndpointID
+
+#--- Find all SEs of type DPM
+ldapsearch -b "$BASE" "(&(ObjectClass=GLUE2StorageEndpoint)(GLUE2EndpointImplementationName=DPM))" GLUE2EndpointID | egrep "^GLUE2EndpointID"
+
+#--- Find all SEs of one site
+ldapsearch -b "GLUE2DomainID=$SITE,$BASE" objectclass=GLUE2StorageService
+ldapsearch -b "GLUE2DomainID=$SITE,$BASE" objectclass=GLUE2StorageServiceCapacity
+
+ldapsearch -b "GLUE2DomainID=$SITE,$BASE" objectclass=GLUE2StorageShare
+ldapsearch -b "GLUE2DomainID=$SITE,$BASE" objectclass=GLUE2StorageShareCapacity
+
+ldapsearch -b "GLUE2DomainID=$SITE,$BASE" objectclass=GLUE2StorageEndpoint
+ldapsearch -b "GLUE2DomainID=$SITE,$BASE" objectclass=GLUE2StorageManager
+ldapsearch -b "GLUE2DomainID=$SITE,$BASE" objectclass=GLUE2StorageAccessProtocol
+
+
+#--- Get details about one SE
+
+# Global SE information
+ldapsearch -b "$BASE" "(&(objectclass=GLUE2StorageService)(GLUE2ServiceID=$SE))"
+ldapsearch -b "$BASE" "(&(objectclass=GLUE2StorageServiceCapacity)(GLUE2StorageServiceCapacityStorageServiceForeignKey=$SE))"
+
+# Per-share information (a share is a space reserved for one or several VOs)
+ldapsearch -b "$BASE" "(&(objectclass=GLUE2StorageShare)(GLUE2ShareServiceForeignKey=$SE))"
+ldapsearch -b "$BASE" "(&(objectclass=GLUE2StorageShareCapacity)(GLUE2StorageShareCapacityStorageShareForeignKey=${SE}*))"
+
+# Other administrative and exploitation information
+ldapsearch -b "$BASE" "(&(objectclass=GLUE2StorageEndpoint)(GLUE2EndpointServiceForeignKey=$SE))"
+ldapsearch -b "$BASE" "(&(objectclass=GLUE2StorageManager)(GLUE2ManagerServiceForeignKey=$SE))"
+ldapsearch -b "$BASE" "(&(objectclass=GLUE2StorageAccessProtocol)(GLUE2StorageAccessProtocolStorageServiceForeignKey=$SE))"
+
+
+#--- Get the endpoints of the SE that supports the VO
+ldapsearch -b $BASE "(&(GLUE2PolicyUserDomainForeignKey=${VO})(ObjectClass=GLUE2AccessPolicy)(GLUE2AccessPolicyEndpointForeignKey=${SE}*))" GLUE2AccessPolicyEndpointForeignKey
+
+#--- Get the shares of the SE that support the VO
+ldapsearch -b $BASE "(&(|(GLUE2PolicyRule=VO:${VO})(GLUE2PolicyRule=VOMS:${VO})(GLUE2PolicyRule=VOM/${VO})(GLUE2PolicyRule=/${VO}))(ObjectClass=GLUE2MappingPolicy)(GLUE2MappingPolicyShareForeignKey=${SE}*))" GLUE2MappingPolicyShareForeignKey
+
+
+#----------------------------------------------------------
+# Queries about computing elements
+#----------------------------------------------------------
+
+#--- Find all CEs if one site
+ldapsearch -b "GLUE2DomainID=$SITE,$BASE" objectclass=GLUE2Benchmark
+ldapsearch -b "GLUE2DomainID=$SITE,$BASE" objectclass=GLUE2ComputingService
+ldapsearch -b "GLUE2DomainID=$SITE,$BASE" objectclass=GLUE2ComputingShare
+
+ldapsearch -b "GLUE2DomainID=$SITE,$BASE" objectclass=GLUE2ComputingEndpoint
+ldapsearch -b "GLUE2DomainID=$SITE,$BASE" objectclass=GLUE2ComputingManager
+
+
+#--- Get details of one CE
+
+# Global SE information
+ldapsearch -b "$BASE" "(&(ObjectClass=GLUE2Benchmark)(GLUE2BenchmarkID=${CE}*))"
+ldapsearch -b "$BASE" "(&(ObjectClass=GLUE2ComputingService)(GLUE2ServiceID=${CE}*))"
+
+# Per-share information (a share is a set of computing slots(?) reserved for one or several VOs)
+ldapsearch -b "$BASE" "(&(ObjectClass=GLUE2ComputingShare)(GLUE2ShareEndpointForeignKey=${CE}*))"
+
+# Other administrative and exploitation information
+ldapsearch -b "$BASE" "(&(ObjectClass=GLUE2ComputingEndpoint)(GLUE2EndpointServiceForeignKey=${CE}*)(GLUE2EndpointImplementationName=CREAM))"
+ldapsearch -b "$BASE" "(&(ObjectClass=GLUE2ComputingManager)(GLUE2ComputingManagerComputingServiceForeignKey=${CE}*))"
+
+
+#--- Get the endpoints of the CE that supports the VO (only CREAM endpoints)
+ldapsearch -b "$BASE" "(&(GLUE2PolicyUserDomainForeignKey=${VO})(ObjectClass=GLUE2AccessPolicy)(GLUE2AccessPolicyEndpointForeignKey=${CE}*CREAM*))"
+
+
+
