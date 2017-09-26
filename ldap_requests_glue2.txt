@@ -55,17 +55,17 @@ ldapsearch -b "GLUE2DomainID=$SITE,$BASE" objectclass=GLUE2StorageAccessProtocol
 #--- Get details about one SE
 
 # Global SE information
-ldapsearch -b "$BASE" "(&(objectclass=GLUE2StorageService)(GLUE2ServiceID=$SE))"
-ldapsearch -b "$BASE" "(&(objectclass=GLUE2StorageServiceCapacity)(GLUE2StorageServiceCapacityStorageServiceForeignKey=$SE))"
+ldapsearch -b "$BASE" "(&(objectclass=GLUE2StorageService)(GLUE2ServiceID=${SE}*))"
+ldapsearch -b "$BASE" "(&(objectclass=GLUE2StorageServiceCapacity)(GLUE2StorageServiceCapacityStorageServiceForeignKey=${SE}*))"
 
 # Per-share information (a share is a space reserved for one or several VOs)
-ldapsearch -b "$BASE" "(&(objectclass=GLUE2StorageShare)(GLUE2ShareServiceForeignKey=$SE))"
+ldapsearch -b "$BASE" "(&(objectclass=GLUE2StorageShare)(GLUE2ShareServiceForeignKey=${SE}*))"
 ldapsearch -b "$BASE" "(&(objectclass=GLUE2StorageShareCapacity)(GLUE2StorageShareCapacityStorageShareForeignKey=${SE}*))"
 
 # Other administrative and exploitation information
-ldapsearch -b "$BASE" "(&(objectclass=GLUE2StorageEndpoint)(GLUE2EndpointServiceForeignKey=$SE))"
-ldapsearch -b "$BASE" "(&(objectclass=GLUE2StorageManager)(GLUE2ManagerServiceForeignKey=$SE))"
-ldapsearch -b "$BASE" "(&(objectclass=GLUE2StorageAccessProtocol)(GLUE2StorageAccessProtocolStorageServiceForeignKey=$SE))"
+ldapsearch -b "$BASE" "(&(objectclass=GLUE2StorageEndpoint)(GLUE2EndpointServiceForeignKey=${SE}*))"
+ldapsearch -b "$BASE" "(&(objectclass=GLUE2StorageManager)(GLUE2ManagerServiceForeignKey=${SE}*))"
+ldapsearch -b "$BASE" "(&(objectclass=GLUE2StorageAccessProtocol)(GLUE2StorageAccessProtocolStorageServiceForeignKey=${SE}*))"
 
 
 #--- Get the endpoints of the SE that supports the VO
@@ -91,13 +91,13 @@ ldapsearch -b "GLUE2DomainID=$SITE,$BASE" objectclass=GLUE2ComputingManager
 #--- Get details of one CE
 
 # Global SE information
-ldapsearch -b "$BASE" "(&(ObjectClass=GLUE2Benchmark)(GLUE2BenchmarkID=${CE}*))"
 ldapsearch -b "$BASE" "(&(ObjectClass=GLUE2ComputingService)(GLUE2ServiceID=${CE}*))"
 
 # Per-share information (a share is a set of computing slots(?) reserved for one or several VOs)
 ldapsearch -b "$BASE" "(&(ObjectClass=GLUE2ComputingShare)(GLUE2ShareEndpointForeignKey=${CE}*))"
 
 # Other administrative and exploitation information
+ldapsearch -b "$BASE" "(&(ObjectClass=GLUE2Benchmark)(GLUE2BenchmarkID=${CE}*))"
 ldapsearch -b "$BASE" "(&(ObjectClass=GLUE2ComputingEndpoint)(GLUE2EndpointServiceForeignKey=${CE}*)(GLUE2EndpointImplementationName=CREAM))"
 ldapsearch -b "$BASE" "(&(ObjectClass=GLUE2ComputingManager)(GLUE2ComputingManagerComputingServiceForeignKey=${CE}*))"
 
