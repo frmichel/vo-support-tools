@@ -5,4 +5,5 @@ StdError      = "std.err";
 OutputSandbox = {"std.out","std.err"};
 RetryCount  =  0;
 ShallowRetryCount  =  0;
+OutputSandboxDestURI = {"gsiftp://localhost/std.out","gsiftp://localhost/std.err"};
 ]

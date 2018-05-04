@@ -40,7 +40,7 @@ fi
 echo "Using queue $QUEUE."
 OUTPUT=/tmp/jobsubmit_$$.output
 set -xe
-glite-wms-job-submit -a -r $QUEUE $VO_SUPPORT_TOOLS/CE/simple_job/test_ce.jdl > $OUTPUT
+glite-ce-job-submit -a -r $QUEUE $VO_SUPPORT_TOOLS/CE/simple_job/test_ce.jdl > $OUTPUT
 set +xe
 
 #--- Save the job id
@@ -48,6 +48,7 @@ echo -n "$CEHOSTNAME " >> jobids
 cat $OUTPUT  | egrep "^https"  >> jobids
 
 #--- Cleaning up
+
 rm $OUTPUT
 rm -f RECV.log SENT.log TEST.log
 
